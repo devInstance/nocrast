@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NoCrast.PWA.Shared
+namespace NoCrast.Shared
 {
     public class WeatherForecast
     {

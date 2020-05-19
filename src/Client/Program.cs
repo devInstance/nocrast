@@ -4,8 +4,11 @@ using System.Threading.Tasks;
 using System.Text;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using NoCrast.Client.Services;
+using NoCrast.Client.Utils;
+using System.Net.Http;
 
-namespace NoCrast.PWA.Client
+namespace NoCrast.Client
 {
     public class Program
     {
@@ -14,7 +17,11 @@ namespace NoCrast.PWA.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
-            builder.Services.AddBaseAddressHttpClient();
+            builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
+
+            builder.Services.AddSingleton<TimersService>();
+
+            builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             await builder.Build().RunAsync();
         }

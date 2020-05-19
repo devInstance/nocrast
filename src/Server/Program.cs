@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace NoCrast.PWA.Server
+namespace NoCrast.Server
 {
     public class Program
     {

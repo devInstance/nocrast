@@ -1,6 +1,6 @@
 {
-  "name": "NoCrast.PWA",
-  "short_name": "NoCrast.PWA",
+  "name": "NoCrast",
+  "short_name": "NoCrast",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",

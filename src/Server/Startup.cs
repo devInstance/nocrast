@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 
-namespace NoCrast.PWA.Server
+namespace NoCrast.Server
 {
     public class Startup
     {
