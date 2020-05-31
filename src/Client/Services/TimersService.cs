@@ -1,5 +1,6 @@
 ﻿using NoCrast.Client.ModelExtensions;
 using NoCrast.Client.Utils;
+using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,18 @@ namespace NoCrast.Client.Services
         private List<TaskItem> list = new List<TaskItem>();
 
         public ITimeProvider Provider { get; }
-        
+        public ILog Log { get; private set; }
+
         public event EventHandler DataHasChanged;
 
-        public TimersService(ITimeProvider provider)
+        public TimersService(ITimeProvider provider, ILogProvider logProvider)
         {
+            LogTEst.MainF();
+
             Provider = provider;
+            Log = logProvider.CreateLogger(this);
+
+            LogTEst.MainF();
         }
 
         private void NotifyDataHasChanged()
@@ -29,7 +36,10 @@ namespace NoCrast.Client.Services
 
         public List<TaskItem> GetTasks()
         {
-            return list;
+            using(var l = Log.DebugScope())
+            {
+                return list;
+            }
         }
 
         public TaskItem AddNewTask(string title)
