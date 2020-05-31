@@ -9,6 +9,7 @@
 
 @inject TimersService Service;
 @inject ITimeProvider TimeProvider;
+@inject ILogProvider LogProvider;
 
 <input class="new-timer-edit" @bind="Title" type="text" />
 
@@ -62,6 +63,8 @@
 
     private System.Timers.Timer timer;
 
+    private ILog log;
+
     private string FormatTime(TimeSpan time)
     {
         return String.Format("{0:hh}:{0:mm}:{0:ss}", time);
@@ -69,17 +72,21 @@
 
     protected override void OnInitialized()
     {
+        log = LogProvider.CreateLogger(this);
         try
         {
-            SetUpTimer();
+            using (var scope = log.DebugScope())
+            {
+                SetUpTimer();
 
-            Service.DataHasChanged += OnDataHasChanged;
+                Service.DataHasChanged += OnDataHasChanged;
 
-            RefreshData();
+                RefreshData();
+            }
         }
         catch (Exception ex)
         {
-            //TODO: do something
+            log.E(ex);
         }
     }
 

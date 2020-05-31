@@ -1,12 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NoCrast.Client.Services;
 using NoCrast.Client.Utils;
 using System.Net.Http;
+using NoCrast.Shared.Logging;
+using System.Threading;
 
 namespace NoCrast.Client
 {
@@ -18,6 +18,7 @@ namespace NoCrast.Client
             builder.RootComponents.Add<App>("app");
 
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
+            builder.Services.AddSingleton<ILogProvider>(new ConsoleLogProvider(LogLevel.DEBUG));
 
             builder.Services.AddSingleton<TimersService>();
 
