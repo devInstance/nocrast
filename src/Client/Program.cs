@@ -7,6 +7,7 @@ using NoCrast.Client.Utils;
 using System.Net.Http;
 using NoCrast.Shared.Logging;
 using System.Threading;
+using NoCrast.Client.Storage;
 
 namespace NoCrast.Client
 {
@@ -19,6 +20,8 @@ namespace NoCrast.Client
 
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
             builder.Services.AddSingleton<ILogProvider>(new ConsoleLogProvider(LogLevel.DEBUG));
+            builder.Services.AddSingleton<IJsRuntime, JsRuntime>();
+            builder.Services.AddSingleton<IStorageProvider, LocalStorageProvider>();
 
             builder.Services.AddSingleton<TimersService>();
 

@@ -103,9 +103,9 @@
         RefreshData();
     }
 
-    private void RefreshData()
+    private async void RefreshData()
     {
-        TasksList = Service.GetTasks();
+        TasksList = await Service.GetTasksAsync();
         StateHasChanged();
     }
 
@@ -114,24 +114,24 @@
         StateHasChanged();
     }
 
-    private void AddTimer()
+    private async void AddTimer()
     {
-        Service.AddNewTask(Title);
+        await Service.AddNewTaskAsync(Title);
     }
 
-    private void Remove(TaskItem item)
+    private async void Remove(TaskItem item)
     {
-        Service.RemoveTask(item);
+        Service.RemoveTaskAsync(item);
     }
 
-    private void Start(TaskItem item)
+    private async void Start(TaskItem item)
     {
-        Service.StartTask(item);
+        Service.StartTaskAsync(item);
     }
 
-    private void Stop(TaskItem item)
+    private async void Stop(TaskItem item)
     {
-        Service.StopTask(item);
+        Service.StopTaskAsync(item);
     }
 
 }
