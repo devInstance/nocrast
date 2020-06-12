@@ -1,6 +1,6 @@
-﻿using Moq;
+﻿using Blazored.LocalStorage;
+using Moq;
 using NoCrast.Client.Model;
-using NoCrast.Client.Storage;
 using NoCrast.Client.Utils;
 using NoCrast.Shared.Logging;
 using System;
@@ -28,14 +28,14 @@ namespace NoCrast.ClientTests
             return log.Object;
         }
 
-        internal static Mock<IStorageProvider> CreateStorageProviderMock(NoCrastData data)
+        internal static Mock<ILocalStorageService> CreateStorageProviderMock(NoCrastData data)
         {
-            var provider = new Mock<IStorageProvider>();
-            provider.Setup(x => x.ReadAsync()).Returns(Task.FromResult(data));
+            var provider = new Mock<ILocalStorageService>();
+            provider.Setup(x => x.GetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName))).Returns(Task.FromResult(data));
             return provider;
         }
 
-        internal static IStorageProvider CreateStorageProvider(NoCrastData data)
+        internal static ILocalStorageService CreateStorageProvider(NoCrastData data)
         {
             return CreateStorageProviderMock(data).Object;
         }
