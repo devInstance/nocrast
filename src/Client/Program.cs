@@ -6,8 +6,7 @@ using NoCrast.Client.Services;
 using NoCrast.Client.Utils;
 using System.Net.Http;
 using NoCrast.Shared.Logging;
-using System.Threading;
-using NoCrast.Client.Storage;
+using Blazored.LocalStorage;
 
 namespace NoCrast.Client
 {
@@ -18,12 +17,12 @@ namespace NoCrast.Client
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
+            builder.Services.AddBlazoredLocalStorage();
+
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
             builder.Services.AddSingleton<ILogProvider>(new ConsoleLogProvider(LogLevel.DEBUG));
-            builder.Services.AddSingleton<IJsRuntime, JsRuntime>();
-            builder.Services.AddSingleton<IStorageProvider, LocalStorageProvider>();
 
-            builder.Services.AddSingleton<TimersService>();
+            builder.Services.AddScoped<TimersService>();
 
             builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 

@@ -1,6 +1,6 @@
-﻿using NoCrast.Client.Model;
+﻿using Blazored.LocalStorage;
+using NoCrast.Client.Model;
 using NoCrast.Client.ModelExtensions;
-using NoCrast.Client.Storage;
 using NoCrast.Client.Utils;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
@@ -16,16 +16,17 @@ namespace NoCrast.Client.Services
         private NoCrastData data = null;
 
         public ITimeProvider Provider { get; }
-        public IStorageProvider Storage { get; }
+        public ILocalStorageService Storage { get; }
         public ILog Log { get; private set; }
 
         public event EventHandler DataHasChanged;
 
-        public TimersService(ITimeProvider provider, ILogProvider logProvider, IStorageProvider storage)
+        public TimersService(ITimeProvider provider, ILogProvider logProvider, ILocalStorageService storage)
         {
             Provider = provider;
             Storage = storage;
             Log = logProvider.CreateLogger(this);
+            Log.D("contructor");
         }
 
         private void NotifyDataHasChanged()
@@ -40,7 +41,7 @@ namespace NoCrast.Client.Services
         {
             if (data == null)
             {
-                data = await Storage.ReadAsync();
+                data = await Storage.GetItemAsync<NoCrastData>(NoCrastData.StorageKeyName);
                 if (data == null)
                 {
                     data = new NoCrastData();
@@ -74,11 +75,17 @@ namespace NoCrast.Client.Services
 
             var task = new TaskItem { Title = title };
             data.Tasks.Add(task);
-            await Storage.SaveAsync(data);
+
+            await SaveDataAsync();
 
             NotifyDataHasChanged();
 
             return task;
+        }
+
+        private async Task SaveDataAsync()
+        {
+            await Storage.SetItemAsync(NoCrastData.StorageKeyName, data);
         }
 
         public async Task<bool> RemoveTaskAsync(TaskItem item)
@@ -87,7 +94,7 @@ namespace NoCrast.Client.Services
 
             if(data.Tasks.Remove(item))
             {
-                await Storage.SaveAsync(data);
+                await SaveDataAsync();
 
                 NotifyDataHasChanged();
                 return true;
@@ -101,7 +108,7 @@ namespace NoCrast.Client.Services
             await TryLoadDataAsync();
 
             item.Start(Provider);
-            await Storage.SaveAsync(data);
+            await SaveDataAsync();
 
             NotifyDataHasChanged();
         }
@@ -111,7 +118,7 @@ namespace NoCrast.Client.Services
             await TryLoadDataAsync();
 
             item.Stop(Provider);
-            await Storage.SaveAsync(data);
+            await SaveDataAsync();
 
             NotifyDataHasChanged();
         }
