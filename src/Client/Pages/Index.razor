@@ -11,6 +11,8 @@
 @inject ITimeProvider TimeProvider;
 @inject ILogProvider LogProvider;
 
+@implements IDisposable
+
 <input class="new-timer-edit" @bind="Title" type="text" />
 
 <button class="btn btn-primary" @onclick="AddTimer">Add Timer</button>
@@ -98,6 +100,15 @@
         timer.Enabled = true;
     }
 
+    public void Dispose()
+    {
+        if (timer != null)
+        {
+            timer.Elapsed -= OnTimedEvent;
+            timer.Dispose();
+        }
+    }
+
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
         RefreshData();
@@ -111,6 +122,7 @@
 
     private void OnTimedEvent(Object source, ElapsedEventArgs e)
     {
+        log.D("OnTimedEvent");
         StateHasChanged();
     }
 
