@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NoCrast.Client.Services;
@@ -7,6 +8,7 @@ using NoCrast.Client.Utils;
 using System.Net.Http;
 using NoCrast.Shared.Logging;
 using Blazored.LocalStorage;
+using NoCrast.Client.Services.Authorization;
 
 namespace NoCrast.Client
 {
@@ -19,12 +21,19 @@ namespace NoCrast.Client
 
             builder.Services.AddBlazoredLocalStorage();
 
+            builder.Services.AddOptions();
+            builder.Services.AddAuthorizationCore();
+
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
             builder.Services.AddSingleton<ILogProvider>(new ConsoleLogProvider(LogLevel.DEBUG));
 
+            builder.Services.AddScoped<IdentityAuthenticationStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<IdentityAuthenticationStateProvider>());
+
+            builder.Services.AddScoped<AuthorizationService>();
             builder.Services.AddScoped<TimersService>();
 
-            builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             await builder.Build().RunAsync();
         }

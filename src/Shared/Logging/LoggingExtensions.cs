@@ -35,6 +35,13 @@ namespace NoCrast.Shared.Logging
             log.Line(LogLevel.ERROR, ex.StackTrace);
         }
 
+        public static void E(this ILog log, string message, Exception ex)
+        {
+            log.Line(LogLevel.ERROR, message);
+            log.Line(LogLevel.ERROR, ex.StackTrace);
+        }
+
+
         public static ILog DebugScope(this ILog log, [CallerMemberName] string scope = "scope")
         {
             return log.CreateScope(LogLevel.DEBUG, scope);

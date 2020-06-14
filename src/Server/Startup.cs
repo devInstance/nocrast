@@ -28,7 +28,7 @@ namespace NoCrast.Server
             services.ConfigureDatabase(Configuration);
             services.ConfigureIdentity();
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddNewtonsoftJson();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +51,7 @@ namespace NoCrast.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
