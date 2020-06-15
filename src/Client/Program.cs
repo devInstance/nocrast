@@ -9,6 +9,8 @@ using System.Net.Http;
 using NoCrast.Shared.Logging;
 using Blazored.LocalStorage;
 using NoCrast.Client.Services.Authorization;
+using NoCrast.Client.Services.Api;
+using NoCrast.Client.Services.Net;
 
 namespace NoCrast.Client
 {
@@ -26,6 +28,9 @@ namespace NoCrast.Client
 
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
             builder.Services.AddSingleton<ILogProvider>(new ConsoleLogProvider(LogLevel.DEBUG));
+
+            builder.Services.AddScoped<IAuthorizationApi, AuthorizationApi>();
+            builder.Services.AddScoped<ITasksApi, TasksApi>();
 
             builder.Services.AddScoped<IdentityAuthenticationStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<IdentityAuthenticationStateProvider>());

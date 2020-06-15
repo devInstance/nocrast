@@ -1,42 +1,35 @@
-﻿using NoCrast.Shared.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
+﻿using NoCrast.Client.Services.Api;
+using NoCrast.Shared.Model;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services.Authorization
 {
     public class AuthorizationService
     {
-        private const string Controller = "api/user/account/";
+        protected IAuthorizationApi Api { get; }
 
         private UserInfo currentUser;
-        private readonly HttpClient httpClient;
 
-        public AuthorizationService(HttpClient http)
+        public AuthorizationService(IAuthorizationApi api)
         {
-            httpClient = http;
+            Api = api;
         }
 
-        public async Task RegisterAsync(RegisterParameters registerParameters)
+        public Task RegisterAsync(RegisterParameters registerParameters)
         {
-            var result = await httpClient.PostAsJsonAsync(Controller + "register", registerParameters);
-            result.EnsureSuccessStatusCode();
+            return Api.RegisterAsync(registerParameters);
         }
 
-        public async Task LoginAsync(LoginParameters loginParameters)
+        public Task LoginAsync(LoginParameters loginParameters)
         {
-            var result = await httpClient.PostAsJsonAsync(Controller + "signin", loginParameters);
-            result.EnsureSuccessStatusCode();
+            return Api.LoginAsync(loginParameters);
         }
 
-        public async Task LogoutAsync()
+        public Task LogoutAsync()
         {
-            var result = await httpClient.PostAsync(Controller + "signout", null);
-            result.EnsureSuccessStatusCode();
+            var result = Api.LogoutAsync();
             currentUser = null;
+            return result;
         }
 
         public async Task<UserInfo> GetUserInfoAsync()
@@ -45,8 +38,8 @@ namespace NoCrast.Client.Services.Authorization
             {
                 return currentUser;
             }
-            
-            currentUser = await httpClient.GetFromJsonAsync<UserInfo>(Controller + "user-info");
+
+            currentUser = await Api.GetUserInfoAsync();
             return currentUser;
         }
     }

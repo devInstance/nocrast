@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using Moq;
 using NoCrast.Client.Model;
+using NoCrast.Client.Services.Api;
 using NoCrast.ClientTests;
 using NoCrast.Shared.Model;
 using System;
@@ -27,7 +28,8 @@ namespace NoCrast.Client.Services.Tests
             var storage = TestUtils.CreateStorageProviderMock(null);
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        TestUtils.CreateTasksApi());
 
 
             var result = await service.GetTasksAsync();
@@ -41,9 +43,14 @@ namespace NoCrast.Client.Services.Tests
         public async void GetTasksAsync_MultiElementTest()
         {
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
+
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
 
             var result = await service.GetTasksAsync();
 
@@ -61,9 +68,13 @@ namespace NoCrast.Client.Services.Tests
             var storage = TestUtils.CreateStorageProviderMock(null);
             storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 1))).Returns(Task.FromResult(true));
 
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.AddTaskAsync(It.IsAny<TaskItem>())).Returns<TaskItem>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
@@ -72,6 +83,7 @@ namespace NoCrast.Client.Services.Tests
             var result = await service.AddNewTaskAsync("Test 3");
 
             Assert.True(hasEventOccured);
+            Assert.NotNull(result);
             Assert.Equal("Test 3", result.Title);
             storage.Verify();
         }
@@ -84,9 +96,13 @@ namespace NoCrast.Client.Services.Tests
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
             storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 3))).Returns(Task.FromResult(true));
 
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.AddTaskAsync(It.IsAny<TaskItem>())).Returns<TaskItem>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
 
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
@@ -96,6 +112,7 @@ namespace NoCrast.Client.Services.Tests
             var result = await service.AddNewTaskAsync("Test 3");
 
             Assert.True(hasEventOccured);
+            Assert.NotNull(result);
             Assert.Equal("Test 3", result.Title);
             storage.Verify();
         }
@@ -112,7 +129,8 @@ namespace NoCrast.Client.Services.Tests
 
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        TestUtils.CreateTasksApi());
 
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
@@ -138,9 +156,13 @@ namespace NoCrast.Client.Services.Tests
 
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
 
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
 
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
@@ -163,9 +185,13 @@ namespace NoCrast.Client.Services.Tests
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
             storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 1 && d.Tasks[0].Title == "Test 2"))).Returns(Task.FromResult(true));
 
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
@@ -186,7 +212,8 @@ namespace NoCrast.Client.Services.Tests
 
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        TestUtils.CreateTasksApi());
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
@@ -209,7 +236,8 @@ namespace NoCrast.Client.Services.Tests
 
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        TestUtils.CreateTasksApi());
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
@@ -230,9 +258,13 @@ namespace NoCrast.Client.Services.Tests
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
             storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 2))).Returns(Task.FromResult(true));
 
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
@@ -253,9 +285,13 @@ namespace NoCrast.Client.Services.Tests
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
             storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 2))).Returns(Task.FromResult(true));
 
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
-                                                        storage.Object);
+                                                        storage.Object,
+                                                        tasksApi.Object);
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
@@ -267,6 +303,5 @@ namespace NoCrast.Client.Services.Tests
             Assert.False(twoElementsData.Tasks[0].IsRunning);
             storage.Verify();
         }
-
     }
 }

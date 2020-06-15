@@ -1,12 +1,15 @@
 ﻿using Blazored.LocalStorage;
 using NoCrast.Client.Model;
 using NoCrast.Client.ModelExtensions;
+using NoCrast.Client.Services.Api;
 using NoCrast.Client.Utils;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services
@@ -16,13 +19,18 @@ namespace NoCrast.Client.Services
         private NoCrastData data = null;
 
         public ITimeProvider Provider { get; }
-        public ILocalStorageService Storage { get; }
+        protected ILocalStorageService Storage { get; }
         public ILog Log { get; private set; }
+        protected ITasksApi Api { get; }
 
         public event EventHandler DataHasChanged;
 
-        public TimersService(ITimeProvider provider, ILogProvider logProvider, ILocalStorageService storage)
+        public TimersService(ITimeProvider provider,
+                            ILogProvider logProvider,
+                            ILocalStorageService storage, 
+                            ITasksApi api)
         {
+            Api = api;
             Provider = provider;
             Storage = storage;
             Log = logProvider.CreateLogger(this);
@@ -42,9 +50,14 @@ namespace NoCrast.Client.Services
             if (data == null)
             {
                 data = await Storage.GetItemAsync<NoCrastData>(NoCrastData.StorageKeyName);
+
+                SyncUpWithServer();
+
                 if (data == null)
                 {
+                    var tasks = await Api.GetTasksAsync();
                     data = new NoCrastData();
+                    data.Tasks.AddRange(tasks);
                 }
             }
             return data;
@@ -76,11 +89,34 @@ namespace NoCrast.Client.Services
             var task = new TaskItem { Title = title };
             data.Tasks.Add(task);
 
+            try
+            {
+                task = await Api.AddTaskAsync(task);
+            } 
+            catch (Exception ex)
+            {
+                //fallback
+                //If server is not availabe, generate id
+            }
+
             await SaveDataAsync();
 
             NotifyDataHasChanged();
 
             return task;
+        }
+
+        /// <summary>
+        /// Should be called after app start
+        /// </summary>
+        public async void SyncUpWithServer()
+        {
+            if (data != null)
+            {
+                var result = await Api.SyncUpWithServer(data.Tasks.ToArray());
+                data.Tasks.Clear();
+                data.Tasks.AddRange(result);
+            }
         }
 
         private async Task SaveDataAsync()
@@ -94,6 +130,8 @@ namespace NoCrast.Client.Services
 
             if(data.Tasks.Remove(item))
             {
+                await Api.RemoveTaskAsync(item.Id);
+
                 await SaveDataAsync();
 
                 NotifyDataHasChanged();
@@ -108,6 +146,9 @@ namespace NoCrast.Client.Services
             await TryLoadDataAsync();
 
             item.Start(Provider);
+
+            await Api.UpdateTaskAsync(item);
+
             await SaveDataAsync();
 
             NotifyDataHasChanged();
@@ -118,6 +159,9 @@ namespace NoCrast.Client.Services
             await TryLoadDataAsync();
 
             item.Stop(Provider);
+
+            await Api.UpdateTaskAsync(item);
+
             await SaveDataAsync();
 
             NotifyDataHasChanged();

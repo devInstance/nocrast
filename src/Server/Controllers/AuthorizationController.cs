@@ -12,12 +12,12 @@ namespace NoCrast.Server.Controllers
 {
     [Route("api/user/account")]
     [ApiController]
-    public class AuthorizeController : ControllerBase
+    public class AuthorizationController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
 
-        public AuthorizeController(UserManager<ApplicationUser> um, SignInManager<ApplicationUser> sm)
+        public AuthorizationController(UserManager<ApplicationUser> um, SignInManager<ApplicationUser> sm)
         {
             userManager = um;
             signInManager = sm;

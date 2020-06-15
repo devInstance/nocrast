@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using Moq;
 using NoCrast.Client.Model;
+using NoCrast.Client.Services.Api;
 using NoCrast.Client.Utils;
 using NoCrast.Shared.Logging;
 using System;
@@ -39,5 +40,12 @@ namespace NoCrast.ClientTests
         {
             return CreateStorageProviderMock(data).Object;
         }
+
+        internal static ITasksApi CreateTasksApi()
+        {
+            var tasksApi = new Mock<ITasksApi>();
+            return tasksApi.Object;
+        }
+
     }
 }
