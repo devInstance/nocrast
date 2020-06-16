@@ -8,7 +8,7 @@ namespace NoCrast.Client.Services.Net
 {
     public class TasksApi : ApiBase, ITasksApi
     {
-        private const string Controller = "api/data/tasks";
+        private const string Controller = "api/data/tasks/";
 
         public TasksApi(HttpClient http) : base(http)
         {

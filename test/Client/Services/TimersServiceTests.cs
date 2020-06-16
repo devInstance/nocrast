@@ -150,9 +150,10 @@ namespace NoCrast.Client.Services.Tests
         }
 
         [Fact()]
-        public void AddNewTaskAsync_TitleAlreadyExists()
+        public async void AddNewTaskAsync_TitleAlreadyExists()
         {
             bool hasEventOccured = false;
+            ServiceErrorEventArgs error = null;
 
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
 
@@ -169,10 +170,17 @@ namespace NoCrast.Client.Services.Tests
                 hasEventOccured = true;
             };
 
-            Action actual = () => AsyncExceptionExtractor.Run(service.AddNewTaskAsync("Test 1"));
-            Assert.Throws<ArgumentException>(actual);
+            service.ErrorHasOccured += delegate (object sender, ServiceErrorEventArgs e)
+            {
+                error = e;
+            };
+
+            await service.AddNewTaskAsync("Test 1");
 
             Assert.False(hasEventOccured);
+            Assert.NotNull(error);
+            Assert.True(error.IsUIError);
+            Assert.False(error.ResetUIError);
             VerifySetItemNaverCalled(storage);
             storage.Verify();
         }
@@ -302,6 +310,60 @@ namespace NoCrast.Client.Services.Tests
             Assert.True(hasEventOccured);
             Assert.False(twoElementsData.Tasks[0].IsRunning);
             storage.Verify();
+        }
+
+        [Fact()]
+        public async void ErrorHasOccured_NetworkError_AddNewTaskAsync()
+        {
+            ServiceErrorEventArgs error = null;
+
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.GetTasksAsync()).Throws<Exception>();
+            tasksApi.Setup(x => x.AddTaskAsync(It.IsAny<TaskItem>())).Throws<Exception>();
+
+            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+                                            TestUtils.CreateLogProvider(),
+                                            TestUtils.CreateStorageProvider(null),
+                                            tasksApi.Object);
+
+            service.ErrorHasOccured += delegate (object sender, ServiceErrorEventArgs e)
+            {
+                error = e;
+            };
+
+            await service.AddNewTaskAsync("Test 1");
+
+            Assert.NotNull(error);
+            Assert.True(error.IsNetworkError);
+            Assert.False(error.ResetNetworkError);
+        }
+
+        [Fact()]
+        public async void ErrorHasOccured_NetworkRecovery_AddNewTaskAsync()
+        {
+            int counter = 0;
+            ServiceErrorEventArgs error = null;
+
+            var tasksApi = new Mock<ITasksApi>();
+            tasksApi.Setup(x => x.GetTasksAsync()).Throws<Exception>();
+
+            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+                                            TestUtils.CreateLogProvider(),
+                                            TestUtils.CreateStorageProvider(null),
+                                            tasksApi.Object);
+
+            service.ErrorHasOccured += delegate (object sender, ServiceErrorEventArgs e)
+            {
+                counter++;
+                error = e;
+            };
+
+            await service.AddNewTaskAsync("Test 1");
+
+            Assert.NotNull(error);
+            Assert.Equal(2, counter);
+            Assert.False(error.IsNetworkError);
+            Assert.True(error.ResetNetworkError);
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 
 namespace NoCrast.Client.Services.Net
 {
@@ -13,6 +9,5 @@ namespace NoCrast.Client.Services.Net
         {
             httpClient = http;
         }
-
     }
 }

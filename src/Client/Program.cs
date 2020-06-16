@@ -8,7 +8,6 @@ using NoCrast.Client.Utils;
 using System.Net.Http;
 using NoCrast.Shared.Logging;
 using Blazored.LocalStorage;
-using NoCrast.Client.Services.Authorization;
 using NoCrast.Client.Services.Api;
 using NoCrast.Client.Services.Net;
 

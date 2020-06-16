@@ -2,7 +2,7 @@
 using NoCrast.Shared.Model;
 using System.Threading.Tasks;
 
-namespace NoCrast.Client.Services.Authorization
+namespace NoCrast.Client.Services
 {
     public class AuthorizationService
     {

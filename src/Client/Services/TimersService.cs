@@ -8,8 +8,6 @@ using NoCrast.Shared.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services
@@ -24,6 +22,10 @@ namespace NoCrast.Client.Services
         protected ITasksApi Api { get; }
 
         public event EventHandler DataHasChanged;
+        public event ServiceErrorEventHandler ErrorHasOccured;
+
+        private bool isNetworkErrorRisen = false;
+        private bool isUiErrorRisen = false;
 
         public TimersService(ITimeProvider provider,
                             ILogProvider logProvider,
@@ -45,6 +47,66 @@ namespace NoCrast.Client.Services
             }
         }
 
+        private void NotifyUIError(Exception ex)
+        {
+            var arg = new ServiceErrorEventArgs()
+            {
+                Message = ex.Message,
+                IsUIError = true
+            };
+
+            Log.E(ex);
+            NotifyError(arg);
+            isUiErrorRisen = true;
+        }
+
+        private void ResetUIError()
+        {
+            if (isUiErrorRisen)
+            {
+                var arg = new ServiceErrorEventArgs()
+                {
+                    ResetUIError = true
+                };
+                NotifyError(arg);
+                isUiErrorRisen = false;
+            }
+        }
+
+        private void ResetNetworkError()
+        {
+            if (isNetworkErrorRisen)
+            {
+                var arg = new ServiceErrorEventArgs()
+                {
+                    ResetNetworkError = true
+                };
+                NotifyError(arg);
+                isNetworkErrorRisen = false;
+            }
+        }
+
+        private void NotifyNetworkError(Exception ex)
+        {
+            var arg = new ServiceErrorEventArgs()
+            {
+                Message = ex.Message,
+                IsNetworkError = true
+            };
+
+            Log.E(ex);
+            NotifyError(arg);
+            isNetworkErrorRisen = true;
+        }
+
+        private void NotifyError(ServiceErrorEventArgs arg)
+        {
+            if (ErrorHasOccured != null)
+            {
+                ErrorHasOccured(this, arg);
+            }
+        }
+
         private async Task<NoCrastData> TryLoadDataAsync()
         {
             if (data == null)
@@ -55,9 +117,17 @@ namespace NoCrast.Client.Services
 
                 if (data == null)
                 {
-                    var tasks = await Api.GetTasksAsync();
                     data = new NoCrastData();
-                    data.Tasks.AddRange(tasks);
+                    try
+                    {
+                        var tasks = await Api.GetTasksAsync();
+                        data.Tasks.AddRange(tasks);
+                        ResetNetworkError();
+                    }
+                    catch (Exception ex)
+                    {
+                        NotifyNetworkError(ex);
+                    }
                 }
             }
             return data;
@@ -67,6 +137,7 @@ namespace NoCrast.Client.Services
         {
             using (var l = Log.DebugScope())
             {
+                ResetUIError();
                 await TryLoadDataAsync();
                 return data.Tasks;
             }
@@ -83,8 +154,11 @@ namespace NoCrast.Client.Services
 
             if ((from d in data.Tasks where d.Title == title select d).FirstOrDefault() != null)
             {
-                throw new ArgumentException("Task already exists", nameof(title));
+                NotifyUIError(new ArgumentException("Task already exists", nameof(title)));
+                return null;
+                //throw;
             }
+            ResetUIError();
 
             var task = new TaskItem { Title = title };
             data.Tasks.Add(task);
@@ -92,9 +166,11 @@ namespace NoCrast.Client.Services
             try
             {
                 task = await Api.AddTaskAsync(task);
-            } 
+                ResetNetworkError();
+            }
             catch (Exception ex)
             {
+                NotifyNetworkError(ex);
                 //fallback
                 //If server is not availabe, generate id
             }
@@ -113,9 +189,17 @@ namespace NoCrast.Client.Services
         {
             if (data != null)
             {
-                var result = await Api.SyncUpWithServer(data.Tasks.ToArray());
-                data.Tasks.Clear();
-                data.Tasks.AddRange(result);
+                try
+                {
+                    var result = await Api.SyncUpWithServer(data.Tasks.ToArray());
+                    data.Tasks.Clear();
+                    data.Tasks.AddRange(result);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
             }
         }
 
@@ -130,7 +214,15 @@ namespace NoCrast.Client.Services
 
             if(data.Tasks.Remove(item))
             {
-                await Api.RemoveTaskAsync(item.Id);
+                try
+                {
+                    await Api.RemoveTaskAsync(item.Id);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
 
                 await SaveDataAsync();
 
@@ -147,7 +239,15 @@ namespace NoCrast.Client.Services
 
             item.Start(Provider);
 
-            await Api.UpdateTaskAsync(item);
+            try
+            {
+                await Api.UpdateTaskAsync(item);
+                ResetNetworkError();
+            }
+            catch (Exception ex)
+            {
+                NotifyNetworkError(ex);
+            }
 
             await SaveDataAsync();
 
@@ -160,7 +260,15 @@ namespace NoCrast.Client.Services
 
             item.Stop(Provider);
 
-            await Api.UpdateTaskAsync(item);
+            try
+            {
+                await Api.UpdateTaskAsync(item);
+                ResetNetworkError();
+            }
+            catch (Exception ex)
+            {
+                NotifyNetworkError(ex);
+            }
 
             await SaveDataAsync();
 

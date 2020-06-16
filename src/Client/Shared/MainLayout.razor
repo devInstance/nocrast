@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager navigationManager
 @inject IdentityAuthenticationStateProvider authStateProvider
+@inject TimersService Service;
 
 <AuthorizeView>
     <Authorized>
@@ -10,6 +11,10 @@
 
         <div class="main">
             <div class="top-row px-4">
+                @if (!String.IsNullOrEmpty(ErrorText))
+                {
+                    <label class="text-danger">@ErrorText</label>
+                }
                 <button type="button" class="btn btn-link ml-md-auto" @onclick="@LogoutClick">Logout</button>
             </div>
 
@@ -25,6 +30,8 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationState { get; set; }
 
+    string ErrorText { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         if (!(await AuthenticationState).User.Identity.IsAuthenticated)
@@ -32,6 +39,26 @@
             navigationManager.NavigateTo("/login");
         }
     }
+
+    protected override void OnInitialized()
+    {
+        Service.ErrorHasOccured += OnError;
+    }
+
+    private void OnError(Object sender, ServiceErrorEventArgs e)
+    {
+        if (e.IsNetworkError)
+        {
+            //ErrorText = e.Message;
+            ErrorText = "Error connecting to the server";
+        }
+        else if (e.ResetNetworkError)
+        {
+            ErrorText = "";
+        }
+        StateHasChanged();
+    }
+
 
     async Task LogoutClick()
     {

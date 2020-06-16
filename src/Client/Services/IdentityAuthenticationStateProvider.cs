@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace NoCrast.Client.Services.Authorization
+namespace NoCrast.Client.Services
 {
     public class IdentityAuthenticationStateProvider : AuthenticationStateProvider
     {
