@@ -1,14 +1,8 @@
 ﻿@page "/"
 
-@using NoCrast.Shared.Model;
-@using NoCrast.Client.ModelExtensions;
-@using NoCrast.Client.Services;
-@using NoCrast.Client.Utils;
-
 @using System.Timers;
 
 @inject TimersService Service;
-@inject ITimeProvider TimeProvider;
 @inject ILogProvider LogProvider;
 
 @implements IDisposable
@@ -27,58 +21,22 @@
     <ul class="timer-list">
         @foreach (var item in TasksList)
         {
-            <li>
-                <div class="alert alert-info timer-item-container" role="document">
-                    <div class="timer-item-context">
-                        <button class="btn btn-default timer-button" @onclick="@(() => Remove(item))">
-                            <span class="oi oi-circle-x" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                    <div class="timer-item-title">
-                        <span class="timer-text">
-                            <strong>@item.Title</strong>
-                        </span>
-                    </div>
-                    <div class="timer-item-time">
-                        <span class="timer-text">@FormatTime(item.GetElapsedTimeSpan(TimeProvider))</span>
-                    </div>
-                    <div class="timer-item-panel">
-                        @if (item.IsRunning)
-                        {
-                            <button class="btn btn-default timer-button" @onclick="@(() => Stop(item))">
-                                <span class="oi oi-media-pause" aria-hidden="true"></span>
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-default timer-button" @onclick="@(() => Start(item))">
-                                <span class="oi oi-media-play" aria-hidden="true"></span>
-                            </button>
-                        }
-                    </div>
-                </div>
-            </li>
+            <TaskView Task="item" />
         }
     </ul>
 }
 
 @code {
 
-    private List<TaskItem> TasksList { get; set; }
+    private List<TaskItemView> TasksList { get; set; }
 
     private string title = "";
 
     string ErrorText { get; set; }
 
-
     private System.Timers.Timer timer;
 
     private ILog log;
-
-    private string FormatTime(TimeSpan time)
-    {
-        return String.Format("{0:hh}:{0:mm}:{0:ss}", time);
-    }
 
     protected async override Task OnInitializedAsync()
     {
@@ -153,20 +111,4 @@
     {
         await Service.AddNewTaskAsync(title);
     }
-
-    private async void Remove(TaskItem item)
-    {
-        Service.RemoveTaskAsync(item);
-    }
-
-    private async void Start(TaskItem item)
-    {
-        Service.StartTaskAsync(item);
-    }
-
-    private async void Stop(TaskItem item)
-    {
-        Service.StopTaskAsync(item);
-    }
-
 }

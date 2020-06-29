@@ -1,0 +1,17 @@
+﻿@page "/task/{id}"
+
+@inject TimersService Service;
+
+<h3>TaskDetails</h3>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private List<TimeLogItem> TimeLog { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        //TimeLog = await Service.GetTimeLogItemsAsync(Id);
+    }
+}

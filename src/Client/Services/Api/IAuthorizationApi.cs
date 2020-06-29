@@ -15,6 +15,6 @@ namespace NoCrast.Client.Services.Api
 
         Task LogoutAsync();
 
-        Task<UserInfo> GetUserInfoAsync();
+        Task<UserInfoItem> GetUserInfoAsync();
     }
 }

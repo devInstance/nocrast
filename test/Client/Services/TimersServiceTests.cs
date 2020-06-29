@@ -1,6 +1,8 @@
 ﻿using Blazored.LocalStorage;
 using Moq;
 using NoCrast.Client.Model;
+using NoCrast.Client.ModelExtensions;
+using NoCrast.Client.ModelViews;
 using NoCrast.Client.Services.Api;
 using NoCrast.ClientTests;
 using NoCrast.Shared.Model;
@@ -16,10 +18,15 @@ namespace NoCrast.Client.Services.Tests
         private readonly NoCrastData twoElementsData = new NoCrastData
         {
             Tasks = new List<TaskItem>
-                {
-                    new TaskItem { Title = "Test 1" },
-                    new TaskItem { Title = "Test 2" }
-                }
+            {
+                new TaskItem { Title = "Test 1" },
+                new TaskItem { Title = "Test 2" }
+            },
+            Logs = new List<List<TimeLogItem>>
+            {
+                new List<TimeLogItem>{ },
+                new List<TimeLogItem>{ }
+            }
         };
 
         [Fact()]
@@ -35,6 +42,7 @@ namespace NoCrast.Client.Services.Tests
             var result = await service.GetTasksAsync();
 
             Assert.Empty(result);
+            Assert.True(false, "Add API call verification");
             storage.Verify(x => x.GetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName)), Times.Once());
             storage.Verify();
         }
@@ -53,9 +61,10 @@ namespace NoCrast.Client.Services.Tests
                                                         tasksApi.Object);
 
             var result = await service.GetTasksAsync();
+            Assert.True(false, "Add API call verification");
 
             Assert.Equal(2, result.Count);
-            Assert.Equal("Test 1", result[0].Title);
+            Assert.Equal("Test 1", result[0].Task.Title);
             storage.Verify(x => x.GetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName)), Times.Once());
             storage.Verify();
         }
@@ -84,7 +93,7 @@ namespace NoCrast.Client.Services.Tests
 
             Assert.True(hasEventOccured);
             Assert.NotNull(result);
-            Assert.Equal("Test 3", result.Title);
+            Assert.Equal("Test 3", result.Task.Title);
             storage.Verify();
         }
 
@@ -113,7 +122,7 @@ namespace NoCrast.Client.Services.Tests
 
             Assert.True(hasEventOccured);
             Assert.NotNull(result);
-            Assert.Equal("Test 3", result.Title);
+            Assert.Equal("Test 3", result.Task.Title);
             storage.Verify();
         }
 
@@ -188,128 +197,182 @@ namespace NoCrast.Client.Services.Tests
         [Fact()]
         public async void RemoveTaskAsync_NonEmptyList()
         {
-            bool hasEventOccured = false;
+            Assert.True(false, "Rewrite");
+            //bool hasEventOccured = false;
 
-            var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
-            storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 1 && d.Tasks[0].Title == "Test 2"))).Returns(Task.FromResult(true));
+            //var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
+            //storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 1 && d.Tasks[0].Title == "Test 2"))).Returns(Task.FromResult(true));
 
-            var tasksApi = new Mock<ITasksApi>();
-            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+            //var tasksApi = new Mock<ITasksApi>();
+            //tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
-                                                        TestUtils.CreateLogProvider(),
-                                                        storage.Object,
-                                                        tasksApi.Object);
-            service.DataHasChanged += delegate (object sender, EventArgs e)
-            {
-                hasEventOccured = true;
-            };
+            //TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            //                                            TestUtils.CreateLogProvider(),
+            //                                            storage.Object,
+            //                                            tasksApi.Object);
+            //service.DataHasChanged += delegate (object sender, EventArgs e)
+            //{
+            //    hasEventOccured = true;
+            //};
 
-            var result = await service.RemoveTaskAsync(twoElementsData.Tasks[0]);
+            //var result = await service.RemoveTaskAsync(twoElementsData.Tasks[0]);
 
-            Assert.True(hasEventOccured);
-            storage.Verify();
+            //Assert.True(hasEventOccured);
+            //storage.Verify();
         }
 
         [Fact()]
         public async void RemoveTaskAsync_EmptyList()
         {
-            bool hasEventOccured = false;
+            Assert.True(false, "Rewrite");
+            //bool hasEventOccured = false;
 
-            var storage = TestUtils.CreateStorageProviderMock(null);
+            //var storage = TestUtils.CreateStorageProviderMock(null);
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
-                                                        TestUtils.CreateLogProvider(),
-                                                        storage.Object,
-                                                        TestUtils.CreateTasksApi());
-            service.DataHasChanged += delegate (object sender, EventArgs e)
-            {
-                hasEventOccured = true;
-            };
+            //TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            //                                            TestUtils.CreateLogProvider(),
+            //                                            storage.Object,
+            //                                            TestUtils.CreateTasksApi());
+            //service.DataHasChanged += delegate (object sender, EventArgs e)
+            //{
+            //    hasEventOccured = true;
+            //};
 
-            var result = await service.RemoveTaskAsync(twoElementsData.Tasks[0]);
+            //var result = await service.RemoveTaskAsync(twoElementsData.Tasks[0]);
 
-            Assert.False(hasEventOccured);
-            VerifySetItemNaverCalled(storage);
-            storage.Verify();
+            //Assert.False(hasEventOccured);
+            //VerifySetItemNaverCalled(storage);
+            //storage.Verify();
         }
 
         [Theory]
         [InlineData(null)]
         public async void RemoveTaskAsync_InvalidParameters(TaskItem item)
         {
-            bool hasEventOccured = false;
+            Assert.True(false, "Rewrite");
+            //bool hasEventOccured = false;
 
-            var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
+            //var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
-                                                        TestUtils.CreateLogProvider(),
-                                                        storage.Object,
-                                                        TestUtils.CreateTasksApi());
-            service.DataHasChanged += delegate (object sender, EventArgs e)
-            {
-                hasEventOccured = true;
-            };
+            //TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            //                                            TestUtils.CreateLogProvider(),
+            //                                            storage.Object,
+            //                                            TestUtils.CreateTasksApi());
+            //service.DataHasChanged += delegate (object sender, EventArgs e)
+            //{
+            //    hasEventOccured = true;
+            //};
 
-            var result = await service.RemoveTaskAsync(item);
+            //var result = await service.RemoveTaskAsync(item);
 
-            Assert.False(hasEventOccured);
-            VerifySetItemNaverCalled(storage);
-            storage.Verify();
+            //Assert.False(hasEventOccured);
+            //VerifySetItemNaverCalled(storage);
+            //storage.Verify();
         }
 
+        /// <summary>
+        /// Case with previous network error
+        /// </summary>
         [Fact()]
-        public void StartTaskAsync_Success()
+        public void StartTaskAsync_TaskHasntBeenSynced()
         {
+            var requestTask = new TaskItem
+            {
+                IsRunning = false,
+                TimeLogCount = 1,
+                Title = "Test 1"
+            };
+            requestTask.SetInternalId(Guid.NewGuid());
+
+            var responseLog = new TimeLogItem
+            {
+                Id = "sdfjkhasd",
+                ElapsedMilliseconds = 0,
+                StartTime = DateTime.Now
+            };
+
+            var responseTask = new TaskItem
+            {
+                Id = "wquieyqwuiyre",
+                IsRunning = true,
+                TimeLogCount = 1,
+                Title = "Test 1",
+                LatestTimeLogItemId = responseLog.Id
+            };
+
+            var data = new NoCrastData
+            {
+                Tasks = new List<TaskItem>
+                {
+                    requestTask
+                },
+                Logs = new List<List<TimeLogItem>>
+                {
+                    new List<TimeLogItem>()
+                }
+            };
+
+            var itemView = new TaskItemView(TestUtils.CreateTimerProvider(), requestTask, null);
             bool hasEventOccured = false;
 
-            var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
+            var storage = TestUtils.CreateStorageProviderMock(data);
             storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 2))).Returns(Task.FromResult(true));
 
             var tasksApi = new Mock<ITasksApi>();
             tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+            tasksApi.Setup(x => x.UpdateTimerAsync(It.Is<UpdateTaskParameters>(r  => r.Task.IsRunning))).Returns<UpdateTaskParameters>((req) => Task.FromResult(new UpdateTaskParameters
+            {
+                Task = responseTask,
+                Log = responseLog
+            })) ;
 
             TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         tasksApi.Object);
+
             service.DataHasChanged += delegate (object sender, EventArgs e)
             {
                 hasEventOccured = true;
             };
 
-            service.StartTaskAsync(twoElementsData.Tasks[0]);
+            service.StartTaskAsync(itemView);
 
-            Assert.True(hasEventOccured);
-            Assert.True(twoElementsData.Tasks[0].IsRunning);
+            Assert.True(hasEventOccured, "hasEventOccured failed");
+            Assert.True(data.Tasks[0].IsRunning, "Task is not running");
+            Assert.Equal(responseTask.Id, data.Tasks[0].Id);
+            Assert.Equal(responseLog.Id, data.Tasks[0].LatestTimeLogItemId);
+            Assert.Single(data.Logs[0]);
+            Assert.Equal(responseLog.Id, data.Logs[0][0].Id);
             storage.Verify();
         }
 
         [Fact()]
         public void StopTaskAsync_Success()
         {
-            bool hasEventOccured = false;
+            Assert.True(false, "Rewrite");
+            //bool hasEventOccured = false;
 
-            var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
-            storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 2))).Returns(Task.FromResult(true));
+            //var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
+            //storage.Setup(x => x.SetItemAsync<NoCrastData>(It.Is<string>(n => n == NoCrastData.StorageKeyName), It.Is<NoCrastData>(d => d.Tasks.Count == 2))).Returns(Task.FromResult(true));
 
-            var tasksApi = new Mock<ITasksApi>();
-            tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
+            //var tasksApi = new Mock<ITasksApi>();
+            //tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
-                                                        TestUtils.CreateLogProvider(),
-                                                        storage.Object,
-                                                        tasksApi.Object);
-            service.DataHasChanged += delegate (object sender, EventArgs e)
-            {
-                hasEventOccured = true;
-            };
+            //TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            //                                            TestUtils.CreateLogProvider(),
+            //                                            storage.Object,
+            //                                            tasksApi.Object);
+            //service.DataHasChanged += delegate (object sender, EventArgs e)
+            //{
+            //    hasEventOccured = true;
+            //};
 
-            service.StopTaskAsync(twoElementsData.Tasks[0]);
+            //service.StopTaskAsync(twoElementsData.Tasks[0]);
 
-            Assert.True(hasEventOccured);
-            Assert.False(twoElementsData.Tasks[0].IsRunning);
-            storage.Verify();
+            //Assert.True(hasEventOccured);
+            //Assert.False(twoElementsData.Tasks[0].IsRunning);
+            //storage.Verify();
         }
 
         [Fact()]

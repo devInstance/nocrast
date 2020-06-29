@@ -32,9 +32,9 @@ namespace NoCrast.Client.Services.Net
             result.EnsureSuccessStatusCode();
         }
 
-        public async Task<UserInfo> GetUserInfoAsync()
+        public async Task<UserInfoItem> GetUserInfoAsync()
         {
-            return await httpClient.GetFromJsonAsync<UserInfo>(Controller + "user-info");
+            return await httpClient.GetFromJsonAsync<UserInfoItem>(Controller + "user-info");
         }
     }
 }

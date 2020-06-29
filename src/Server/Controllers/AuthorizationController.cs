@@ -75,9 +75,9 @@ namespace NoCrast.Server.Controllers
 
         [Route("user-info")]
         [HttpGet]
-        public UserInfo GetUserInfo()
+        public UserInfoItem GetUserInfo()
         {
-            return new UserInfo
+            return new UserInfoItem
             {
                 IsAuthenticated = User.Identity.IsAuthenticated,
                 UserName = User.Identity.Name,

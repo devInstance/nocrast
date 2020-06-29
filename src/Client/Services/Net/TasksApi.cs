@@ -33,6 +33,16 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
+        public Task<UpdateTaskParameters> UpdateTimerAsync(UpdateTaskParameters request)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<UpdateTaskParameters> StopTimerAsync(UpdateTaskParameters request)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public async Task<TaskItem[]> SyncUpWithServer(TaskItem[] tasks)
         {
             var result = await httpClient.PostAsJsonAsync(Controller + "sync-up", tasks);

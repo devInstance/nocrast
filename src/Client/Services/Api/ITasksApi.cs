@@ -17,5 +17,7 @@ namespace NoCrast.Client.Services.Api
         Task<TaskItem> UpdateTaskAsync(TaskItem task);
 
         Task<TaskItem[]> SyncUpWithServer(TaskItem[] tasks);
+
+        Task<UpdateTaskParameters> UpdateTimerAsync(UpdateTaskParameters request);
     }
 }

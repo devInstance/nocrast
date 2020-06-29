@@ -8,7 +8,7 @@ namespace NoCrast.Client.Services
     {
         protected IAuthorizationApi Api { get; }
 
-        private UserInfo currentUser;
+        private UserInfoItem currentUser;
 
         public AuthorizationService(IAuthorizationApi api)
         {
@@ -32,7 +32,7 @@ namespace NoCrast.Client.Services
             return result;
         }
 
-        public async Task<UserInfo> GetUserInfoAsync()
+        public async Task<UserInfoItem> GetUserInfoAsync()
         {
             if (currentUser != null && currentUser.IsAuthenticated)
             {
