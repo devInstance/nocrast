@@ -6,6 +6,7 @@ using NoCrast.Client.ModelViews;
 using NoCrast.Client.Services.Api;
 using NoCrast.ClientTests;
 using NoCrast.Shared.Model;
+using PhotoShaRa.Lib.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -282,7 +283,7 @@ namespace NoCrast.Client.Services.Tests
                 TimeLogCount = 1,
                 Title = "Test 1"
             };
-            requestTask.SetInternalId(Guid.NewGuid());
+            requestTask.ClientId = IdGenerator.New();
 
             var responseLog = new TimeLogItem
             {
@@ -312,7 +313,7 @@ namespace NoCrast.Client.Services.Tests
                 }
             };
 
-            var itemView = new TaskItemView(TestUtils.CreateTimerProvider(), requestTask, null);
+            var itemView = new TaskItemView(TestUtils.CreateTimerProvider(), requestTask, null, 0);
             bool hasEventOccured = false;
 
             var storage = TestUtils.CreateStorageProviderMock(data);

@@ -6,10 +6,11 @@ using NoCrast.Client.Services.Api;
 using NoCrast.Client.Utils;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
+using PhotoShaRa.Lib.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services
@@ -31,33 +32,48 @@ namespace NoCrast.Client.Services
             Provider = provider;
             Storage = storage;
             Log = logProvider.CreateLogger(this);
-            Log.D("contructor");
+            Log.D("constructor");
         }
 
         private async Task<NoCrastData> TryLoadDataAsync()
         {
-            if (data == null)
+            using (var l = Log.DebugScope())
             {
-                data = await Storage.GetItemAsync<NoCrastData>(NoCrastData.StorageKeyName);
-
-                SyncUpWithServer();
-
                 if (data == null)
                 {
-                    data = new NoCrastData();
-                    try
+                    // Step 1: Try loading from the local store
+                    data = await Storage.GetItemAsync<NoCrastData>(NoCrastData.StorageKeyName);
+
+                    JsonSerializerOptions options = new JsonSerializerOptions
                     {
-                        var tasks = await Api.GetTasksAsync();
-                        data.Tasks.AddRange(tasks);
-                        ResetNetworkError();
-                    }
-                    catch (Exception ex)
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        WriteIndented = true
+                    };
+
+                    string result = JsonSerializer.Serialize<NoCrastData>(data, options);
+                    l.D(result);
+
+                    // Step 2: Sync-up with server any previous un-committed changes
+                    await SyncUpWithServer();
+
+                    // Step 3: If no local data and server is not responding then initialize empty
+                    if (data == null)
                     {
-                        NotifyNetworkError(ex);
+                        data = new NoCrastData();
+                        try
+                        {
+                            var tasks = await Api.GetTasksAsync();
+                            data.Tasks.AddRange(tasks);
+                            ResetNetworkError();
+                        }
+                        catch (Exception ex)
+                        {
+                            NotifyNetworkError(ex);
+                        }
                     }
                 }
+                return data;
             }
-            return data;
         }
 
         public async Task<List<TaskItemView>> GetTasksAsync()
@@ -71,8 +87,20 @@ namespace NoCrast.Client.Services
                 for(int i = 0; i < data.Tasks.Count; i ++)
                 {
                     var task = data.Tasks[i];
-                    var timeLog = data.Logs[i].Find(f => f.Id == task.LatestTimeLogItemId);
-                    var itemView = new TaskItemView(Provider, task, timeLog);
+                    var logs = data.Logs[i];
+                    TimeLogItem lastTimeLog = null;
+                    long totalTime = 0;
+                    for (int j = 0; j < logs.Count; j++)
+                    {
+                        var log = logs[j];
+                        totalTime += log.ElapsedMilliseconds;
+                        if (log.Id == task.LatestTimeLogItemId || log.ClientId == task.LatestTimeLogItemId)
+                        {
+                            lastTimeLog = log;
+                        }
+                    }
+                    var itemView = new TaskItemView(Provider, task, lastTimeLog, totalTime);
+                    result.Add(itemView);
                 }
                 return result;
             }
@@ -80,91 +108,179 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItemView> AddNewTaskAsync(string title)
         {
-            if (string.IsNullOrWhiteSpace(title))
+            using (var l = Log.DebugScope())
             {
-                throw new ArgumentException("Empty title", nameof(title));
-            }
-
-            await TryLoadDataAsync();
-
-            if ((from d in data.Tasks where d.Title == title select d).FirstOrDefault() != null)
-            {
-                NotifyUIError(new ArgumentException("Task already exists", nameof(title)));
-                return null;
-            }
-
-            ResetUIError();
-
-            var task = new TaskItem { Title = title };
-            task.SetInternalId(Guid.NewGuid());
-            data.Tasks.Add(task);
-            data.Logs.Add(new List<TimeLogItem>());
-
-            TaskItem response = null;
-            try
-            {
-                response = await Api.AddTaskAsync(task);
-                ResetNetworkError();
-            }
-            catch (Exception ex)
-            {
-                NotifyNetworkError(ex);
-            }
-
-            if (response != null)
-            {
-                if (!data.ApplyTaskItem(task, response))
+                if (string.IsNullOrWhiteSpace(title))
                 {
-                    await LocalDataOverideAsync();
+                    throw new ArgumentException("Empty title", nameof(title));
                 }
+
+                // Step 1: Make sure data is already loaded
+                await TryLoadDataAsync();
+
+                // Step 2: Validate integrity
+                if ((from d in data.Tasks where d.Title == title select d).FirstOrDefault() != null)
+                {
+                    NotifyUIError(new ArgumentException("Task already exists", nameof(title)));
+                    return null;
+                }
+
+                ResetUIError();
+
+                // Step 3: Create a new object
+                var task = new TaskItem { Title = title };
+                task.ClientId = IdGenerator.New();
+                data.Tasks.Add(task);
+                data.Logs.Add(new List<TimeLogItem>());
+
+                // Step 4: Post the object on server
+                TaskItem response = null;
+                try
+                {
+                    response = await Api.AddTaskAsync(task);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+
+                // Step 5: Apply processed object from server back
+                if (response != null)
+                {
+                    if (!data.ApplyTaskItem(response))
+                    {
+                        // if response cannot be applied then local data is 
+                        // corrupted and full re-sync from server required
+                        await LocalDataOverideAsync();
+                    }
+                }
+
+                // Step 6: Save to the local storage
+                await SaveDataAsync();
+
+                NotifyDataHasChanged();
+
+                return new TaskItemView(Provider, response, null, 0);
             }
-
-            await SaveDataAsync();
-
-            NotifyDataHasChanged();
-
-            return new TaskItemView(Provider, response, null);
         }
 
         /// <summary>
         /// Should be called after app start
         /// </summary>
-        public async void SyncUpWithServer()
+        public async Task<bool> SyncUpWithServer()
         {
-            if (data != null)
+            using (var l = Log.DebugScope())
             {
-                try
+                bool result = false;
+                if (data != null)
                 {
-                    //TODO: only sync-up if you have internal id
-                    var result = await Api.SyncUpWithServer(data.Tasks.ToArray());
-                    data.Tasks.Clear();
-                    data.Tasks.AddRange(result);
-                    ResetNetworkError();
+                    try
+                    {
+                        //TODO: only sync-up if you have internal id
+                        var tasks = await Api.SyncUpWithServer(data.Tasks.ToArray());
+                        //TODO: Proper sync-up
+                        data.Tasks.Clear();
+                        data.Tasks.AddRange(tasks);
+                        ResetNetworkError();
+                        result = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        NotifyNetworkError(ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    NotifyNetworkError(ex);
-                }
+                return result;
             }
         }
 
         private async Task SaveDataAsync()
         {
-            await Storage.SetItemAsync(NoCrastData.StorageKeyName, data);
+            using (var l = Log.DebugScope())
+            {
+                JsonSerializerOptions options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                };
+
+                string result = JsonSerializer.Serialize<NoCrastData>(data, options);
+                l.D(result);
+                await Storage.SetItemAsync(NoCrastData.StorageKeyName, data);
+            }
         }
 
         public async Task<bool> RemoveTaskAsync(TaskItemView item)
         {
-            await TryLoadDataAsync();
-
-            int index = data.Tasks.FindIndex(f => f.Id == item.Task.Id);
-            if (index >= 0)
+            using (var l = Log.DebugScope())
             {
-                data.Tasks.RemoveAt(index);
-                data.Logs.RemoveAt(index);
+                await TryLoadDataAsync();
+
+                int index = data.FindTaskIndex(item.Task);
+                if (index >= 0)
+                {
+                    data.Tasks.RemoveAt(index);
+                    data.Logs.RemoveAt(index);
+                    try
+                    {
+                        await Api.RemoveTaskAsync(item.Task.Id);
+                        ResetNetworkError();
+                    }
+                    catch (Exception ex)
+                    {
+                        NotifyNetworkError(ex);
+                    }
+
+                    await SaveDataAsync();
+
+                    NotifyDataHasChanged();
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public async void StartTaskAsync(TaskItemView item)
+        {
+            using (var l = Log.DebugScope())
+            {
+                if (item is null)
+                {
+                    throw new ArgumentNullException(nameof(item));
+                }
+
+                if (item.Task.IsRunning) return;
+
+                var load = TryLoadDataAsync();
+
+                TimeLogItem log = new TimeLogItem
+                {
+                    StartTime = Provider.CurrentTime
+                };
+                log.ClientId = IdGenerator.New();
+
+                item.TimeLog = log;
+                item.Task.LatestTimeLogItemId = log.ClientId;
+                item.Task.IsRunning = true;
+
+                await load;
+
+                if (!data.InsertNewLog(item.Task, log))
+                {
+                    await LocalDataOverideAsync();
+                }
+
+                var request = new UpdateTaskParameters()
+                {
+                    Task = item.Task,
+                    Log = item.TimeLog
+                };
+
+                UpdateTaskParameters response = null;
                 try
                 {
-                    await Api.RemoveTaskAsync(item.Task.Id);
+                    response = await Api.UpdateTimerAsync(request);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -172,135 +288,74 @@ namespace NoCrast.Client.Services
                     NotifyNetworkError(ex);
                 }
 
+                if (response != null)
+                {
+                    if (!data.ApplyStartTaskParameters(response))
+                    {
+                        await LocalDataOverideAsync();
+                    }
+                }
+
                 await SaveDataAsync();
 
                 NotifyDataHasChanged();
-                return true;
             }
-
-            return false;
         }
 
-        public async void StartTaskAsync(TaskItemView item)
-        {
-            if (item is null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            if (item.Task.IsRunning) return;
-
-            var load = TryLoadDataAsync();
-
-            TimeLogItem log = new TimeLogItem
-            {
-                StartTime = Provider.CurrentTime
-            };
-            log.SetInternalId(Guid.NewGuid());
-
-            item.TimeLog = log;
-            item.Task.IsRunning = true;
-
-            await load;
-
-            if (!data.InsertNewLog(item.Task, log))
-            {
-                await LocalDataOverideAsync();
-            }
-
-            var request = new UpdateTaskParameters()
-            {
-                Task = item.Task,
-                Log = item.TimeLog
-            };
-
-            UpdateTaskParameters response = null;
-            try
-            {
-                response = await Api.UpdateTimerAsync(request);
-                ResetNetworkError();
-            }
-            catch (Exception ex)
-            {
-                NotifyNetworkError(ex);
-            }
-
-            if(response != null)
-            {
-                if (!data.ApplyStartTaskParameters(request, response))
-                {
-                    await LocalDataOverideAsync();
-                }
-            }
-
-            await SaveDataAsync();
-
-            NotifyDataHasChanged();
-        }
-
-        private Task LocalDataOverideAsync()
+        private async Task<bool> LocalDataOverideAsync()
         {
             throw new NotImplementedException();
         }
 
         public async void StopTaskAsync(TaskItemView item)
         {
-            if (item is null)
+            using (var l = Log.DebugScope())
             {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            if (!item.Task.IsRunning) return;
-
-            var load = TryLoadDataAsync();
-
-            item.Stop();
-
-            await load;
-
-            int index = data.Tasks.FindIndex(f => f.Id == item.Task.Id);
-            if (index >= 0)
-            {
-                data.Tasks[index] = item.Task;
-                int indexLog = data.Logs[index].FindIndex(f => f.Id == item.TimeLog.Id);
-                if (indexLog >= 0)
+                if (item is null)
                 {
-                    data.Logs[index][indexLog] = item.TimeLog;
+                    throw new ArgumentNullException(nameof(item));
                 }
-            }
-            else
-            {
-                await LocalDataOverideAsync();
-            }
 
-            var request = new UpdateTaskParameters()
-            {
-                Task = item.Task,
-                Log = item.TimeLog
-            };
+                if (!item.Task.IsRunning) return;
 
-            UpdateTaskParameters response = null;
-            try
-            {
-                response = await Api.UpdateTimerAsync(request);
-                ResetNetworkError();
-            }
-            catch (Exception ex)
-            {
-                NotifyNetworkError(ex);
-            }
+                await TryLoadDataAsync();
 
-            if (response != null)
-            {
-                if (!data.ApplyStartTaskParameters(request, response))
+                item.Stop();
+
+                if (!data.UpdateTimeLog(item.Task, item.TimeLog))
                 {
                     await LocalDataOverideAsync();
                 }
+
+                var request = new UpdateTaskParameters()
+                {
+                    Task = item.Task,
+                    Log = item.TimeLog
+                };
+
+                UpdateTaskParameters response = null;
+                try
+                {
+                    response = await Api.UpdateTimerAsync(request);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+
+                if (response != null)
+                {
+                    if (!data.ApplyStartTaskParameters(response))
+                    {
+                        await LocalDataOverideAsync();
+                    }
+                }
+
+                await SaveDataAsync();
+
+                NotifyDataHasChanged();
             }
-
-            await SaveDataAsync();
-
-            NotifyDataHasChanged();
         }
 
         public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItem item)

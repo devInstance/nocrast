@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace NoCrast.Shared.Model
 {
-    public class TimeLogItem
+    public class TimeLogItem : ModelItem
     {
-        [Required]
-        public string Id { get; set; }
 
         public DateTime StartTime { get; set; }
 

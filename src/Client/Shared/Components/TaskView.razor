@@ -15,6 +15,12 @@
             <span class="timer-text">
                 <strong>@Task.Task.Title</strong>
             </span>
+            <span>
+                |
+            </span>
+            <span>
+                @String.Format("{0:F1}", Task.TotalHoursSpent) hour(s)
+            </span>
         </div>
         <div class="timer-item-time">
             <span class="timer-text">@FormatTime(Task.GetElapsedTimeSpan())</span>

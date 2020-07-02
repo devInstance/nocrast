@@ -1,81 +1,95 @@
 ﻿using NoCrast.Client.Model;
 using NoCrast.Shared.Model;
-using System;
-using System.Threading.Tasks;
 
 namespace NoCrast.Client.ModelExtensions
 {
     public static class NoCrastDataExtensions
     {
-        public static bool ApplyTaskItem(this NoCrastData data, TaskItem request, TaskItem response)
+        public static int FindTaskIndex(this NoCrastData data, TaskItem item)
         {
-            var taskId = request.GetInternalId();
- 
-            //TODO: optimize it later when logic is finalized
-            for (int i = 0; i < data.Tasks.Count; i++)
+            if(item.ClientId != null)
             {
-                TaskItem task = data.Tasks[i];
-                var id = task.GetInternalId();
-                if (id.HasValue && id.Value == taskId
-                    || !String.IsNullOrEmpty(task.Id) && request.Id == task.Id)
-                {
-                    data.Tasks[i] = response;
-                    return true;
-                }
+                return data.Tasks.FindIndex(f => f.ClientId == item.ClientId);
             }
-            return false;
+            return data.Tasks.FindIndex(f => f.Id == item.Id);
+        }
+
+        public static int FindTimeLogIndex(this NoCrastData data, int taskIndex, TimeLogItem item)
+        {
+            var logs = data.Logs[taskIndex];
+            if (item.ClientId != null)
+            {
+                return logs.FindIndex(f => f.ClientId == item.ClientId);
+            }
+            return logs.FindIndex(f => f.Id == item.Id);
+        }
+
+        public static bool ApplyTaskItem(this NoCrastData data, TaskItem response)
+        {
+            var index = data.FindTaskIndex(response);
+            if(index < 0)
+            {
+                return false;
+            }
+
+            response.ClientId = null;
+            data.Tasks[index] = response;
+
+            return true;
         }
 
         public static bool InsertNewLog(this NoCrastData data, TaskItem item, TimeLogItem log)
         {
-            var taskId = item.GetInternalId();
-
-            //TODO: optimize it later when logic is finalized
-            for (int i = 0; i < data.Tasks.Count; i++)
+            var index = data.FindTaskIndex(item);
+            if (index < 0)
             {
-                TaskItem task = data.Tasks[i];
-                var id = task.GetInternalId();
-                if (id.HasValue && id.Value == taskId
-                    || !String.IsNullOrEmpty(task.Id) && item.Id == task.Id)
-                {
-                    data.Logs[i].Add(log);
-                    return true;
-                }
+                return false;
             }
-            return false;
+
+            data.Logs[index].Add(log);
+
+            return true;
         }
 
-        public static bool ApplyStartTaskParameters(this NoCrastData data, UpdateTaskParameters request, UpdateTaskParameters response)
+        public static bool UpdateTimeLog(this NoCrastData data, TaskItem item, TimeLogItem log)
         {
-            var taskId = request.Task.GetInternalId();
-            var logId = request.Log.GetInternalId();
-
-            //TODO: optimize it later when logic is finalized
-            for (int i = 0; i < data.Tasks.Count; i ++)
+            var index = data.FindTaskIndex(item);
+            if (index < 0)
             {
-                TaskItem task = data.Tasks[i];
-                var id = task.GetInternalId();
-                if (id.HasValue && id.Value == taskId 
-                    || !String.IsNullOrEmpty(task.Id) && request.Task.Id == task.Id)
-                {
-                    data.Tasks[i] = response.Task;
-                }
-
-                var log = data.Logs[i];
-                //TODO: optimize it later when logic is finalized
-                for (int n = 0; n < log.Count; n++)
-                {
-                    var l = log[n];
-                    var lid = l.GetInternalId();
-                    if (lid.HasValue && lid.Value == logId
-                        || !String.IsNullOrEmpty(l.Id) && request.Log.Id == l.Id)
-                    {
-                        log[n] = response.Log;
-                        return true;
-                    }
-                }
+                return false;
             }
-            return false;
+
+            var logIndex = data.FindTimeLogIndex(index, log);
+            if (logIndex < 0)
+            {
+                return false;
+            }
+
+            data.Logs[index][logIndex] = log;
+
+            return true;
+        }
+
+        public static bool ApplyStartTaskParameters(this NoCrastData data, UpdateTaskParameters response)
+        {
+            var index = data.FindTaskIndex(response.Task);
+            if (index < 0)
+            {
+                return false;
+            }
+
+            response.Task.ClientId = null;
+            data.Tasks[index] = response.Task;
+
+            var logIndex = data.FindTimeLogIndex(index, response.Log);
+            if (logIndex < 0)
+            {
+                return false;
+            }
+            response.Log.ClientId = null;
+            data.Logs[index][logIndex] = response.Log;
+            
+            return true;
         }
     }
 }

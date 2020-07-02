@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NoCrast.Shared.Model
 {
-    public class TaskItem
+    public class TaskItem : ModelItem
     {
-        [Required]
-        public string Id { get; set; }
-
         [Required]
         public string Title { get; set; }
  
@@ -17,5 +14,7 @@ namespace NoCrast.Shared.Model
         public string LatestTimeLogItemId { get; set; }
 
         public int TimeLogCount { get; set; }
+
+        public long TotalTimeSpent { get; set; }
     }
 }
