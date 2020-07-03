@@ -1,5 +1,7 @@
 ﻿using NoCrast.Client.Model;
 using NoCrast.Shared.Model;
+using System;
+using System.Collections.Generic;
 
 namespace NoCrast.Client.ModelExtensions
 {
@@ -91,5 +93,11 @@ namespace NoCrast.Client.ModelExtensions
             
             return true;
         }
+
+        public static bool ApplyTimeLog(this NoCrastData data, TaskItem task, List<TimeLogItem> response)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

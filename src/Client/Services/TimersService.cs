@@ -83,6 +83,8 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 await TryLoadDataAsync();
 
+                ///TODO: This is not going to work with server request.
+                ///Use Task.TotalTimeSpent instead
                 var result = new List<TaskItemView>();
                 for(int i = 0; i < data.Tasks.Count; i ++)
                 {
@@ -252,7 +254,7 @@ namespace NoCrast.Client.Services
 
                 if (item.Task.IsRunning) return;
 
-                var load = TryLoadDataAsync();
+                await TryLoadDataAsync();
 
                 TimeLogItem log = new TimeLogItem
                 {
@@ -263,8 +265,6 @@ namespace NoCrast.Client.Services
                 item.TimeLog = log;
                 item.Task.LatestTimeLogItemId = log.ClientId;
                 item.Task.IsRunning = true;
-
-                await load;
 
                 if (!data.InsertNewLog(item.Task, log))
                 {
@@ -358,9 +358,44 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItem item)
+        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItemView item)
         {
-            throw new NotImplementedException();
+            using (var l = Log.DebugScope())
+            {
+                if (item is null)
+                {
+                    throw new ArgumentNullException(nameof(item));
+                }
+                //TODO: This is a temp solution based on assumption that
+                //list is not previously fetched from the server if count is 0
+                //It should a flag introduced in the long run 
+                //if task has id it has been already synced with server
+                var taskIndex = data.FindTaskIndex(item.Task);
+                if (!String.IsNullOrEmpty(item.Task.Id) && data.Logs[taskIndex].Count == 0)
+                {
+                    List<TimeLogItem> response = null;
+                    try
+                    {
+                        response = await Api.GetTimelogAsync(item.Task.Id);
+                        ResetNetworkError();
+                    }
+                    catch (Exception ex)
+                    {
+                        NotifyNetworkError(ex);
+                    }
+
+                    if (response != null)
+                    {
+                        if (!data.ApplyTimeLog(item.Task, response))
+                        {
+                            await LocalDataOverideAsync();
+                        }
+                    }
+                    await SaveDataAsync();
+                }
+
+                return new List<TimeLogItem>(data.Logs[taskIndex]);
+            }
         }
     }
 }

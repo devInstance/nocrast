@@ -1,5 +1,6 @@
 ﻿using NoCrast.Client.Services.Api;
 using NoCrast.Shared.Model;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -55,6 +56,11 @@ namespace NoCrast.Client.Services.Net
             var result = await httpClient.PutAsJsonAsync(Controller + task.Id, task);
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
+        }
+
+        public Task<List<TimeLogItem>> GetTimelogAsync(string taskid)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

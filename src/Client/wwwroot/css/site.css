@@ -198,7 +198,7 @@ ul {
 .timer-item-container {
     display: grid;
     grid-template-columns: 6em auto 1em;
-    grid-template-rows: 1em 1.5em 1.5em;
+    grid-template-rows: 1em 1.5em 1.5em auto;
     /*padding: 0.75em 1em;*/
 }
 
@@ -215,6 +215,11 @@ ul {
 .timer-item-panel {
     grid-column: 2;
     grid-row: 3;
+}
+
+.timer-item-timelog-panel {
+    grid-column: 2;
+    grid-row: 4;
 }
 
 .timer-item-context {

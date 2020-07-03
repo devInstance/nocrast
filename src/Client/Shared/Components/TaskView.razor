@@ -13,20 +13,20 @@
         </div>
         <div class="timer-item-title">
             <span class="timer-text">
-                <strong>@Task.Task.Title</strong>
+                <strong>@Item.Task.Title</strong>
             </span>
             <span>
                 |
             </span>
             <span>
-                @String.Format("{0:F1}", Task.TotalHoursSpent) hour(s)
+                @String.Format("{0:F1}", Item.TotalHoursSpent) hour(s)
             </span>
         </div>
         <div class="timer-item-time">
-            <span class="timer-text">@FormatTime(Task.GetElapsedTimeSpan())</span>
+            <span class="timer-text">@FormatTime(Item.GetElapsedTimeSpan())</span>
         </div>
         <div class="timer-item-panel">
-            @if (Task.Task.IsRunning)
+            @if (Item.Task.IsRunning)
             {
                 <button class="btn btn-default timer-button" @onclick="@(() => Stop())">
                     <span class="oi oi-media-pause" aria-hidden="true"></span>
@@ -39,12 +39,47 @@
                 </button>
             }
         </div>
+        <div class="timer-item-timelog-panel">
+            <button class="btn btn-default timer-button" @onclick="@(() => ToggleLogPanel())">
+                @if (IsTimeLogShown)
+                {
+                    <span class="oi oi-chevron-top" aria-hidden="true"></span>
+                }
+                else
+                {
+                    <span class="oi oi-chevron-bottom" aria-hidden="true"></span>
+                }
+            </button>
+            @if (IsTimeLogShown)
+            {
+                @if (TimeLog != null)
+                {
+                    <ul class="timer-list">
+                        @foreach (var tl in TimeLog)
+                        {
+                            <li>@FormatTime(TimeSpan.FromMilliseconds(tl.ElapsedMilliseconds))</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <div>Loading ...</div>
+                }
+            }
+        </div>
     </div>
 </li>
 
 @code {
     [Parameter]
-    public TaskItemView Task { get; set; }
+    public TaskItemView Item { get; set; }
+    public List<TimeLogItem> TimeLog { get; set; }
+    public bool IsTimeLogShown { get; set; }
+
+    protected override void OnInitialized()
+    {
+        IsTimeLogShown = false;
+    }
 
     private string FormatTime(TimeSpan time)
     {
@@ -53,17 +88,32 @@
 
     private async void Remove()
     {
-        await Service.RemoveTaskAsync(Task);
+        await Service.RemoveTaskAsync(Item);
     }
 
-    private async void Start()
+    private void Start()
     {
-        Service.StartTaskAsync(Task);
+        Service.StartTaskAsync(Item);
     }
 
-    private async void Stop()
+    private void Stop()
     {
-        Service.StopTaskAsync(Task);
+        Service.StopTaskAsync(Item);
     }
 
+    private async void ToggleLogPanel()
+    {
+        if(!IsTimeLogShown)
+        {
+            IsTimeLogShown = true;
+            if(TimeLog == null)
+            {
+                TimeLog = await Service.GetTimeLogItemsAsync(Item);
+            }
+        }
+        else
+        {
+            IsTimeLogShown = false;
+        }
+    }
 }
