@@ -34,7 +34,7 @@ namespace NoCrast.Client.ModelExtensions
                 return false;
             }
 
-            response.ClientId = null;
+            //TODO:response.ClientId = null;
             data.Tasks[index] = response;
 
             return true;
@@ -72,24 +72,24 @@ namespace NoCrast.Client.ModelExtensions
             return true;
         }
 
-        public static bool ApplyStartTaskParameters(this NoCrastData data, UpdateTaskParameters response)
+        public static bool ApplyStartTaskParameters(this NoCrastData data, TaskItem item, TimeLogItem log)
         {
-            var index = data.FindTaskIndex(response.Task);
+            var index = data.FindTaskIndex(item);
             if (index < 0)
             {
                 return false;
             }
 
-            response.Task.ClientId = null;
-            data.Tasks[index] = response.Task;
+            //TODO:item.ClientId = null;
+            data.Tasks[index] = item;
 
-            var logIndex = data.FindTimeLogIndex(index, response.Log);
+            var logIndex = data.FindTimeLogIndex(index, log);
             if (logIndex < 0)
             {
                 return false;
             }
-            response.Log.ClientId = null;
-            data.Logs[index][logIndex] = response.Log;
+            //TODO:log.ClientId = null;
+            data.Logs[index][logIndex] = log;
             
             return true;
         }

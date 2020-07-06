@@ -34,7 +34,7 @@ namespace NoCrast.Client.Services.Tests
         public async void GetTasksAsync_EmptyTest()
         {
             var storage = TestUtils.CreateStorageProviderMock(null);
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         TestUtils.CreateTasksApi());
@@ -56,7 +56,7 @@ namespace NoCrast.Client.Services.Tests
             var tasksApi = new Mock<ITasksApi>();
             tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         tasksApi.Object);
@@ -81,7 +81,7 @@ namespace NoCrast.Client.Services.Tests
             var tasksApi = new Mock<ITasksApi>();
             tasksApi.Setup(x => x.AddTaskAsync(It.IsAny<TaskItem>())).Returns<TaskItem>((task) => Task.FromResult(task));
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         tasksApi.Object);
@@ -109,7 +109,7 @@ namespace NoCrast.Client.Services.Tests
             var tasksApi = new Mock<ITasksApi>();
             tasksApi.Setup(x => x.AddTaskAsync(It.IsAny<TaskItem>())).Returns<TaskItem>((task) => Task.FromResult(task));
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         tasksApi.Object);
@@ -137,7 +137,7 @@ namespace NoCrast.Client.Services.Tests
 
             var storage = TestUtils.CreateStorageProviderMock(twoElementsData);
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         TestUtils.CreateTasksApi());
@@ -170,7 +170,7 @@ namespace NoCrast.Client.Services.Tests
             var tasksApi = new Mock<ITasksApi>();
             tasksApi.Setup(x => x.SyncUpWithServer(It.IsAny<TaskItem[]>())).Returns<TaskItem[]>((task) => Task.FromResult(task));
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         tasksApi.Object);
@@ -327,7 +327,7 @@ namespace NoCrast.Client.Services.Tests
                 Log = responseLog
             })) ;
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                                         TestUtils.CreateLogProvider(),
                                                         storage.Object,
                                                         tasksApi.Object);
@@ -385,7 +385,7 @@ namespace NoCrast.Client.Services.Tests
             tasksApi.Setup(x => x.GetTasksAsync()).Throws<Exception>();
             tasksApi.Setup(x => x.AddTaskAsync(It.IsAny<TaskItem>())).Throws<Exception>();
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                             TestUtils.CreateLogProvider(),
                                             TestUtils.CreateStorageProvider(null),
                                             tasksApi.Object);
@@ -411,7 +411,7 @@ namespace NoCrast.Client.Services.Tests
             var tasksApi = new Mock<ITasksApi>();
             tasksApi.Setup(x => x.GetTasksAsync()).Throws<Exception>();
 
-            TimersService service = new TimersService(TestUtils.CreateTimerProvider(),
+            TasksService service = new TasksService(TestUtils.CreateTimerProvider(),
                                             TestUtils.CreateLogProvider(),
                                             TestUtils.CreateStorageProvider(null),
                                             tasksApi.Object);
