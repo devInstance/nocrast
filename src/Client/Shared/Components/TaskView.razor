@@ -57,7 +57,7 @@
                     <ul class="timer-list">
                         @foreach (var tl in TimeLog)
                         {
-                            <li>@FormatTime(TimeSpan.FromMilliseconds(tl.ElapsedMilliseconds))</li>
+                            <li>@FormatTime(tl.GetElapsedTimeSpan(TimeProvider))</li>
                         }
                     </ul>
                 }
@@ -78,7 +78,16 @@
 
     protected override void OnInitialized()
     {
-        IsTimeLogShown = false;
+        Service.DataHasChanged += OnDataHasChanged;
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        if (IsTimeLogShown)
+        {
+            TimeLog = Service.GetTimeLogItemsAsync(Item, 5).Result;
+        }
+        StateHasChanged();
     }
 
     private string FormatTime(TimeSpan time)
@@ -106,10 +115,7 @@
         if(!IsTimeLogShown)
         {
             IsTimeLogShown = true;
-            if(TimeLog == null)
-            {
-                TimeLog = await Service.GetTimeLogItemsAsync(Item);
-            }
+            TimeLog = await Service.GetTimeLogItemsAsync(Item, 5);
         }
         else
         {

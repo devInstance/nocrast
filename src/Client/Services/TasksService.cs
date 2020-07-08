@@ -7,7 +7,6 @@ using NoCrast.Client.Services.LocalStore;
 using NoCrast.Client.Utils;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
-using PhotoShaRa.Lib.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -267,7 +266,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItemView item)
+        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItemView item, int topn)
         {
             using (var l = Log.DebugScope())
             {
@@ -279,7 +278,12 @@ namespace NoCrast.Client.Services
                 //list is not previously fetched from the server if count is 0
                 //It should a flag introduced in the long run 
                 //if task has id it has been already synced with server
-                return await LocalStorage.GetTimeLogAsync(item.Task);
+                var list = await LocalStorage.GetTimeLogAsync(item.Task);
+                if(topn > 0)
+                {
+                    return list.Take(topn).ToList();
+                }
+                return list;
             }
         }
 

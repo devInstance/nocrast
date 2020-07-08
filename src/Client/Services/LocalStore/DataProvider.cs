@@ -3,13 +3,13 @@ using NoCrast.Client.Model;
 using NoCrast.Client.ModelExtensions;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
-using PhotoShaRa.Lib.Core.Utils;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
 using NoCrast.Client.Utils;
+using NoCrast.Shared.Utils;
 
 namespace NoCrast.Client.Services.LocalStore
 {
@@ -181,7 +181,7 @@ namespace NoCrast.Client.Services.LocalStore
             {
                 throw new Exception("Invalid task");
             }
-            data.Logs[index].Add(log);
+            data.Logs[index].Insert(0, log);
             return log;
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PhotoShaRa.Lib.Core.Utils
+namespace NoCrast.Shared.Utils
 {
     /// <summary>
     /// Transforms Guid into a case sensitive string representation
