@@ -1,5 +1,5 @@
-﻿using NoCrast.Client.Utils;
-using NoCrast.Shared.Model;
+﻿using NoCrast.Shared.Model;
+using NoCrast.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

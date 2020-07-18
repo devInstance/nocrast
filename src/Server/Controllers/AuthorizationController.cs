@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Server.Model;
@@ -25,6 +26,8 @@ namespace NoCrast.Server.Controllers
 
         [Route("signin")]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginParameters parameters)
         {
             var user = await userManager.FindByNameAsync(parameters.UserName);
@@ -48,6 +51,8 @@ namespace NoCrast.Server.Controllers
 
         [Route("register")]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(RegisterParameters parameters)
         {
             var user = new ApplicationUser();
@@ -67,6 +72,8 @@ namespace NoCrast.Server.Controllers
         [Route("signout")]
         [Authorize]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
@@ -75,6 +82,7 @@ namespace NoCrast.Server.Controllers
 
         [Route("user-info")]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public UserInfoItem GetUserInfo()
         {
             return new UserInfoItem

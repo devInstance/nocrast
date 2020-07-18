@@ -6,8 +6,13 @@ using System;
 
 namespace NoCrast.Server.Database
 {
-    internal class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
+        public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<TimerTask> Tasks { get; set; }
+        public DbSet<TimerTaskState> TaskState { get; set; }
+        public DbSet<TimeLog> TimeLog { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -21,6 +26,7 @@ namespace NoCrast.Server.Database
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.HasPostgresExtension("uuid-ossp");
         }
     }
 }

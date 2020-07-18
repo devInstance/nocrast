@@ -8,7 +8,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
-using NoCrast.Client.Utils;
 using NoCrast.Shared.Utils;
 
 namespace NoCrast.Client.Services.LocalStore

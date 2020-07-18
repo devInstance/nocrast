@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NoCrast.Client.Services;
-using NoCrast.Client.Utils;
 using System.Net.Http;
 using NoCrast.Shared.Logging;
 using Blazored.LocalStorage;
 using NoCrast.Client.Services.Api;
 using NoCrast.Client.Services.Net;
 using NoCrast.Client.Services.LocalStore;
+using NoCrast.Shared.Utils;
 
 namespace NoCrast.Client
 {
