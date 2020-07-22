@@ -36,25 +36,56 @@ namespace NoCrast.Client.Services
             LocalStorage.OnLoadTimeLog += LocalStorage_OnLoadTimeLog;
         }
 
-        private async Task<List<TaskItem>> LocalStorage_OnLoadTasks(List<TaskItem> items)
+        private async Task<bool> SyncUpWithServerAsync(List<TaskItem> tasks)
         {
-            List<TaskItem> tasks = items;
-            if (items != null)
+            using (var l = Log.DebugScope())
             {
-                try
+                //Sync first in case there are any pending changes
+                foreach (var t in tasks)
                 {
-                    //TODO: only sync-up if you have client id
-                    var response = await Api.SyncUpWithServer(items.ToArray());
-                    tasks.Clear();
-                    tasks.AddRange(response);
-                    ResetNetworkError();
-                }
-                catch (Exception ex)
-                {
-                    NotifyNetworkError(ex);
+                    TaskItem updatedTask = t;
+                    if (!String.IsNullOrEmpty(t.ClientId))
+                    {
+                        //insert
+                        if (String.IsNullOrEmpty(t.Id))
+                        {
+                            l.D($"Insert task {t.Title}");
+                            updatedTask = await Api.AddTaskAsync(t);
+                        }
+                        else
+                        {
+                            l.D($"Update task {t.Title}");
+                            updatedTask = await Api.UpdateTaskAsync(t.Id, t);
+                        }
+                        updatedTask.ClientId = null;
+                    }
                 }
             }
-            return tasks;
+            return true;
+        }
+
+        private async Task<List<TaskItem>> LocalStorage_OnLoadTasks(List<TaskItem> items)
+        {
+            using (var l = Log.DebugScope())
+            {
+                List<TaskItem> tasks = items;
+                if (items != null)
+                {
+                    try
+                    {
+                        //TODO: only sync-up if you have client id
+                        await SyncUpWithServerAsync(items);
+                        tasks.Clear();
+                        tasks.AddRange(await Api.GetTasksAsync());
+                        ResetNetworkError();
+                    }
+                    catch (Exception ex)
+                    {
+                        NotifyNetworkError(ex);
+                    }
+                }
+                return tasks;
+            }
         }
 
         public async Task<List<TaskItemView>> GetTasksAsync()
@@ -194,7 +225,7 @@ namespace NoCrast.Client.Services
                 UpdateTaskParameters response = null;
                 try
                 {
-                    response = await Api.UpdateTimerAsync(request);
+                    response = await Api.InsertTimerAsync(item.Task.Id, request);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -246,7 +277,7 @@ namespace NoCrast.Client.Services
                 UpdateTaskParameters response = null;
                 try
                 {
-                    response = await Api.UpdateTimerAsync(request);
+                    response = await Api.UpdateTimerAsync(request.Task.Id, request.Log.Id, request);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -289,10 +320,11 @@ namespace NoCrast.Client.Services
 
         private async Task<List<TimeLogItem>> LocalStorage_OnLoadTimeLog(TaskItem task, List<TimeLogItem> items)
         {
-            List<TimeLogItem> response = null;
+            //TODO: Sync-up pending changes
+            List<TimeLogItem> response = new List<TimeLogItem>();
             try
             {
-                response = await Api.GetTimelogAsync(task.Id);
+                response.AddRange(await Api.GetTimelogAsync(task.Id));
                 ResetNetworkError();
             }
             catch (Exception ex)

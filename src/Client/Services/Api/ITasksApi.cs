@@ -12,14 +12,17 @@ namespace NoCrast.Client.Services.Api
 
         Task<TaskItem> AddTaskAsync(TaskItem task);
 
+        Task<TaskItem> UpdateTaskAsync(string id, TaskItem task);
+
         Task<TaskItem> RemoveTaskAsync(string id);
 
-        Task<TaskItem> UpdateTaskAsync(TaskItem task);
+        Task<TimeLogItem[]> GetTimelogAsync(string id);
 
-        Task<TaskItem[]> SyncUpWithServer(TaskItem[] tasks);
+        Task<UpdateTaskParameters> InsertTimerAsync(string id, UpdateTaskParameters request);
 
-        Task<UpdateTaskParameters> UpdateTimerAsync(UpdateTaskParameters request);
+        Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request);
 
-        Task<List<TimeLogItem>> GetTimelogAsync(string taskid);
+        Task<UpdateTaskParameters> RemoveTimerAsync(string id, string timerId);
+
     }
 }

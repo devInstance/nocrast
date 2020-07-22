@@ -68,11 +68,13 @@ namespace NoCrast.Client.Services.LocalStore
                     if (OnLoadTasks != null)
                     {
                         data.Tasks = await OnLoadTasks(data.Tasks);
-                        //TODO: data.Logs.Clear();
-                        //for (int i = 0; i < data.Tasks.Count; i ++)
-                        //{
-                        //    data.Logs.Add(new List<TimeLogItem>());
-                        //}
+                        data.Logs.Clear();
+                        foreach (var task in data.Tasks)
+                        {
+                            //TODO: Fix it
+                            data.Logs.Add(await OnLoadTimeLog(task, new List<TimeLogItem>()));
+                        }
+                        await SaveDataAsync();
                     }
                 }
             }

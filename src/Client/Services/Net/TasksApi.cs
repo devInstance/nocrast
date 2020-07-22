@@ -15,6 +15,11 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
+        public async Task<TaskItem[]> GetTasksAsync()
+        {
+            return await httpClient.GetFromJsonAsync<TaskItem[]>(Controller);
+        }
+
         public async Task<TaskItem> AddTaskAsync(TaskItem task)
         {
             var result = await httpClient.PostAsJsonAsync(Controller, task);
@@ -22,9 +27,11 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
-        public Task<TaskItem[]> GetTasksAsync()
+        public async Task<TaskItem> UpdateTaskAsync(string id, TaskItem task)
         {
-            return httpClient.GetFromJsonAsync<TaskItem[]>(Controller);
+            var result = await httpClient.PutAsJsonAsync(Controller + id, task);
+            result.EnsureSuccessStatusCode();
+            return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
         public async Task<TaskItem> RemoveTaskAsync(string id)
@@ -34,33 +41,30 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
-        public Task<UpdateTaskParameters> UpdateTimerAsync(UpdateTaskParameters request)
+        public async Task<TimeLogItem[]> GetTimelogAsync(string id)
         {
-            throw new System.NotImplementedException();
+            return await httpClient.GetFromJsonAsync<TimeLogItem[]>(Controller + id + "/timelog");
         }
 
-        public Task<UpdateTaskParameters> StopTimerAsync(UpdateTaskParameters request)
+        public async Task<UpdateTaskParameters> InsertTimerAsync(string id, UpdateTaskParameters request)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public async Task<TaskItem[]> SyncUpWithServer(TaskItem[] tasks)
-        {
-            var result = await httpClient.PostAsJsonAsync(Controller + "sync-up", tasks);
+            var result = await httpClient.PostAsJsonAsync(Controller + id + "/timelog", request);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<TaskItem[]>().Result;
+            return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
 
-        public async Task<TaskItem> UpdateTaskAsync(TaskItem task)
+        public async Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request)
         {
-            var result = await httpClient.PutAsJsonAsync(Controller + task.Id, task);
+            var result = await httpClient.PutAsJsonAsync(Controller + id + "/timelog/" + timerId, request);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<TaskItem>().Result;
+            return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
 
-        public Task<List<TimeLogItem>> GetTimelogAsync(string taskid)
+        public async Task<UpdateTaskParameters> RemoveTimerAsync(string id, string timerId)
         {
-            throw new System.NotImplementedException();
+            var result = await httpClient.DeleteAsync(Controller + id + "/timelog/" + timerId);
+            result.EnsureSuccessStatusCode();
+            return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
     }
 }

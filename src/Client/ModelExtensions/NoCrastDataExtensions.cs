@@ -9,21 +9,29 @@ namespace NoCrast.Client.ModelExtensions
     {
         public static int FindTaskIndex(this NoCrastData data, TaskItem item)
         {
-            if(item.ClientId != null)
+            if(!String.IsNullOrEmpty(item.Id))
             {
-                return data.Tasks.FindIndex(f => f.ClientId == item.ClientId);
+                var index = data.Tasks.FindIndex(f => f.Id == item.Id);
+                if (index >= 0)
+                {
+                    return index;
+                }
             }
-            return data.Tasks.FindIndex(f => f.Id == item.Id);
+            return data.Tasks.FindIndex(f => f.ClientId == item.ClientId);
         }
 
         public static int FindTimeLogIndex(this NoCrastData data, int taskIndex, TimeLogItem item)
         {
             var logs = data.Logs[taskIndex];
-            if (item.ClientId != null)
+            if (!String.IsNullOrEmpty(item.Id))
             {
-                return logs.FindIndex(f => f.ClientId == item.ClientId);
+                var index = logs.FindIndex(f => f.Id == item.Id);
+                if(index >= 0)
+                {
+                    return index;
+                }
             }
-            return logs.FindIndex(f => f.Id == item.Id);
+            return logs.FindIndex(f => f.ClientId == item.ClientId);
         }
 
         public static bool ApplyTaskItem(this NoCrastData data, TaskItem response)
@@ -33,8 +41,6 @@ namespace NoCrast.Client.ModelExtensions
             {
                 return false;
             }
-
-            //TODO:response.ClientId = null;
             data.Tasks[index] = response;
 
             return true;

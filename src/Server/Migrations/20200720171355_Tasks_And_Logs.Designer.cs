@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NoCrast.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200717223921_Tasks_And_Logs")]
+    [Migration("20200720171355_Tasks_And_Logs")]
     partial class Tasks_And_Logs
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -263,9 +263,6 @@ namespace NoCrast.Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("StateId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -276,9 +273,6 @@ namespace NoCrast.Server.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProfileId");
-
-                    b.HasIndex("StateId")
-                        .IsUnique();
 
                     b.ToTable("Tasks");
                 });
@@ -295,9 +289,15 @@ namespace NoCrast.Server.Migrations
                     b.Property<Guid?>("LatestTimeLogItemId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LatestTimeLogItemId");
+
+                    b.HasIndex("TaskId")
+                        .IsUnique();
 
                     b.ToTable("TaskState");
                 });
@@ -400,12 +400,6 @@ namespace NoCrast.Server.Migrations
                     b.HasOne("NoCrast.Server.Model.UserProfile", "Profile")
                         .WithMany()
                         .HasForeignKey("ProfileId");
-
-                    b.HasOne("NoCrast.Server.Model.TimerTaskState", "State")
-                        .WithOne("Task")
-                        .HasForeignKey("NoCrast.Server.Model.TimerTask", "StateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("NoCrast.Server.Model.TimerTaskState", b =>
@@ -413,6 +407,12 @@ namespace NoCrast.Server.Migrations
                     b.HasOne("NoCrast.Server.Model.TimeLog", "LatestTimeLogItem")
                         .WithMany()
                         .HasForeignKey("LatestTimeLogItemId");
+
+                    b.HasOne("NoCrast.Server.Model.TimerTask", "Task")
+                        .WithOne("State")
+                        .HasForeignKey("NoCrast.Server.Model.TimerTaskState", "TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

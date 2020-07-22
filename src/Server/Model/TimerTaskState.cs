@@ -11,6 +11,9 @@ namespace NoCrast.Server.Model
     {
         [Key]
         public Guid Id { get; set; }
+
+        [ForeignKey("Task")]
+        public Guid TaskId { get; set; }
         public virtual TimerTask Task { get; set; }
 
         [Required]

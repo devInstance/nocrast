@@ -16,8 +16,6 @@ namespace NoCrast.Server.Model
   
         public virtual ICollection<TimeLog> TimeLog { get; set; }
 
-        [ForeignKey("State")]
-        public Guid StateId { get; set; }
         public virtual TimerTaskState State { get; set; }
     }
 }
