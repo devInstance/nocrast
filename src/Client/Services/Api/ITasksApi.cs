@@ -14,7 +14,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<TaskItem> UpdateTaskAsync(string id, TaskItem task);
 
-        Task<TaskItem> RemoveTaskAsync(string id);
+        Task<bool> RemoveTaskAsync(string id);
 
         Task<TimeLogItem[]> GetTimelogAsync(string id);
 
@@ -22,7 +22,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request);
 
-        Task<UpdateTaskParameters> RemoveTimerAsync(string id, string timerId);
+        Task<bool> RemoveTimerAsync(string id, string timerId);
 
     }
 }

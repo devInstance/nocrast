@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NoCrast.Server.Database;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Model;
+using NoCrast.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +15,13 @@ namespace NoCrast.Server.Controllers
 {
     [Route("api/user/account")]
     [ApiController]
-    public class AuthorizationController : ControllerBase
+    public class AuthorizationController : BaseController
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
 
-        public AuthorizationController(UserManager<ApplicationUser> um, SignInManager<ApplicationUser> sm)
+        public AuthorizationController(ApplicationDbContext db, UserManager<ApplicationUser> um, SignInManager<ApplicationUser> sm)
+            : base(db)
         {
             userManager = um;
             signInManager = sm;
@@ -44,6 +47,22 @@ namespace NoCrast.Server.Controllers
             }
 
             await signInManager.SignInAsync(user, parameters.RememberMe);
+
+            DB.UserProfiles.Add(new UserProfile 
+            {
+                Id = Guid.NewGuid(),
+                PublicId = IdGenerator.New(),
+                Status = UserStatus.LIVE,
+
+                ApplicationUserId = user.Id,
+                Name = parameters.UserName,
+                Email = parameters.UserName,
+
+                CreateDate = DateTime.Now,
+                UpdateDate = DateTime.Now
+            }
+            );
+            DB.SaveChanges();
 
             return Ok();
         }

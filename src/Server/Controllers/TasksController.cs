@@ -10,8 +10,6 @@ using NoCrast.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NoCrast.Server.Controllers
 {
@@ -100,6 +98,11 @@ namespace NoCrast.Server.Controllers
                                   where task.PublicId == id && task.Profile == CurrentProfile
                                   select task).Include(a => a.State).FirstOrDefault();
 
+                if(taskRecord == null)
+                {
+                    return NotFound();
+                }
+
                 taskRecord.Title = task.Title;
                 taskRecord.UpdateDate = DateTime.Now;
 
@@ -113,11 +116,23 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<TaskItem> RemoveTask(string id)
+        public ActionResult<bool> RemoveTask(string id)
         {
-            return HandleWebRequest<TaskItem>(() =>
+            return HandleWebRequest<bool>(() =>
             {
-                throw new NotImplementedException();
+                var taskRecord = (from task in DB.Tasks
+                                  where task.PublicId == id && task.Profile == CurrentProfile
+                                  select task).Include(a => a.State).FirstOrDefault();
+
+                if (taskRecord == null)
+                {
+                    return NotFound();
+                }
+
+                DB.Tasks.Remove(taskRecord);
+                DB.SaveChanges();
+
+                return Ok(true);
             });
         }
 
@@ -126,7 +141,6 @@ namespace NoCrast.Server.Controllers
         [Route("{id}/timelog")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<TimeLogItem[]> GetTimelogAsync(string id)
         {
             return HandleWebRequest<TimeLogItem[]>(() =>
@@ -158,6 +172,10 @@ namespace NoCrast.Server.Controllers
                 var taskRecord = (from task in DB.Tasks
                                   where task.PublicId == id && task.Profile == CurrentProfile
                                   select task).Include(a => a.State).FirstOrDefault();
+                if (taskRecord == null)
+                {
+                    return NotFound();
+                }
 
                 var timeLog = new TimeLog
                 {
@@ -202,6 +220,10 @@ namespace NoCrast.Server.Controllers
                                   join state in DB.TaskState on task equals state.Task
                                   where task.PublicId == id && task.Profile == CurrentProfile && timeLog.PublicId == timerId
                                   select new { task, timeLog, state }).FirstOrDefault();
+                if (taskRecord == null)
+                {
+                    return NotFound();
+                }
 
                 taskRecord.state.IsRunning = request.Task.IsRunning;
                 taskRecord.task.UpdateDate = DateTime.Now;
@@ -215,21 +237,30 @@ namespace NoCrast.Server.Controllers
             });
         }
 
-
         [Authorize]
         [HttpDelete]
         [Route("{id}/timelog/{timerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<UpdateTaskParameters> DeleteTimerLogAsync(string id, string timerId)
+        public ActionResult<bool> DeleteTimerLogAsync(string id, string timerId)
         {
-            return HandleWebRequest<UpdateTaskParameters>(() =>
+            return HandleWebRequest<bool>(() =>
             {
-                throw new NotImplementedException();
+                var timeLogRecord = (from task in DB.Tasks
+                                  join timeLog in DB.TimeLog on task equals timeLog.Task
+                                  where task.PublicId == id && task.Profile == CurrentProfile && timeLog.PublicId == timerId
+                                  select timeLog).FirstOrDefault();
+                if (timeLogRecord == null)
+                {
+                    return NotFound();
+                }
+
+                DB.TimeLog.Remove(timeLogRecord);
+                DB.SaveChanges();
+                //TODO: return task object with re-calculated totals
+                return Ok(true);
             });
         }
-
-
     }
 }

@@ -34,11 +34,11 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
-        public async Task<TaskItem> RemoveTaskAsync(string id)
+        public async Task<bool> RemoveTaskAsync(string id)
         {
             var result = await httpClient.DeleteAsync(Controller + id);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<TaskItem>().Result;
+            return result.Content.ReadFromJsonAsync<bool>().Result;
         }
 
         public async Task<TimeLogItem[]> GetTimelogAsync(string id)
@@ -60,11 +60,11 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
 
-        public async Task<UpdateTaskParameters> RemoveTimerAsync(string id, string timerId)
+        public async Task<bool> RemoveTimerAsync(string id, string timerId)
         {
             var result = await httpClient.DeleteAsync(Controller + id + "/timelog/" + timerId);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
+            return result.Content.ReadFromJsonAsync<bool>().Result;
         }
     }
 }
