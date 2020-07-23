@@ -67,7 +67,6 @@ namespace NoCrast.Server.Controllers
             return Ok();
         }
 
-
         [Route("register")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]

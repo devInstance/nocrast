@@ -21,12 +21,14 @@ namespace NoCrast.Client.Services.LocalStore
 
         public ITimeProvider TimeProvider { get; }
         protected ILocalStorageService Storage { get; }
+        protected AuthorizationService AuthorizationService { get; }
         public ILog Log { get; protected set; }
 
-        public DataProvider(ITimeProvider timeProvider, ILocalStorageService storage, ILogProvider logProvider)
+        public DataProvider(ITimeProvider timeProvider, ILocalStorageService storage, ILogProvider logProvider, AuthorizationService authorizationService)
         {
             TimeProvider = timeProvider;
             Storage = storage;
+            AuthorizationService = authorizationService;
             Log = logProvider.CreateLogger(this);
             Log.D("constructor");
         }
@@ -45,7 +47,7 @@ namespace NoCrast.Client.Services.LocalStore
                 using (var l = Log.DebugScope())
                 {
                     // Step 1: Try loading from the local store
-                    data = await Storage.GetItemAsync<NoCrastData>(NoCrastData.StorageKeyName);
+                    data = await Storage.GetItemAsync<NoCrastData>(GetStorageName());
 
                     JsonSerializerOptions options = new JsonSerializerOptions
                     {
@@ -81,6 +83,13 @@ namespace NoCrast.Client.Services.LocalStore
             return true;
         }
 
+        private string GetStorageName()
+        {
+            string keyPrefix = AuthorizationService.CurrentUser?.UserName ?? "unknown";
+            var fullName = $"{keyPrefix}_{NoCrastData.StorageKeyName}";
+            return fullName;
+        }
+
         private async Task SaveDataAsync()
         {
             using (var l = Log.DebugScope())
@@ -95,7 +104,7 @@ namespace NoCrast.Client.Services.LocalStore
 
                 string result = JsonSerializer.Serialize<NoCrastData>(data, options);
                 l.D(result);
-                await Storage.SetItemAsync(NoCrastData.StorageKeyName, data);
+                await Storage.SetItemAsync(GetStorageName(), data);
             }
         }
 
