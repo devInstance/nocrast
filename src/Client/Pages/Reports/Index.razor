@@ -1,0 +1,38 @@
+﻿@page "/reports"
+
+@using System.Timers;
+
+@inject ILogProvider LogProvider;
+
+@implements IDisposable
+
+<h1>Reports</h1>
+
+<p>Under construction :)</p>
+
+@code {
+
+    string ErrorText { get; set; }
+
+    private ILog log;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        try
+        {
+            using (var scope = log.DebugScope())
+            {
+            }
+        }
+        catch (Exception ex)
+        {
+            log.E(ex);
+        }
+    }
+
+    public void Dispose()
+    {
+    }
+
+}

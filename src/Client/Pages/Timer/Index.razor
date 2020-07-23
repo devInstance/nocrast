@@ -1,0 +1,114 @@
+﻿@page "/"
+
+@using System.Timers;
+
+@inject TasksService Service;
+@inject ILogProvider LogProvider;
+
+@implements IDisposable
+
+<input class="new-timer-edit" @bind="title" type="text" />
+
+<button class="btn btn-primary" @onclick="AddTimer">Add Timer</button>
+
+@if (!String.IsNullOrEmpty(ErrorText))
+{
+    <label class="text-danger">@ErrorText</label>
+}
+
+@if (TasksList != null)
+{
+    <ul class="timer-list">
+        @foreach (var item in TasksList)
+        {
+            <TaskView Item="item" />
+        }
+    </ul>
+}
+
+@code {
+
+    private List<TaskItemView> TasksList { get; set; }
+
+    private string title = "";
+
+    string ErrorText { get; set; }
+
+    private System.Timers.Timer timer;
+
+    private ILog log;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        try
+        {
+            using (var scope = log.DebugScope())
+            {
+                SetUpTimer();
+
+                Service.DataHasChanged += OnDataHasChanged;
+                Service.ErrorHasOccured += OnError;
+
+                await RefreshData();
+            }
+        }
+        catch (Exception ex)
+        {
+            log.E(ex);
+        }
+    }
+
+    private void SetUpTimer()
+    {
+        timer = new System.Timers.Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    public void Dispose()
+    {
+        if (timer != null)
+        {
+            timer.Elapsed -= OnTimedEvent;
+            timer.Dispose();
+        }
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        RefreshData();
+    }
+
+    private void OnError(Object sender, ServiceErrorEventArgs e)
+    {
+        if(e.IsUIError)
+        {
+            ErrorText = e.Message;
+        } 
+        else if (e.ResetUIError)
+        {
+            ErrorText = "";
+        }
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        TasksList = await Service.GetTasksAsync();
+        StateHasChanged();
+
+        return true;
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        log.D("OnTimedEvent");
+        StateHasChanged();
+    }
+
+    private async void AddTimer()
+    {
+        await Service.AddNewTaskAsync(title);
+    }
+}
