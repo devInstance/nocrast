@@ -153,7 +153,7 @@ namespace NoCrast.Server.Controllers
                               {
                                   Id = timeLog.PublicId,
                                   ElapsedMilliseconds = timeLog.ElapsedMilliseconds,
-                                  StartTime = timeLog.StartTime
+                                  StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc)
                               }).ToList();
                 return Ok(result.ToArray());
             });

@@ -11,7 +11,9 @@ namespace NoCrast.Shared.Utils
         {
             get
             {
-                return DateTime.Now;
+                return DateTime.UtcNow;
+                //TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("America/New_York");
+                //return TimeZoneInfo.ConvertTime(DateTime.Now, easternZone);
             }
         }
     }
