@@ -19,6 +19,6 @@ namespace NoCrast.Server.Model
         [Required]
         public bool IsRunning { get; set; }
 
-        public virtual TimeLog? LatestTimeLogItem { get; set; }
+        public virtual TimeLog? ActiveTimeLogItem { get; set; }
     }
 }

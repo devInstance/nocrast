@@ -108,7 +108,7 @@ namespace NoCrast.Client.Services
                     {
                         var log = logs[j];
                         totalTime += log.ElapsedMilliseconds;
-                        if (log.Id == task.LatestTimeLogItemId || log.ClientId == task.LatestTimeLogItemId)
+                        if (log.Id == task.ActiveTimeLogItemId || log.ClientId == task.ActiveTimeLogItemId)
                         {
                             lastTimeLog = log;
                         }
@@ -208,7 +208,7 @@ namespace NoCrast.Client.Services
 
                 TimeLogItem log = await LocalStorage.CreateTimeLogAsync(item.Task);
                 item.TimeLog = log;
-                item.Task.LatestTimeLogItemId = log.ClientId;
+                item.Task.ActiveTimeLogItemId = log.ClientId;
                 item.Task.IsRunning = true;
 
                 if (!await LocalStorage.UpdateTimeLogAsync(item.Task, log))

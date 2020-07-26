@@ -37,7 +37,7 @@ namespace NoCrast.Server.Controllers
                             {
                                 Id = tasks.PublicId,
                                 IsRunning = state.IsRunning,
-                                LatestTimeLogItemId = state.LatestTimeLogItem != null ? state.LatestTimeLogItem.PublicId : null,
+                                ActiveTimeLogItemId = state.ActiveTimeLogItem != null ? state.ActiveTimeLogItem.PublicId : null,
                                 TimeLogCount = tasks.TimeLog.Count, //TODO: May not work
                                 Title = tasks.Title,
                                 //TotalTimeSpent //TODO:
@@ -193,13 +193,13 @@ namespace NoCrast.Server.Controllers
 
                 taskRecord.State.IsRunning = request.Task.IsRunning;
                 taskRecord.UpdateDate = DateTime.Now;
-                taskRecord.State.LatestTimeLogItem = timeLog;
+                taskRecord.State.ActiveTimeLogItem = timeLog;
 
                 DB.SaveChanges();
 
                 request.Log.Id = timeLog.PublicId;
                 request.Task.Id = taskRecord.PublicId;
-                request.Task.LatestTimeLogItemId = timeLog.PublicId;
+                request.Task.ActiveTimeLogItemId = timeLog.PublicId;
 
                 return Ok(request);
             });

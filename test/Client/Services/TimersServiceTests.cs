@@ -298,7 +298,7 @@ namespace NoCrast.Client.Services.Tests
                 IsRunning = true,
                 TimeLogCount = 1,
                 Title = "Test 1",
-                LatestTimeLogItemId = responseLog.Id
+                ActiveTimeLogItemId = responseLog.Id
             };
 
             var data = new NoCrastData
@@ -342,7 +342,7 @@ namespace NoCrast.Client.Services.Tests
             Assert.True(hasEventOccured, "hasEventOccured failed");
             Assert.True(data.Tasks[0].IsRunning, "Task is not running");
             Assert.Equal(responseTask.Id, data.Tasks[0].Id);
-            Assert.Equal(responseLog.Id, data.Tasks[0].LatestTimeLogItemId);
+            Assert.Equal(responseLog.Id, data.Tasks[0].ActiveTimeLogItemId);
             Assert.Single(data.Logs[0]);
             Assert.Equal(responseLog.Id, data.Logs[0][0].Id);
             storage.Verify();
