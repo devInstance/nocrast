@@ -16,5 +16,9 @@ namespace NoCrast.Shared.Model
         public int TimeLogCount { get; set; }
 
         public long TotalTimeSpent { get; set; }
+
+        public long TotalTimeSpentThisWeek { get; set; }
+
+        public long TotalTimeSpentToday { get; set; }
     }
 }

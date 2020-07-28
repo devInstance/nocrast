@@ -5,8 +5,11 @@
 @using NoCrast.Client.ModelExtensions;
 
     <div class="@(IsActive ? "timer-active-item-timelog-panel" : "timer-item-timelog-panel")">
+
         @if (IsTimeLogShown)
         {
+            <span class="timer-text left-column">@String.Format("This Week: {0:F1}", Item.TotalHoursSpentThisWeek) hour(s)</span>
+            <span class="timer-text left-column">@String.Format("Total: {0:F1}", Item.TotalHoursSpent) hour(s)</span>
             @if (TimeLog != null)
             {
                 <ul class="timer-list">

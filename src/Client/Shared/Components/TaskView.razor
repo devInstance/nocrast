@@ -34,7 +34,7 @@
             }
         </div>
         <div class="timer-item-time left-column">
-            <span class="timer-text">@String.Format("{0:F1}", Item.TotalHoursSpent) hour(s)</span>
+            <span class="timer-text">@String.Format("Today {0:F1}", Item.TotalHoursSpentToday) hour(s)</span>
         </div>
         <div class="timer-item-panel">
             <button class="btn btn-default timer-button" @onclick="@(() => Start())">

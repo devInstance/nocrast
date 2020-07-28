@@ -10,14 +10,12 @@ namespace NoCrast.Client.ModelViews
 
         public TaskItem Task { get; set; }
         public TimeLogItem ActiveTimeLog { get; set; }
-        public long TotalTimeSpent { get; set; }
 
-        public TaskItemView(ITimeProvider provider, TaskItem task, TimeLogItem timeLog, long totalTimeSpent)
+        public TaskItemView(ITimeProvider provider, TaskItem task, TimeLogItem timeLog)
         {
             Provider = provider;
             Task = task;
             ActiveTimeLog = timeLog;
-            TotalTimeSpent = totalTimeSpent;
         }
 
         public long GetElapsedThisPeriod()
@@ -64,7 +62,22 @@ namespace NoCrast.Client.ModelViews
         { 
             get
             {
-                return (float)TotalTimeSpent / (60 * 60 * 1000);
+                return (float)Task.TotalTimeSpent / (60 * 60 * 1000);
+            }
+        }
+
+        public float TotalHoursSpentThisWeek
+        {
+            get
+            {
+                return (float)Task.TotalTimeSpentThisWeek / (60 * 60 * 1000);
+            }
+        }
+        public float TotalHoursSpentToday
+        {
+            get
+            {
+                return (float)Task.TotalTimeSpentToday / (60 * 60 * 1000);
             }
         }
     }

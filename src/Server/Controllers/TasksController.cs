@@ -30,19 +30,43 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem[]>(() =>
             {
-                var result = (from tasks in DB.Tasks
-                            join state in DB.TaskState on tasks equals state.Task
-                            where tasks.Profile == CurrentProfile
-                            select new TaskItem
+                var tasks = (from tks in DB.Tasks
+                            join state in DB.TaskState on tks equals state.Task
+                            where tks.Profile == CurrentProfile
+                            select new
                             {
-                                Id = tasks.PublicId,
-                                IsRunning = state.IsRunning,
+                                tks.Id,
+                                tks.PublicId,
+                                state.IsRunning,
                                 ActiveTimeLogItemId = state.ActiveTimeLogItem != null ? state.ActiveTimeLogItem.PublicId : null,
-                                TimeLogCount = tasks.TimeLog.Count, //TODO: May not work
-                                Title = tasks.Title,
-                                //TotalTimeSpent //TODO:
+                                TimeLogCount = tks.TimeLog.Count,
+                                tks.Title
                             }
                             ).ToList();
+
+                DateTime startOfTheWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+                var result = (from t in tasks
+                            select new TaskItem
+                            {
+                                Id = t.PublicId,
+                                IsRunning = t.IsRunning,
+                                ActiveTimeLogItemId = t.ActiveTimeLogItemId,
+                                TimeLogCount = t.TimeLogCount, //TODO: May not work
+                                Title = t.Title,
+                                TotalTimeSpent = (from tl in DB.TimeLog
+                                                  where tl.TaskId == t.Id
+                                                  select tl.ElapsedMilliseconds).Sum(),
+                                TotalTimeSpentThisWeek = (from tl in DB.TimeLog
+                                                  where tl.TaskId == t.Id 
+                                                  && tl.StartTime >= startOfTheWeek
+                                                          select tl.ElapsedMilliseconds).Sum(),
+                                TotalTimeSpentToday = (from tl in DB.TimeLog
+                                                          where tl.TaskId == t.Id
+                                                          && tl.StartTime >= DateTime.Now.Date
+                                                          select tl.ElapsedMilliseconds).Sum()
+
+                            }).ToList();
+
                 return Ok(result.ToArray());
             });
         }

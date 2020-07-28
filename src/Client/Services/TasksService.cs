@@ -103,17 +103,16 @@ namespace NoCrast.Client.Services
                     var task = tasks[i];
                     var logs = await LocalStorage.GetTimeLogAsync(task);
                     TimeLogItem lastTimeLog = null;
-                    long totalTime = 0;
                     for (int j = 0; j < logs.Count; j++)
                     {
                         var log = logs[j];
-                        totalTime += log.ElapsedMilliseconds;
                         if (log.Id == task.ActiveTimeLogItemId || log.ClientId == task.ActiveTimeLogItemId)
                         {
                             lastTimeLog = log;
+                            break;
                         }
                     }
-                    var itemView = new TaskItemView(TimeProvider, task, lastTimeLog, totalTime);
+                    var itemView = new TaskItemView(TimeProvider, task, lastTimeLog);
                     result.Add(itemView);
                 }
                 return result;
@@ -166,7 +165,7 @@ namespace NoCrast.Client.Services
 
                 NotifyDataHasChanged();
 
-                return new TaskItemView(TimeProvider, response, null, 0);
+                return new TaskItemView(TimeProvider, response, null);
             }
         }
 
