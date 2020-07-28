@@ -3,8 +3,6 @@
 @inject ITimeProvider TimeProvider;
 @inject ILogProvider LogProvider;
 
-@using NoCrast.Client.ModelExtensions;
-
 <li>
     <div class="alert alert-info timer-item-container" role="document">
         <div class="timer-item-context">
@@ -24,12 +22,12 @@
             }
             else
             {
-                <EditForm Model="@Item" OnValidSubmit="@(() => ApplyChanges())" @onreset="@(()=>ResetChanges())">
-                    <InputText @bind-Value="@Item.Task.Title"></InputText>
+                <EditForm Model="@TitleEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+                    <InputText @bind-Value="@TitleEditText"></InputText>
                     <button type="submit" class="btn timer-button text-info">
                         <span class="oi oi-circle-check" aria-hidden="true"></span>
                     </button>
-                    <button class="btn timer-button text-danger">
+                    <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
                         <span class="oi oi-circle-x" aria-hidden="true"></span>
                     </button>
                 </EditForm>
@@ -51,14 +49,19 @@
     [Parameter]
     public TaskItemView Item { get; set; }
 
+    private EditContext editContext;
     private bool IsEditing { get; set; }
+    private string TitleEditText { get; set; }
 
     private ILog log;
 
+    //TODO: Add form validation for title
     protected override void OnInitialized()
     {
         IsEditing = false;
         log = LogProvider.CreateLogger(this);
+
+        TitleEditText = Item.Task.Title;
     }
 
     private async void Remove()
@@ -76,15 +79,19 @@
         IsEditing = true;
     }
 
-    private void ApplyChanges()
+    private async void ApplyChangesAsync()
     {
         IsEditing = false;
         log.D("ApplyChanges");
+
+        Item.Task = await Service.UpdateTaskTitleAsync(Item.Task, TitleEditText);
+        StateHasChanged();
     }
 
     private void ResetChanges()
     {
         IsEditing = false;
+        TitleEditText = Item.Task.Title;
         log.D("ResetChanges");
     }
 }

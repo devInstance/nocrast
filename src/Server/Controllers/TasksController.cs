@@ -105,6 +105,7 @@ namespace NoCrast.Server.Controllers
 
                 taskRecord.Title = task.Title;
                 taskRecord.UpdateDate = DateTime.Now;
+                DB.SaveChanges();
 
                 return Ok(task);
             });

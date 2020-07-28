@@ -8,7 +8,7 @@ namespace NoCrast.Client.ModelViews
     {
         public ITimeProvider Provider { get; set; }
 
-        public TaskItem Task { get; }
+        public TaskItem Task { get; set; }
         public TimeLogItem ActiveTimeLog { get; set; }
         public long TotalTimeSpent { get; set; }
 

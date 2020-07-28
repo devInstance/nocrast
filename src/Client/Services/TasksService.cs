@@ -170,6 +170,30 @@ namespace NoCrast.Client.Services
             }
         }
 
+        public async Task<TaskItem> UpdateTaskTitleAsync(TaskItem task, string newTitle)
+        {
+            using (var l = Log.DebugScope())
+            {
+                TaskItem newTask;
+                try
+                {
+                    task.Title = newTitle;
+                    newTask = await Api.UpdateTaskAsync(task.Id, task);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    newTask = task;
+                    newTask.ClientId = IdGenerator.New();
+
+                    NotifyNetworkError(ex);
+                }
+
+                await LocalStorage.UpdateTaskAsync(newTask);
+                return newTask;
+            }
+        }
+
         public async Task<bool> RemoveTaskAsync(TaskItemView item)
         {
             using (var l = Log.DebugScope())
