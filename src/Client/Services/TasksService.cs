@@ -207,7 +207,7 @@ namespace NoCrast.Client.Services
                 if (item.Task.IsRunning) return;
 
                 TimeLogItem log = await LocalStorage.CreateTimeLogAsync(item.Task);
-                item.TimeLog = log;
+                item.ActiveTimeLog = log;
                 item.Task.ActiveTimeLogItemId = log.ClientId;
                 item.Task.IsRunning = true;
 
@@ -219,7 +219,7 @@ namespace NoCrast.Client.Services
                 var request = new UpdateTaskParameters()
                 {
                     Task = item.Task,
-                    Log = item.TimeLog
+                    Log = item.ActiveTimeLog
                 };
 
                 UpdateTaskParameters response = null;
@@ -263,7 +263,7 @@ namespace NoCrast.Client.Services
 
                 item.Stop();
 
-                if (!await LocalStorage.UpdateTimeLogAsync(item.Task, item.TimeLog))
+                if (!await LocalStorage.UpdateTimeLogAsync(item.Task, item.ActiveTimeLog))
                 {
                     await LocalDataOverideAsync();
                 }
@@ -271,7 +271,7 @@ namespace NoCrast.Client.Services
                 var request = new UpdateTaskParameters()
                 {
                     Task = item.Task,
-                    Log = item.TimeLog
+                    Log = item.ActiveTimeLog
                 };
 
                 UpdateTaskParameters response = null;
@@ -317,6 +317,15 @@ namespace NoCrast.Client.Services
                 return list;
             }
         }
+
+        public async Task<bool> RemoveTimelogAsync(TaskItemView item, TimeLogItem log)
+        {
+            using (var l = Log.DebugScope())
+            {
+                throw new NotImplementedException();
+            }
+        }
+
 
         private async Task<List<TimeLogItem>> LocalStorage_OnLoadTimeLog(TaskItem task, List<TimeLogItem> items)
         {

@@ -41,6 +41,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<TasksService>();
 
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            //builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5000") });
 
             await builder.Build().RunAsync();
         }

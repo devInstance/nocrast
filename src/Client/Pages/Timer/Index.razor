@@ -18,12 +18,19 @@
 
 @if (TasksList != null)
 {
-    <ul class="timer-list">
-        @foreach (var item in TasksList)
+<ul class="timer-list">
+    @foreach (var item in TasksList)
+    {
+        @if (item.Task.IsRunning)
+        {
+            <ActiveTaskView Item="item" />
+        }
+        else
         {
             <TaskView Item="item" />
         }
-    </ul>
+    }
+</ul>
 }
 
 @code {

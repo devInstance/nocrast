@@ -1,6 +1,7 @@
 ﻿
 @inject TasksService Service;
 @inject ITimeProvider TimeProvider;
+@inject ILogProvider LogProvider;
 
 @using NoCrast.Client.ModelExtensions;
 
@@ -8,91 +9,56 @@
     <div class="alert alert-info timer-item-container" role="document">
         <div class="timer-item-context">
             <button class="btn btn-default timer-button" @onclick="@(() => Remove())">
-                <span class="oi oi-circle-x" aria-hidden="true"></span>
+                <span class="oi oi-x" aria-hidden="true"></span>
             </button>
         </div>
-        <div class="timer-item-title">
-            <span class="timer-text">
-                <strong>@Item.Task.Title</strong>
-            </span>
-            <span>
-                |
-            </span>
-            <span>
-                @String.Format("{0:F1}", Item.TotalHoursSpent) hour(s)
-            </span>
-        </div>
-        <div class="timer-item-time">
-            <span class="timer-text">@FormatTime(Item.GetElapsedTimeSpan())</span>
-        </div>
-        <div class="timer-item-panel">
-            @if (Item.Task.IsRunning)
+        <div class="timer-item-title left-column">
+            @if (!IsEditing)
             {
-                <button class="btn btn-default timer-button" @onclick="@(() => Stop())">
-                    <span class="oi oi-media-pause" aria-hidden="true"></span>
-                </button>
+                <span class="timer-text">
+                    <strong>@Item.Task.Title</strong>
+                    <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+                        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                    </button>
+                </span>
             }
             else
             {
-                <button class="btn btn-default timer-button" @onclick="@(() => Start())">
-                    <span class="oi oi-media-play" aria-hidden="true"></span>
-                </button>
+                <EditForm Model="@Item" OnValidSubmit="@(() => ApplyChanges())" @onreset="@(()=>ResetChanges())">
+                    <InputText @bind-Value="@Item.Task.Title"></InputText>
+                    <button type="submit" class="btn timer-button text-info">
+                        <span class="oi oi-circle-check" aria-hidden="true"></span>
+                    </button>
+                    <button class="btn timer-button text-danger">
+                        <span class="oi oi-circle-x" aria-hidden="true"></span>
+                    </button>
+                </EditForm>
             }
         </div>
-        <div class="timer-item-timelog-panel">
-            <button class="btn btn-default timer-button" @onclick="@(() => ToggleLogPanel())">
-                @if (IsTimeLogShown)
-                {
-                    <span class="oi oi-chevron-top" aria-hidden="true"></span>
-                }
-                else
-                {
-                    <span class="oi oi-chevron-bottom" aria-hidden="true"></span>
-                }
+        <div class="timer-item-time left-column">
+            <span class="timer-text">@String.Format("{0:F1}", Item.TotalHoursSpent) hour(s)</span>
+        </div>
+        <div class="timer-item-panel">
+            <button class="btn btn-default timer-button" @onclick="@(() => Start())">
+                <span class="oi oi-media-play" aria-hidden="true"></span>
             </button>
-            @if (IsTimeLogShown)
-            {
-                @if (TimeLog != null)
-                {
-                    <ul class="timer-list">
-                        @foreach (var tl in TimeLog)
-                        {
-                            <li>@FormatTime(tl.GetElapsedTimeSpan(TimeProvider))</li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <div>Loading ...</div>
-                }
-            }
         </div>
+        <TimeLogPanelView Item="Item"></TimeLogPanelView>
     </div>
 </li>
 
 @code {
     [Parameter]
     public TaskItemView Item { get; set; }
-    public List<TimeLogItem> TimeLog { get; set; }
-    public bool IsTimeLogShown { get; set; }
+
+    private bool IsEditing { get; set; }
+
+    private ILog log;
 
     protected override void OnInitialized()
     {
-        Service.DataHasChanged += OnDataHasChanged;
-    }
-
-    private void OnDataHasChanged(Object sender, EventArgs e)
-    {
-        if (IsTimeLogShown)
-        {
-            TimeLog = Service.GetTimeLogItemsAsync(Item, 5).Result;
-        }
-        StateHasChanged();
-    }
-
-    private string FormatTime(TimeSpan time)
-    {
-        return String.Format("{0:hh}:{0:mm}:{0:ss}", time);
+        IsEditing = false;
+        log = LogProvider.CreateLogger(this);
     }
 
     private async void Remove()
@@ -105,21 +71,20 @@
         Service.StartTaskAsync(Item);
     }
 
-    private void Stop()
+    private void StartEditing()
     {
-        Service.StopTaskAsync(Item);
+        IsEditing = true;
     }
 
-    private async void ToggleLogPanel()
+    private void ApplyChanges()
     {
-        if(!IsTimeLogShown)
-        {
-            IsTimeLogShown = true;
-            TimeLog = await Service.GetTimeLogItemsAsync(Item, 5);
-        }
-        else
-        {
-            IsTimeLogShown = false;
-        }
+        IsEditing = false;
+        log.D("ApplyChanges");
+    }
+
+    private void ResetChanges()
+    {
+        IsEditing = false;
+        log.D("ResetChanges");
     }
 }
