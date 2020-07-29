@@ -61,11 +61,11 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
 
-        public async Task<bool> RemoveTimerAsync(string id, string timerId)
+        public async Task<TaskItem> RemoveTimerAsync(string id, string timerId)
         {
             var result = await httpClient.DeleteAsync(Controller + id + "/timelog/" + timerId);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<bool>().Result;
+            return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
     }
 }

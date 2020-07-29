@@ -22,7 +22,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request);
 
-        Task<bool> RemoveTimerAsync(string id, string timerId);
+        Task<TaskItem> RemoveTimerAsync(string id, string timerId);
 
     }
 }

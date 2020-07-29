@@ -22,6 +22,34 @@ namespace NoCrast.Server.Controllers
         {
         }
 
+        private IQueryable<TaskItem> SelectTasks()
+        {
+            DateTime startOfTheWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+
+            return from tks in DB.Tasks
+                   join state in DB.TaskState on tks equals state.Task
+                   where tks.Profile == CurrentProfile
+                   select new TaskItem
+                   {
+                       Id = tks.PublicId,
+                       IsRunning = state.IsRunning,
+                       ActiveTimeLogItemId = state.ActiveTimeLogItem != null ? state.ActiveTimeLogItem.PublicId : null,
+                       TimeLogCount = tks.TimeLog.Count,
+                       Title = tks.Title,
+                       TotalTimeSpent = (from tl in DB.TimeLog
+                                         where tl.TaskId == tks.Id
+                                         select tl.ElapsedMilliseconds).Sum(),
+                       TotalTimeSpentThisWeek = (from tl in DB.TimeLog
+                                                 where tl.TaskId == tks.Id
+                                                 && tl.StartTime >= startOfTheWeek
+                                                 select tl.ElapsedMilliseconds).Sum(),
+                       TotalTimeSpentToday = (from tl in DB.TimeLog
+                                              where tl.TaskId == tks.Id
+                                              && tl.StartTime >= DateTime.Now.Date
+                                              select tl.ElapsedMilliseconds).Sum()
+                   };
+        }
+
         [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -30,44 +58,10 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem[]>(() =>
             {
-                var tasks = (from tks in DB.Tasks
-                            join state in DB.TaskState on tks equals state.Task
-                            where tks.Profile == CurrentProfile
-                            select new
-                            {
-                                tks.Id,
-                                tks.PublicId,
-                                state.IsRunning,
-                                ActiveTimeLogItemId = state.ActiveTimeLogItem != null ? state.ActiveTimeLogItem.PublicId : null,
-                                TimeLogCount = tks.TimeLog.Count,
-                                tks.Title
-                            }
-                            ).ToList();
 
-                DateTime startOfTheWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
-                var result = (from t in tasks
-                            select new TaskItem
-                            {
-                                Id = t.PublicId,
-                                IsRunning = t.IsRunning,
-                                ActiveTimeLogItemId = t.ActiveTimeLogItemId,
-                                TimeLogCount = t.TimeLogCount, //TODO: May not work
-                                Title = t.Title,
-                                TotalTimeSpent = (from tl in DB.TimeLog
-                                                  where tl.TaskId == t.Id
-                                                  select tl.ElapsedMilliseconds).Sum(),
-                                TotalTimeSpentThisWeek = (from tl in DB.TimeLog
-                                                  where tl.TaskId == t.Id 
-                                                  && tl.StartTime >= startOfTheWeek
-                                                          select tl.ElapsedMilliseconds).Sum(),
-                                TotalTimeSpentToday = (from tl in DB.TimeLog
-                                                          where tl.TaskId == t.Id
-                                                          && tl.StartTime >= DateTime.Now.Date
-                                                          select tl.ElapsedMilliseconds).Sum()
+                var tasks = SelectTasks().ToList();
 
-                            }).ToList();
-
-                return Ok(result.ToArray());
+                return Ok(tasks.ToArray());
             });
         }
 
@@ -268,9 +262,9 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<bool> DeleteTimerLogAsync(string id, string timerId)
+        public ActionResult<TaskItem> DeleteTimerLogAsync(string id, string timerId)
         {
-            return HandleWebRequest<bool>(() =>
+            return HandleWebRequest<TaskItem>(() =>
             {
                 var timeLogRecord = (from task in DB.Tasks
                                   join timeLog in DB.TimeLog on task equals timeLog.Task
@@ -283,8 +277,14 @@ namespace NoCrast.Server.Controllers
 
                 DB.TimeLog.Remove(timeLogRecord);
                 DB.SaveChanges();
-                //TODO: return task object with re-calculated totals
-                return Ok(true);
+
+                var selectTasks = SelectTasks();
+
+                var updatedTask = (from t in selectTasks
+                                   where t.Id == id
+                                   select t).FirstOrDefault();
+
+                return Ok(updatedTask);
             });
         }
     }

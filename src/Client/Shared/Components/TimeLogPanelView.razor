@@ -100,6 +100,7 @@
 
     private async void RemoveLog(TimeLogItem log)
     {
-        await Service.RemoveTimelogAsync(Item, log);
+        Item.Task = await Service.RemoveTimelogAsync(Item, log);
+        StateHasChanged();
     }
 }

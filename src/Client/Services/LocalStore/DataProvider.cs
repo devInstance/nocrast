@@ -56,7 +56,7 @@ namespace NoCrast.Client.Services.LocalStore
                     };
 
                     string result = JsonSerializer.Serialize<NoCrastData>(data, options);
-                    l.D(result);
+                    //l.D(result);
 
                     // Step 2: If no local data then initialize empty
                     if (data == null)
@@ -103,7 +103,7 @@ namespace NoCrast.Client.Services.LocalStore
                 };
 
                 string result = JsonSerializer.Serialize<NoCrastData>(data, options);
-                l.D(result);
+                //l.D(result);
                 await Storage.SetItemAsync(GetStorageName(), data);
             }
         }
@@ -208,11 +208,23 @@ namespace NoCrast.Client.Services.LocalStore
             return false;
         }
 
-        public async Task<bool> RemoveTimeLogAsync(TimeLogItem item)
+        public async Task<bool> RemoveTimeLogAsync(TaskItem item, TimeLogItem log)
         {
             await TryLoadDataAsync();
+            int index = data.FindTaskIndex(item);
+            if (index >= 0)
+            {
+                int timeLogIndex = data.FindTimeLogIndex(index, log);
+                if (timeLogIndex >= 0)
+                {
+                    data.Logs[index].RemoveAt(timeLogIndex);
+                    await SaveDataAsync();
 
-            throw new NotImplementedException();
+                    return true;
+                }
+            }
+            return false;
+
         }
     }
 }

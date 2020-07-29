@@ -30,6 +30,6 @@ namespace NoCrast.Client.Services.LocalStore
 
         Task<bool> UpdateTimeLogAsync(TaskItem item, TimeLogItem log);
 
-        Task<bool> RemoveTimeLogAsync(TimeLogItem item);
+        Task<bool> RemoveTimeLogAsync(TaskItem item, TimeLogItem log);
     }
 }

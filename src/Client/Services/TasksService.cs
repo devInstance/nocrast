@@ -341,11 +341,27 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<bool> RemoveTimelogAsync(TaskItemView item, TimeLogItem log)
+        public async Task<TaskItem> RemoveTimelogAsync(TaskItemView item, TimeLogItem log)
         {
             using (var l = Log.DebugScope())
             {
-                throw new NotImplementedException();
+                if (await LocalStorage.RemoveTimeLogAsync(item.Task, log))
+                {
+                    try
+                    {
+                        var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id);
+                        ResetNetworkError();
+                        LocalStorage.UpdateTaskAsync(result);
+                        NotifyDataHasChanged();
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        l.E(ex);
+                        NotifyNetworkError(ex);
+                    }
+                }
+                return item.Task;
             }
         }
 
