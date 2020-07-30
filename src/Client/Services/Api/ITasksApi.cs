@@ -8,11 +8,11 @@ namespace NoCrast.Client.Services.Api
 {
     public interface ITasksApi
     {
-        Task<TaskItem[]> GetTasksAsync();
+        Task<TaskItem[]> GetTasksAsync(int timeoffset);
 
-        Task<TaskItem> AddTaskAsync(TaskItem task);
+        Task<TaskItem> AddTaskAsync(TaskItem task, int timeoffset);
 
-        Task<TaskItem> UpdateTaskAsync(string id, TaskItem task);
+        Task<TaskItem> UpdateTaskAsync(string id, TaskItem task, int timeoffset);
 
         Task<bool> RemoveTaskAsync(string id);
 
@@ -22,7 +22,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request);
 
-        Task<TaskItem> RemoveTimerAsync(string id, string timerId);
+        Task<TaskItem> RemoveTimerAsync(string id, string timerId, int timeoffset);
 
     }
 }

@@ -50,12 +50,12 @@ namespace NoCrast.Client.Services
                         if (String.IsNullOrEmpty(t.Id))
                         {
                             l.D($"Insert task {t.Title}");
-                            updatedTask = await Api.AddTaskAsync(t);
+                            updatedTask = await Api.AddTaskAsync(t, TimeProvider.UtcTimeOffset);
                         }
                         else
                         {
                             l.D($"Update task {t.Title}");
-                            updatedTask = await Api.UpdateTaskAsync(t.Id, t);
+                            updatedTask = await Api.UpdateTaskAsync(t.Id, t, TimeProvider.UtcTimeOffset);
                         }
                         updatedTask.ClientId = null;
                     }
@@ -76,7 +76,7 @@ namespace NoCrast.Client.Services
                         //TODO: only sync-up if you have client id
                         await SyncUpWithServerAsync(items);
                         tasks.Clear();
-                        tasks.AddRange(await Api.GetTasksAsync());
+                        tasks.AddRange(await Api.GetTasksAsync(TimeProvider.UtcTimeOffset));
                         ResetNetworkError();
                     }
                     catch (Exception ex)
@@ -144,7 +144,7 @@ namespace NoCrast.Client.Services
                 TaskItem response = null;
                 try
                 {
-                    response = await Api.AddTaskAsync(task);
+                    response = await Api.AddTaskAsync(task, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -177,7 +177,7 @@ namespace NoCrast.Client.Services
                 try
                 {
                     task.Title = newTitle;
-                    newTask = await Api.UpdateTaskAsync(task.Id, task);
+                    newTask = await Api.UpdateTaskAsync(task.Id, task, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -349,7 +349,7 @@ namespace NoCrast.Client.Services
                 {
                     try
                     {
-                        var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id);
+                        var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id, TimeProvider.UtcTimeOffset);
                         ResetNetworkError();
                         LocalStorage.UpdateTaskAsync(result);
                         NotifyDataHasChanged();

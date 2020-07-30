@@ -16,28 +16,28 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<TaskItem[]> GetTasksAsync()
+        public async Task<TaskItem[]> GetTasksAsync(int timeoffset)
         {
-            return await httpClient.GetFromJsonAsync<TaskItem[]>(Controller);
+            return await httpClient.GetFromJsonAsync<TaskItem[]>($"{Controller}?timeoffset={timeoffset}");
         }
 
-        public async Task<TaskItem> AddTaskAsync(TaskItem task)
+        public async Task<TaskItem> AddTaskAsync(TaskItem task, int timeoffset)
         {
-            var result = await httpClient.PostAsJsonAsync(Controller, task);
+            var result = await httpClient.PostAsJsonAsync($"{Controller}?timeoffset={timeoffset}", task);
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
-        public async Task<TaskItem> UpdateTaskAsync(string id, TaskItem task)
+        public async Task<TaskItem> UpdateTaskAsync(string id, TaskItem task, int timeoffset)
         {
-            var result = await httpClient.PutAsJsonAsync(Controller + id, task);
+            var result = await httpClient.PutAsJsonAsync($"{Controller}{id}?timeoffset={timeoffset}", task);
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
         public async Task<bool> RemoveTaskAsync(string id)
         {
-            var result = await httpClient.DeleteAsync(Controller + id);
+            var result = await httpClient.DeleteAsync($"{Controller}{id}");
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<bool>().Result;
         }
@@ -61,9 +61,9 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
 
-        public async Task<TaskItem> RemoveTimerAsync(string id, string timerId)
+        public async Task<TaskItem> RemoveTimerAsync(string id, string timerId, int timeoffset)
         {
-            var result = await httpClient.DeleteAsync(Controller + id + "/timelog/" + timerId);
+            var result = await httpClient.DeleteAsync($"{Controller}{id}/timelog/{timerId}?timeoffset={timeoffset}");
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using NoCrast.Server.Database;
 using NoCrast.Server.Indentity;
 using Newtonsoft.Json;
+using NoCrast.Shared.Utils;
 
 namespace NoCrast.Server
 {
@@ -28,6 +29,8 @@ namespace NoCrast.Server
         {
             services.ConfigureDatabase(Configuration);
             services.ConfigureIdentity();
+
+            services.AddSingleton<ITimeProvider, TimeProvider>();
 
             services.AddControllersWithViews().AddNewtonsoftJson();
         }

@@ -17,14 +17,19 @@ namespace NoCrast.Server.Controllers
     [Route("api/data/tasks")]
     public class TasksController : UserBaseController
     {
-        public TasksController(ApplicationDbContext d, UserManager<ApplicationUser> userManager) 
+        public ITimeProvider TimeProvider { get; }
+
+        public TasksController(ApplicationDbContext d, UserManager<ApplicationUser> userManager, ITimeProvider timeProvider) 
             : base(d, userManager)
         {
+            TimeProvider = timeProvider;
         }
 
-        private IQueryable<TaskItem> SelectTasks()
+        private IQueryable<TaskItem> SelectTasks(int timeoffset)
         {
-            DateTime startOfTheWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+            DateTime now = TimeProvider.CurrentTime;
+            DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset * -1);
+            DateTime startOfTheDay = now.Date.AddMinutes(timeoffset * -1);
 
             return from tks in DB.Tasks
                    join state in DB.TaskState on tks equals state.Task
@@ -45,7 +50,7 @@ namespace NoCrast.Server.Controllers
                                                  select tl.ElapsedMilliseconds).Sum(),
                        TotalTimeSpentToday = (from tl in DB.TimeLog
                                               where tl.TaskId == tks.Id
-                                              && tl.StartTime >= DateTime.Now.Date
+                                              && tl.StartTime >= startOfTheDay
                                               select tl.ElapsedMilliseconds).Sum()
                    };
         }
@@ -54,12 +59,11 @@ namespace NoCrast.Server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<TaskItem[]> GetTasks()
+        public ActionResult<TaskItem[]> GetTasks(int timeoffset)
         {
             return HandleWebRequest<TaskItem[]>(() =>
             {
-
-                var tasks = SelectTasks().ToList();
+                var tasks = SelectTasks(timeoffset).ToList();
 
                 return Ok(tasks.ToArray());
             });
@@ -73,6 +77,8 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem>(() =>
             {
+                DateTime now = TimeProvider.CurrentTime;
+
                 var newTask = new TimerTask
                 {
                     Id = Guid.NewGuid(),
@@ -81,8 +87,8 @@ namespace NoCrast.Server.Controllers
 
                     Title = task.Title,
 
-                    CreateDate = DateTime.Now,//TODO: ITimeProvider ???
-                    UpdateDate = DateTime.Now,//TODO: ITimeProvider ???
+                    CreateDate = now,
+                    UpdateDate = now
                 };
 
                 var newTaskState = new TimerTaskState
@@ -112,6 +118,8 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem>(() =>
             {
+                DateTime now = TimeProvider.CurrentTime;
+
                 var taskRecord = (from task in DB.Tasks
                                   where task.PublicId == id && task.Profile == CurrentProfile
                                   select task).Include(a => a.State).FirstOrDefault();
@@ -122,7 +130,7 @@ namespace NoCrast.Server.Controllers
                 }
 
                 taskRecord.Title = task.Title;
-                taskRecord.UpdateDate = DateTime.Now;
+                taskRecord.UpdateDate = now;
                 DB.SaveChanges();
 
                 return Ok(task);
@@ -172,7 +180,7 @@ namespace NoCrast.Server.Controllers
                               {
                                   Id = timeLog.PublicId,
                                   ElapsedMilliseconds = timeLog.ElapsedMilliseconds,
-                                  StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc)
+                                  StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
                               }).ToList();
                 return Ok(result.ToArray());
             });
@@ -188,6 +196,8 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<UpdateTaskParameters>(() =>
             {
+                DateTime now = TimeProvider.CurrentTime;
+
                 var taskRecord = (from task in DB.Tasks
                                   where task.PublicId == id && task.Profile == CurrentProfile
                                   select task).Include(a => a.State).FirstOrDefault();
@@ -205,13 +215,13 @@ namespace NoCrast.Server.Controllers
                     StartTime = request.Log.StartTime,
                     ElapsedMilliseconds = request.Log.ElapsedMilliseconds,
 
-                    CreateDate = DateTime.Now,//TODO: ITimeProvider ???
-                    UpdateDate = DateTime.Now,//TODO: ITimeProvider ???
+                    CreateDate = now,
+                    UpdateDate = now,
                 };
                 DB.TimeLog.Add(timeLog);
 
                 taskRecord.State.IsRunning = request.Task.IsRunning;
-                taskRecord.UpdateDate = DateTime.Now;
+                taskRecord.UpdateDate = now;
                 taskRecord.State.ActiveTimeLogItem = timeLog;
 
                 DB.SaveChanges();
@@ -234,6 +244,8 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<UpdateTaskParameters>(() =>
             {
+                DateTime now = TimeProvider.CurrentTime;
+
                 var taskRecord = (from task in DB.Tasks
                                   join timeLog in DB.TimeLog on task equals timeLog.Task
                                   join state in DB.TaskState on task equals state.Task
@@ -245,7 +257,7 @@ namespace NoCrast.Server.Controllers
                 }
 
                 taskRecord.state.IsRunning = request.Task.IsRunning;
-                taskRecord.task.UpdateDate = DateTime.Now;
+                taskRecord.task.UpdateDate = now;
 
                 taskRecord.timeLog.StartTime = request.Log.StartTime;
                 taskRecord.timeLog.ElapsedMilliseconds = request.Log.ElapsedMilliseconds;
@@ -262,7 +274,7 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<TaskItem> DeleteTimerLogAsync(string id, string timerId)
+        public ActionResult<TaskItem> DeleteTimerLogAsync(string id, string timerId, int timeoffset)
         {
             return HandleWebRequest<TaskItem>(() =>
             {
@@ -278,7 +290,7 @@ namespace NoCrast.Server.Controllers
                 DB.TimeLog.Remove(timeLogRecord);
                 DB.SaveChanges();
 
-                var selectTasks = SelectTasks();
+                var selectTasks = SelectTasks(timeoffset);
 
                 var updatedTask = (from t in selectTasks
                                    where t.Id == id

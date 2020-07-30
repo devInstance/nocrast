@@ -8,5 +8,7 @@ namespace NoCrast.Shared.Utils
     public interface ITimeProvider
     {
         DateTime CurrentTime { get; }
+
+        int UtcTimeOffset { get; }
     }
 }

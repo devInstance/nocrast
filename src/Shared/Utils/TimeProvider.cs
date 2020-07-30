@@ -16,5 +16,7 @@ namespace NoCrast.Shared.Utils
                 //return TimeZoneInfo.ConvertTime(DateTime.Now, easternZone);
             }
         }
+
+        public int UtcTimeOffset => (int)TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).TotalMinutes;
     }
 }
