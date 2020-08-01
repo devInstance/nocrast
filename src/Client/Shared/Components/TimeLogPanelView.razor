@@ -4,52 +4,47 @@
 
 @using NoCrast.Client.ModelExtensions;
 
-    <div class="@(IsActive ? "timer-active-item-timelog-panel" : "timer-item-timelog-panel")">
+<div class="@(IsActive ? "timer-active-item-timelog-panel" : "timer-item-timelog-panel")">
 
-        @if (IsTimeLogShown)
+    @if (IsTimeLogShown)
+    {
+        <span class="timer-text left-column">@String.Format("This Week: {0:F1}", Item.TotalHoursSpentThisWeek) hour(s)</span>
+        <span class="timer-text left-column">@String.Format("Total: {0:F1}", Item.TotalHoursSpent) hour(s)</span>
+        @if (TimeLog != null)
         {
-            <span class="timer-text left-column">@String.Format("This Week: {0:F1}", Item.TotalHoursSpentThisWeek) hour(s)</span>
-            <span class="timer-text left-column">@String.Format("Total: {0:F1}", Item.TotalHoursSpent) hour(s)</span>
-            @if (TimeLog != null)
-            {
-                <ul class="timer-list">
-                    @foreach (var tl in TimeLog)
-                    {
-                        <li class="timer-list-item">
-                            <span class="timer-list-item">@FormatTime(tl)</span>
-                            @if (!IsActive || Item.ActiveTimeLog.Id != tl.Id)
-                            {
-                                <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(tl))">
-                                    <span class="oi oi-delete small-timer-button" aria-hidden="true"></span>
-                                </button>
-                            }
-                        </li>
-                    }
+            <ul class="timer-list">
+                @foreach (var tl in TimeLog)
+                {
                     <li class="timer-list-item">
-                        <NavLink href="@($"task/{Item.Task.Id}")" Match="NavLinkMatch.All">
-                            <strong>More ...</strong>
-                        </NavLink>
+                        <TimeLogPanelItemView Item="Item" Log="tl" IsActive="IsActive">
+                        </TimeLogPanelItemView>
                     </li>
-                </ul>
+                }
+                <li class="timer-list-item">
+                    <NavLink href="@($"task/{Item.Task.Id}")" Match="NavLinkMatch.All">
+                        <strong>More ...</strong>
+                    </NavLink>
+                </li>
+            </ul>
+        }
+        else
+        {
+            <div>Loading ...</div>
+        }
+    }
+    <div class="@(IsActive ? "timer-item-timelog-panel-button-container color-panel-active" : "timer-item-timelog-panel-button-container color-panel")">
+        <button class="btn btn-default timer-button" @onclick="@(() => ToggleLogPanel())">
+            @if (IsTimeLogShown)
+            {
+                <span class="oi oi-chevron-top small-timer-button" aria-hidden="true"></span>
             }
             else
             {
-                <div>Loading ...</div>
+                <span class="oi oi-chevron-bottom small-timer-button" aria-hidden="true"></span>
             }
-        }
-        <div class="@(IsActive ? "timer-item-timelog-panel-button-container color-panel-active" : "timer-item-timelog-panel-button-container color-panel")">
-            <button class="btn btn-default timer-button" @onclick="@(() => ToggleLogPanel())">
-                @if (IsTimeLogShown)
-                {
-                    <span class="oi oi-chevron-top small-timer-button" aria-hidden="true"></span>
-                }
-                else
-                {
-                    <span class="oi oi-chevron-bottom small-timer-button" aria-hidden="true"></span>
-                }
-            </button>
-        </div>
+        </button>
     </div>
+</div>
 
 @code {
     [Parameter]
@@ -80,11 +75,6 @@
         StateHasChanged();
     }
 
-    private string FormatTime(TimeLogItem time)
-    {
-        return String.Format("{0} - {1:hh}:{1:mm}:{1:ss}", time.StartTime.ToLocalTime(), time.GetElapsedTimeSpan(TimeProvider));
-    }
-
     private async void ToggleLogPanel()
     {
         if (!IsTimeLogShown)
@@ -96,11 +86,5 @@
         {
             IsTimeLogShown = false;
         }
-    }
-
-    private async void RemoveLog(TimeLogItem log)
-    {
-        Item.Task = await Service.RemoveTimelogAsync(Item, log);
-        StateHasChanged();
     }
 }

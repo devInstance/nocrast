@@ -56,7 +56,7 @@ namespace NoCrast.Client.Services.LocalStore
                     };
 
                     string result = JsonSerializer.Serialize<NoCrastData>(data, options);
-                    //l.D(result);
+                    l.D(result);
 
                     // Step 2: If no local data then initialize empty
                     if (data == null)
@@ -103,7 +103,7 @@ namespace NoCrast.Client.Services.LocalStore
                 };
 
                 string result = JsonSerializer.Serialize<NoCrastData>(data, options);
-                //l.D(result);
+                l.D(result);
                 await Storage.SetItemAsync(GetStorageName(), data);
             }
         }
@@ -116,115 +116,135 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<TaskItem> CreateTaskAsync(string title)
         {
-            await TryLoadDataAsync();
+            using (var l = Log.DebugScope())
+            {
+                await TryLoadDataAsync();
 
-            var task = new TaskItem { Title = title };
-            task.ClientId = IdGenerator.New();
-            data.Tasks.Add(task);
-            data.Logs.Add(new List<TimeLogItem>());
+                var task = new TaskItem { Title = title };
+                task.ClientId = IdGenerator.New();
+                data.Tasks.Add(task);
+                data.Logs.Add(new List<TimeLogItem>());
 
-            await SaveDataAsync();
+                await SaveDataAsync();
 
-            return task;
+                return task;
+            }
         }
 
         public async Task<bool> UpdateTaskAsync(TaskItem item)
         {
-            await TryLoadDataAsync();
-
-            if (data.ApplyTaskItem(item))
+            using (var l = Log.DebugScope())
             {
-                await SaveDataAsync();
-                return true;
-            }
+                await TryLoadDataAsync();
 
-            return false;
+                if (data.ApplyTaskItem(item))
+                {
+                    await SaveDataAsync();
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         public async Task<bool> RemoveTaskAsync(TaskItem item)
         {
-            await TryLoadDataAsync();
-
-            int index = data.FindTaskIndex(item);
-            if (index >= 0)
+            using (var l = Log.DebugScope())
             {
-                data.Tasks.RemoveAt(index);
-                data.Logs.RemoveAt(index);
-                await SaveDataAsync();
+                await TryLoadDataAsync();
 
-                return true;
-            }
-            return false;
-        }
-
-        public async Task<List<TimeLogItem>> GetTimeLogAsync(TaskItem item)
-        {
-            await TryLoadDataAsync();
-
-            //TODO: This is a temp solution based on assumption that
-            //list is not previously fetched from the server if count is 0
-            //It should a flag introduced in the long run 
-            //if task has id it has been already synced with server
-
-            var taskIndex = data.FindTaskIndex(item);
-            //TODO: proper sync-up
-            if (!String.IsNullOrEmpty(item.Id) && data.Logs[taskIndex].Count == 0)
-            {
-                data.Logs[taskIndex] = await OnLoadTimeLog(item, data.Logs[taskIndex]);
-            }
-
-            return new List<TimeLogItem>(data.Logs[taskIndex]);
-        }
-
-        public async Task<TimeLogItem> CreateTimeLogAsync(TaskItem item)
-        {
-            await TryLoadDataAsync();
-
-            TimeLogItem log = new TimeLogItem
-            {
-                StartTime = TimeProvider.CurrentTime
-            };
-            log.ClientId = IdGenerator.New();
-
-            int index = data.FindTaskIndex(item);
-            if(index < 0)
-            {
-                throw new Exception("Invalid task");
-            }
-            data.Logs[index].Insert(0, log);
-            return log;
-        }
-
-        public async Task<bool> UpdateTimeLogAsync(TaskItem item, TimeLogItem log)
-        {
-            await TryLoadDataAsync();
-
-            if(data.ApplyStartTaskParameters(item, log))
-            {
-                await SaveDataAsync();
-                return true;
-            }
-
-            return false;
-        }
-
-        public async Task<bool> RemoveTimeLogAsync(TaskItem item, TimeLogItem log)
-        {
-            await TryLoadDataAsync();
-            int index = data.FindTaskIndex(item);
-            if (index >= 0)
-            {
-                int timeLogIndex = data.FindTimeLogIndex(index, log);
-                if (timeLogIndex >= 0)
+                int index = data.FindTaskIndex(item);
+                if (index >= 0)
                 {
-                    data.Logs[index].RemoveAt(timeLogIndex);
+                    data.Tasks.RemoveAt(index);
+                    data.Logs.RemoveAt(index);
                     await SaveDataAsync();
 
                     return true;
                 }
+                return false;
             }
-            return false;
+        }
 
+        public async Task<List<TimeLogItem>> GetTimeLogAsync(TaskItem item)
+        {
+            using (var l = Log.DebugScope())
+            {
+                await TryLoadDataAsync();
+
+                //TODO: This is a temp solution based on assumption that
+                //list is not previously fetched from the server if count is 0
+                //It should a flag introduced in the long run 
+                //if task has id it has been already synced with server
+
+                var taskIndex = data.FindTaskIndex(item);
+                //TODO: proper sync-up
+                if (!String.IsNullOrEmpty(item.Id) && data.Logs[taskIndex].Count == 0)
+                {
+                    data.Logs[taskIndex] = await OnLoadTimeLog(item, data.Logs[taskIndex]);
+                }
+
+                return new List<TimeLogItem>(data.Logs[taskIndex]);
+            }
+        }
+
+        public async Task<TimeLogItem> CreateTimeLogAsync(TaskItem item)
+        {
+            using (var l = Log.DebugScope())
+            {
+                await TryLoadDataAsync();
+
+                TimeLogItem log = new TimeLogItem
+                {
+                    StartTime = TimeProvider.CurrentTime
+                };
+                log.ClientId = IdGenerator.New();
+
+                int index = data.FindTaskIndex(item);
+                if (index < 0)
+                {
+                    throw new Exception("Invalid task");
+                }
+                data.Logs[index].Insert(0, log);
+                return log;
+            }
+        }
+
+        public async Task<bool> UpdateTimeLogAsync(TaskItem item, TimeLogItem log)
+        {
+            using (var l = Log.DebugScope())
+            {
+                await TryLoadDataAsync();
+
+                if (data.ApplyStartTaskParameters(item, log))
+                {
+                    await SaveDataAsync();
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveTimeLogAsync(TaskItem item, TimeLogItem log)
+        {
+            using (var l = Log.DebugScope())
+            {
+                await TryLoadDataAsync();
+                int index = data.FindTaskIndex(item);
+                if (index >= 0)
+                {
+                    int timeLogIndex = data.FindTimeLogIndex(index, log);
+                    if (timeLogIndex >= 0)
+                    {
+                        data.Logs[index].RemoveAt(timeLogIndex);
+                        await SaveDataAsync();
+
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
     }
 }

@@ -1,0 +1,107 @@
+﻿
+@inject TasksService Service;
+@inject ITimeProvider TimeProvider;
+
+@using NoCrast.Client.ModelExtensions;
+
+@if (!IsEditing)
+{
+    <span class="timer-list-item">@FormatTime(Log)</span>
+    <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+    </button>
+}
+else
+{
+<EditForm Model="@editLog" OnValidSubmit="@(() => ApplyChangesAsync())">
+    <InputText @bind-Value="@editLog.StartTime"></InputText>
+    <InputText @bind-Value="@editLog.EndTime"></InputText>
+    <button type="submit" class="btn timer-button text-info">
+        <span class="oi oi-circle-check" aria-hidden="true"></span>
+    </button>
+    <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+        <span class="oi oi-circle-x" aria-hidden="true"></span>
+    </button>
+    @if (!IsActive || Item.ActiveTimeLog.Id != Log.Id)
+    {
+        <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(Log))">
+            <span class="oi oi-delete small-timer-button" aria-hidden="true"></span>
+        </button>
+    }
+</EditForm>
+}
+
+@code {
+    [Parameter]
+    public TaskItemView Item { get; set; }
+
+    [Parameter]
+    public TimeLogItem Log { get; set; }
+
+    [Parameter]
+    public bool IsActive { get; set; }
+
+    private bool IsEditing { get; set; }
+
+    class EditTimeLog
+    {
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+    }
+
+    EditTimeLog editLog = new EditTimeLog();
+
+    protected override void OnInitialized()
+    {
+        Service.DataHasChanged += OnDataHasChanged;
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private string FormatTime(TimeLogItem time)
+    {
+        return String.Format("{0} - {1:hh}:{1:mm}:{1:ss}", time.StartTime.ToLocalTime(), time.GetElapsedTimeSpan(TimeProvider));
+    }
+
+    private async void RemoveLog(TimeLogItem log)
+    {
+        Item.Task = await Service.RemoveTimelogAsync(Item, log);
+        StateHasChanged();
+    }
+
+    private void StartEditing()
+    {
+        IsEditing = true;
+        editLog.StartTime = String.Format("{0}", Log.StartTime.ToLocalTime());
+        editLog.EndTime = String.Format("{0}", Log.StartTime.ToLocalTime().Add(Log.GetElapsedTimeSpan(TimeProvider)));
+
+    }
+
+    private async void ApplyChangesAsync()
+    {
+        IsEditing = false;
+        DateTime startTime = DateTime.Parse(editLog.StartTime).ToUniversalTime();
+        DateTime endTime = DateTime.Parse(editLog.EndTime).ToUniversalTime();
+
+        var newTimelog = new TimeLogItem
+        {
+            StartTime = startTime,
+            ElapsedMilliseconds = (long)(endTime - startTime).TotalMilliseconds,
+            Id = Log.Id
+        };
+
+        Item.Task = await Service.UpdateTimelogAsync(Item, newTimelog);
+        Log = newTimelog;
+
+        StateHasChanged();
+    }
+
+    private void ResetChanges()
+    {
+        IsEditing = false;
+    }
+
+}

@@ -20,7 +20,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<UpdateTaskParameters> InsertTimerAsync(string id, UpdateTaskParameters request);
 
-        Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request);
+        Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request, int timeoffset);
 
         Task<TaskItem> RemoveTimerAsync(string id, string timerId, int timeoffset);
 

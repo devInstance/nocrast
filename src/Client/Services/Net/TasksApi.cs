@@ -54,9 +54,9 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }
 
-        public async Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request)
+        public async Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request, int timeoffset)
         {
-            var result = await httpClient.PutAsJsonAsync(Controller + id + "/timelog/" + timerId, request);
+            var result = await httpClient.PutAsJsonAsync($"{Controller}{id}/timelog/{timerId}?timeoffset={timeoffset}", request);
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
         }

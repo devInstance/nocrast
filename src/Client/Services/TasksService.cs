@@ -300,7 +300,7 @@ namespace NoCrast.Client.Services
                 UpdateTaskParameters response = null;
                 try
                 {
-                    response = await Api.UpdateTimerAsync(request.Task.Id, request.Log.Id, request);
+                    response = await Api.UpdateTimerAsync(request.Task.Id, request.Log.Id, request, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -333,11 +333,41 @@ namespace NoCrast.Client.Services
                 //It should a flag introduced in the long run 
                 //if task has id it has been already synced with server
                 var list = await LocalStorage.GetTimeLogAsync(item.Task);
-                if(topn > 0)
+                if (topn > 0)
                 {
                     return list.Take(topn).ToList();
                 }
                 return list;
+            }
+        }
+        public async Task<TaskItem> UpdateTimelogAsync(TaskItemView item, TimeLogItem log)
+        {
+            using (var l = Log.DebugScope())
+            {
+                try
+                {
+                    var request = new UpdateTaskParameters()
+                    {
+                        Task = item.Task,
+                        Log = log
+                    };
+
+
+                    var result = await Api.UpdateTimerAsync(item.Task.Id, log.Id, request, TimeProvider.UtcTimeOffset);
+                    ResetNetworkError();
+
+                    await LocalStorage.UpdateTaskAsync(result.Task);
+                    await LocalStorage.UpdateTimeLogAsync(result.Task, result.Log);
+
+                    NotifyDataHasChanged();
+                    return result.Task;
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return item.Task;
             }
         }
 
@@ -351,7 +381,7 @@ namespace NoCrast.Client.Services
                     {
                         var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id, TimeProvider.UtcTimeOffset);
                         ResetNetworkError();
-                        LocalStorage.UpdateTaskAsync(result);
+                        await LocalStorage.UpdateTaskAsync(result);
                         NotifyDataHasChanged();
                         return result;
                     }

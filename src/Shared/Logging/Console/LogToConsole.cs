@@ -13,7 +13,7 @@ namespace NoCrast.Shared.Logging
             timeStart = DateTime.Now;
             Level = level;
             ScopeName = scope;
-            if (logConstructor && Level >= LogLevel.DEBUG && String.IsNullOrEmpty(ScopeName))
+            if (logConstructor && Level >= LogLevel.DEBUG && !String.IsNullOrEmpty(ScopeName))
             {
                 Console.WriteLine($"--> begin of {ScopeName}");
             }

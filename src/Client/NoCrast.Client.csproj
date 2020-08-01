@@ -32,6 +32,7 @@
 
     <ItemGroup>
       <Watch Remove="Shared\Components\ActiveTaskView.razor" />
+      <Watch Remove="Shared\Components\TimeLogPanelItemView.razor" />
       <Watch Remove="Shared\Components\TimeLogPanelView.razor" />
     </ItemGroup>
 

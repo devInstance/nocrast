@@ -29,7 +29,7 @@ namespace NoCrast.Server.Controllers
         {
             DateTime now = TimeProvider.CurrentTime;
             DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset * -1);
-            DateTime startOfTheDay = now.Date.AddMinutes(timeoffset * -1);
+            DateTime startOfTheDay = now.Date.AddDays(-1).AddMinutes(timeoffset * -1);
 
             return from tks in DB.Tasks
                    join state in DB.TaskState on tks equals state.Task
@@ -240,7 +240,7 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<UpdateTaskParameters> UpdateTimerLogAsync(string id, string timerId, [FromBody] UpdateTaskParameters request)
+        public ActionResult<UpdateTaskParameters> UpdateTimerLogAsync(string id, string timerId, int timeoffset, [FromBody] UpdateTaskParameters request)
         {
             return HandleWebRequest<UpdateTaskParameters>(() =>
             {
@@ -264,7 +264,18 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                return Ok(request);
+                var selectTasks = SelectTasks(timeoffset);
+
+                var updatedTask = (from t in selectTasks
+                                   where t.Id == id
+                                   select t).FirstOrDefault();
+
+                UpdateTaskParameters reponse = new UpdateTaskParameters
+                {
+                    Task = updatedTask,
+                    Log = request.Log
+                };
+                return Ok(reponse);
             });
         }
 
