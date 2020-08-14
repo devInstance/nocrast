@@ -41,80 +41,102 @@
         </li>
 
         <li>
-            <div class="alert alert-info timer-item-container" role="document">
-                <div class="timer-item-context">
-                    <button class="btn btn-default timer-button">
-                        <span class="oi oi-circle-x" aria-hidden="true"></span>
-                    </button>
-                </div>
-                <div class="timer-item-title left-column">
-                    <span class="timer-text">
-                        <strong>Passive Task (Open)</strong>
-                        <button class="btn btn-default timer-button"><span class="oi oi-pencil small-timer-button" aria-hidden="true"></span></button>
-                    </span>
-                </div>
-                <div class="timer-item-time left-column">
-                    <span class="timer-text">3.5 hour(s)</span>
-                </div>
-                <div class="timer-item-panel">
-                    <button class="btn btn-default timer-button">
-                        <span class="oi oi-media-play" aria-hidden="true"></span>
-                    </button>
-                </div>
-                <div class="timer-item-timelog-panel">
-                    <ul class="timer-list">
-                        <li class="timer-list-item">
-                            <span class="timer-list-item">Jul 27th 4pm - </span><span><strong>30 minutes</strong></span>
-                            <button class="btn btn-default timer-button"><span class="oi oi-delete small-timer-button" aria-hidden="true"></span></button>
-                        </li>
-                        <li class="timer-list-item">
-                            <span class="timer-list-item">Jul 27th 5pm - </span><span><strong>1.6 hours</strong></span>
-                            <button class="btn btn-default timer-button"><span class="oi oi-delete small-timer-button" aria-hidden="true"></span></button>
-                        </li>
-                        <li class="timer-list-item">
-                            <span class="timer-list-item">Jul 27th 8pm - </span><span><strong>1.6 hours</strong></span>
-                            <button class="btn btn-default timer-button"><span class="oi oi-delete small-timer-button" aria-hidden="true"></span></button>
-                        </li>
-                        <li class="timer-list-item"><a href="#"><strong>More ...</strong></a></li>
-                    </ul>
-
-                    <div class="timer-item-timelog-panel-button-container color-panel">
-                        <button class="btn btn-default timer-button">
-                            <span class="oi oi-chevron-top small-timer-button" aria-hidden="true"></span>
-                        </button>
+            <div class="alert alert-danger container-fluid" role="document">
+                <div class="d-flex flex-row">
+                    <div class="d-flex flex-column flex-grow-1">
+                        <div class="d-flex flex-row">
+                            <div class="align-self-center">
+                                <span class="timer-text">
+                                    <strong>Active Task</strong>
+                                    <button class="btn btn-default timer-button"><span class="oi oi-pencil small-timer-button" aria-hidden="true"></span></button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <div class="align-self-center">
+                                <span class="timer-text timer-text-timespan">00:00:23</span>
+                            </div>
+                            <div class="align-self-center">
+                                <button class="btn btn-default">
+                                    <span class="oi oi-media-play" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-
+                    <div class="d-flex">
+                        <div class="align-self-center">
+                            <button class="btn btn-default timer-button" @onclick="@(() => Start())">
+                                <span class="oi oi-chevron-right" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </li>
 
         <li>
-        <div class="alert alert-info timer-item-container" role="document">
-            <div class="timer-item-context">
-                <button class="btn btn-default timer-button" @onclick="@(() => Remove())">
-                    <span class="oi oi-x" aria-hidden="true"></span>
-                </button>
+            <div class="alert alert-info container-fluid" role="document">
+                <div class="d-flex flex-row">
+                    <div class="d-flex flex-column flex-grow-1">
+                        <div class="d-flex flex-row">
+                            <div class="align-self-center">
+                                <span class="timer-text">
+                                    <strong>Passive Task (Open)</strong>
+                                    <button class="btn btn-default timer-button"><span class="oi oi-pencil small-timer-button" aria-hidden="true"></span></button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-row">
+                            <div class="align-self-center">
+                                <span class="timer-text">
+                                    Today: 3.5 hour(s)
+                                </span>
+                            </div>
+                            <div class="align-self-center">
+                                <button class="btn btn-default">
+                                    <span class="oi oi-media-play" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="align-self-center">
+                            <button class="btn btn-default timer-button" @onclick="@(() => Start())">
+                                <span class="oi oi-chevron-right" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="timer-item-title left-column">
-                <EditForm Model="@Item">
-                    <input value="Edit Title"></input>
-                    <button type="submit" class="btn timer-button text-info">
-                        <span class="oi oi-circle-check" aria-hidden="true"></span>
+        </li>
+
+        <li>
+            <div class="alert alert-info timer-item-container" role="document">
+                <div class="timer-item-context">
+                    <button class="btn btn-default timer-button" @onclick="@(() => Remove())">
+                        <span class="oi oi-x" aria-hidden="true"></span>
                     </button>
-                    <button class="btn timer-button text-danger">
-                        <span class="oi oi-circle-x" aria-hidden="true"></span>
+                </div>
+                <div class="timer-item-title left-column">
+                    <EditForm Model="@Item">
+                        <input value="Edit Title"></input>
+                        <button type="submit" class="btn timer-button text-info">
+                            <span class="oi oi-circle-check" aria-hidden="true"></span>
+                        </button>
+                        <button class="btn timer-button text-danger">
+                            <span class="oi oi-circle-x" aria-hidden="true"></span>
+                        </button>
+                    </EditForm>
+                </div>
+                <div class="timer-item-time left-column">
+                    <span class="timer-text">3.5 hour(s)</span>
+                </div>
+                <div class="timer-item-panel">
+                    <button class="btn btn-default timer-button" @onclick="@(() => Start())">
+                        <span class="oi oi-media-play" aria-hidden="true"></span>
                     </button>
-                </EditForm>
+                </div>
             </div>
-            <div class="timer-item-time left-column">
-                <span class="timer-text">3.5 hour(s)</span>
-            </div>
-            <div class="timer-item-panel">
-                <button class="btn btn-default timer-button" @onclick="@(() => Start())">
-                    <span class="oi oi-media-play" aria-hidden="true"></span>
-                </button>
-            </div>
-        </div>
         </li>
 
     </ul>

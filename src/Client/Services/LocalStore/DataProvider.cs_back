@@ -40,6 +40,18 @@ namespace NoCrast.Client.Services.LocalStore
             return data.Tasks;
         }
 
+        public async Task<TaskItem> FindTaskAsync(string id)
+        {
+            await TryLoadDataAsync();
+
+            int index = data.FindTaskIndexById(id);
+            if(index >= 0)
+            {
+                return data.Tasks[index];
+            }
+            return null;
+        }
+
         private async Task<bool> TryLoadDataAsync()
         {
             if (data == null)
@@ -62,8 +74,6 @@ namespace NoCrast.Client.Services.LocalStore
                     if (data == null)
                     {
                         data = new NoCrastData();
-                        data.Tasks = new List<TaskItem>();
-                        data.Logs = new List<List<TimeLogItem>>();
                     }
 
                     // Step 3: Sync-up with server

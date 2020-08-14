@@ -1,9 +1,7 @@
 ﻿using Blazored.LocalStorage;
-using NoCrast.Client.Model;
 using NoCrast.Client.ModelExtensions;
 using NoCrast.Client.ModelViews;
 using NoCrast.Client.Services.Api;
-using NoCrast.Client.Services.LocalStore;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
@@ -18,24 +16,19 @@ namespace NoCrast.Client.Services
     public class TasksService : BaseService
     {
         public ITimeProvider TimeProvider { get; }
-        protected IDataProvider LocalStorage { get; }
         protected ITasksApi Api { get; }
 
         public TasksService(ITimeProvider provider,
                             ILogProvider logProvider,
-                            IDataProvider storage,
                             ITasksApi api)
         {
             Api = api;
             TimeProvider = provider;
-            LocalStorage = storage;
             Log = logProvider.CreateLogger(this);
             Log.D("constructor");
-
-            LocalStorage.OnLoadTasks += LocalStorage_OnLoadTasks;
-            LocalStorage.OnLoadTimeLog += LocalStorage_OnLoadTimeLog;
         }
 
+        /*
         private async Task<bool> SyncUpWithServerAsync(List<TaskItem> tasks)
         {
             using (var l = Log.DebugScope())
@@ -63,7 +56,9 @@ namespace NoCrast.Client.Services
             }
             return true;
         }
+        */
 
+        /*
         private async Task<List<TaskItem>> LocalStorage_OnLoadTasks(List<TaskItem> items)
         {
             using (var l = Log.DebugScope())
@@ -87,6 +82,7 @@ namespace NoCrast.Client.Services
                 return tasks;
             }
         }
+        */
 
         public async Task<List<TaskItemView>> GetTasksAsync()
         {
@@ -94,28 +90,33 @@ namespace NoCrast.Client.Services
             {
                 ResetUIError();
 
-                ///TODO: This is not going to work with server request.
-                ///Use Task.TotalTimeSpent instead
-                var tasks = await LocalStorage.GetTasksAsync();
+                var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
                 var result = new List<TaskItemView>();
-                for (int i = 0; i < tasks.Count; i++)
+                for (int i = 0; i < tasks.Length; i++)
                 {
                     var task = tasks[i];
-                    var logs = await LocalStorage.GetTimeLogAsync(task);
-                    TimeLogItem lastTimeLog = null;
-                    for (int j = 0; j < logs.Count; j++)
-                    {
-                        var log = logs[j];
-                        if (log.Id == task.ActiveTimeLogItemId || log.ClientId == task.ActiveTimeLogItemId)
-                        {
-                            lastTimeLog = log;
-                            break;
-                        }
-                    }
-                    var itemView = new TaskItemView(TimeProvider, task, lastTimeLog);
+                    var itemView = new TaskItemView(TimeProvider, task);
                     result.Add(itemView);
                 }
                 return result;
+            }
+        }
+
+        public async Task<TaskItemView> GetTaskAsync(string taskId)
+        {
+            using (var l = Log.DebugScope())
+            {
+                ResetUIError();
+
+                //TODO: optimize, don't fetch full list, create back local store
+                var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
+                var task = (from t in tasks where t.Id == taskId select t).FirstOrDefault();
+                if(task == null)
+                {
+                    NotifyUIError($"Cannot find task with id {taskId}");
+                    return null;
+                }
+                return new TaskItemView(TimeProvider, task);
             }
         }
 
@@ -129,17 +130,20 @@ namespace NoCrast.Client.Services
                 }
 
                 // Step 2: Validate integrity
-                if ((await LocalStorage.FindTaskByTitleAsync(title)) != null)
+                /*if ((await LocalStorage.FindTaskByTitleAsync(title)) != null)
                 {
                     NotifyUIError(new ArgumentException("Task already exists", nameof(title)));
                     return null;
-                }
+                }*/
 
                 ResetUIError();
 
                 // Step 3: Create a new object
-                var task = await LocalStorage.CreateTaskAsync(title);
-
+                //var task = await LocalStorage.CreateTaskAsync(title);
+                var task = new TaskItem
+                {
+                    Title = title
+                };
                 // Step 4: Post the object on server
                 TaskItem response = null;
                 try
@@ -153,19 +157,19 @@ namespace NoCrast.Client.Services
                 }
 
                 // Step 5: Apply processed object from server back
-                if (response != null)
-                {
-                    if (!await LocalStorage.UpdateTaskAsync(response))
-                    {
-                        // if response cannot be applied then local data is 
-                        // corrupted and full re-sync from server required
-                        await LocalDataOverideAsync();
-                    }
-                }
+                //if (response != null)
+                //{
+                //    if (!await LocalStorage.UpdateTaskAsync(response))
+                //    {
+                //        // if response cannot be applied then local data is 
+                //        // corrupted and full re-sync from server required
+                //        await LocalDataOverideAsync();
+                //    }
+                //}
 
                 NotifyDataHasChanged();
 
-                return new TaskItemView(TimeProvider, response, null);
+                return new TaskItemView(TimeProvider, response);
             }
         }
 
@@ -188,7 +192,6 @@ namespace NoCrast.Client.Services
                     NotifyNetworkError(ex);
                 }
 
-                await LocalStorage.UpdateTaskAsync(newTask);
                 return newTask;
             }
         }
@@ -197,24 +200,18 @@ namespace NoCrast.Client.Services
         {
             using (var l = Log.DebugScope())
             {
-                if (await LocalStorage.RemoveTaskAsync(item.Task))
+                try
                 {
-                    try
-                    {
-                        await Api.RemoveTaskAsync(item.Task.Id);
-                        ResetNetworkError();
-                    }
-                    catch (Exception ex)
-                    {
-                        NotifyNetworkError(ex);
-                    }
-                    NotifyDataHasChanged();
-
-                    return true;
-
+                    await Api.RemoveTaskAsync(item.Task.Id);
+                    ResetNetworkError();
                 }
-
-                return false;
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                    return false;
+                }
+                NotifyDataHasChanged();
+                return true;
             }
         }
 
@@ -229,48 +226,20 @@ namespace NoCrast.Client.Services
 
                 if (item.Task.IsRunning) return;
 
-                TimeLogItem log = await LocalStorage.CreateTimeLogAsync(item.Task);
-                item.ActiveTimeLog = log;
-                item.Task.ActiveTimeLogItemId = log.ClientId;
-                item.Task.IsRunning = true;
+                item.Start();
 
-                if (!await LocalStorage.UpdateTimeLogAsync(item.Task, log))
-                {
-                    await LocalDataOverideAsync();
-                }
-
-                var request = new UpdateTaskParameters()
-                {
-                    Task = item.Task,
-                    Log = item.ActiveTimeLog
-                };
-
-                UpdateTaskParameters response = null;
                 try
                 {
-                    response = await Api.InsertTimerAsync(item.Task.Id, request);
+                    item.Task = await Api.InsertTimerAsync(item.Task.Id, true, item.Task.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
+                    NotifyDataHasChanged();
                 }
                 catch (Exception ex)
                 {
                     NotifyNetworkError(ex);
                 }
 
-                if (response != null)
-                {
-                    if (!await LocalStorage.UpdateTimeLogAsync(response.Task, response.Log))
-                    {
-                        await LocalDataOverideAsync();
-                    }
-                }
-
-                NotifyDataHasChanged();
             }
-        }
-
-        private async Task<bool> LocalDataOverideAsync()
-        {
-            throw new NotImplementedException();
         }
 
         public async void StopTaskAsync(TaskItemView item)
@@ -286,41 +255,20 @@ namespace NoCrast.Client.Services
 
                 item.Stop();
 
-                if (!await LocalStorage.UpdateTimeLogAsync(item.Task, item.ActiveTimeLog))
-                {
-                    await LocalDataOverideAsync();
-                }
-
-                var request = new UpdateTaskParameters()
-                {
-                    Task = item.Task,
-                    Log = item.ActiveTimeLog
-                };
-
-                UpdateTaskParameters response = null;
                 try
                 {
-                    response = await Api.UpdateTimerAsync(request.Task.Id, request.Log.Id, request, TimeProvider.UtcTimeOffset);
+                    item.Task = await Api.UpdateTimerAsync(item.Task.Id, item.Task.ActiveTimeLogItem.Id, false, item.Task.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
+                    NotifyDataHasChanged();
                 }
                 catch (Exception ex)
                 {
                     NotifyNetworkError(ex);
                 }
-
-                if (response != null)
-                {
-                    if (!await LocalStorage.UpdateTimeLogAsync(response.Task, response.Log))
-                    {
-                        await LocalDataOverideAsync();
-                    }
-                }
-
-                NotifyDataHasChanged();
             }
         }
 
-        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItemView item, int topn)
+        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItemView item)
         {
             using (var l = Log.DebugScope())
             {
@@ -328,39 +276,31 @@ namespace NoCrast.Client.Services
                 {
                     throw new ArgumentNullException(nameof(item));
                 }
-                //TODO: This is a temp solution based on assumption that
-                //list is not previously fetched from the server if count is 0
-                //It should a flag introduced in the long run 
-                //if task has id it has been already synced with server
-                var list = await LocalStorage.GetTimeLogAsync(item.Task);
-                if (topn > 0)
+                List<TimeLogItem> response = new List<TimeLogItem>();
+                try
                 {
-                    return list.Take(topn).ToList();
+                    response.AddRange(await Api.GetTimelogAsync(item.Task.Id));
+                    ResetNetworkError();
                 }
-                return list;
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+
+                return response;
             }
         }
+
         public async Task<TaskItem> UpdateTimelogAsync(TaskItemView item, TimeLogItem log)
         {
             using (var l = Log.DebugScope())
             {
                 try
                 {
-                    var request = new UpdateTaskParameters()
-                    {
-                        Task = item.Task,
-                        Log = log
-                    };
-
-
-                    var result = await Api.UpdateTimerAsync(item.Task.Id, log.Id, request, TimeProvider.UtcTimeOffset);
+                    item.Task = await Api.UpdateTimerAsync(item.Task.Id, log.Id, item.Task.IsRunning, log, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
 
-                    await LocalStorage.UpdateTaskAsync(result.Task);
-                    await LocalStorage.UpdateTimeLogAsync(result.Task, result.Log);
-
                     NotifyDataHasChanged();
-                    return result.Task;
                 }
                 catch (Exception ex)
                 {
@@ -375,42 +315,20 @@ namespace NoCrast.Client.Services
         {
             using (var l = Log.DebugScope())
             {
-                if (await LocalStorage.RemoveTimeLogAsync(item.Task, log))
+                try
                 {
-                    try
-                    {
-                        var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id, TimeProvider.UtcTimeOffset);
-                        ResetNetworkError();
-                        await LocalStorage.UpdateTaskAsync(result);
-                        NotifyDataHasChanged();
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        l.E(ex);
-                        NotifyNetworkError(ex);
-                    }
+                    var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id, TimeProvider.UtcTimeOffset);
+                    ResetNetworkError();
+                    NotifyDataHasChanged();
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
                 }
                 return item.Task;
             }
-        }
-
-
-        private async Task<List<TimeLogItem>> LocalStorage_OnLoadTimeLog(TaskItem task, List<TimeLogItem> items)
-        {
-            //TODO: Sync-up pending changes
-            List<TimeLogItem> response = new List<TimeLogItem>();
-            try
-            {
-                response.AddRange(await Api.GetTimelogAsync(task.Id));
-                ResetNetworkError();
-            }
-            catch (Exception ex)
-            {
-                NotifyNetworkError(ex);
-            }
-
-            return response;
         }
 
     }

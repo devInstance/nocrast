@@ -8,10 +8,6 @@
 
         public bool IsUIError { get; set; }
 
-        public bool ResetNetworkError { get; set; }
-
-        public bool ResetUIError { get; set; }
-
         public string Message { get; set; }
     }
 }

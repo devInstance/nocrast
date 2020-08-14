@@ -40,7 +40,7 @@ namespace NoCrast.Shared.Logging
 
         public void Line(LogLevel l, string message)
         {
-            if (l >= Level)
+            if (l <= Level)
             {
                 if (String.IsNullOrEmpty(ScopeName))
                 {

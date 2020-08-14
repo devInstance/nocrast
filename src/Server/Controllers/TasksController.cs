@@ -19,7 +19,7 @@ namespace NoCrast.Server.Controllers
     {
         public ITimeProvider TimeProvider { get; }
 
-        public TasksController(ApplicationDbContext d, UserManager<ApplicationUser> userManager, ITimeProvider timeProvider) 
+        public TasksController(ApplicationDbContext d, UserManager<ApplicationUser> userManager, ITimeProvider timeProvider)
             : base(d, userManager)
         {
             TimeProvider = timeProvider;
@@ -38,7 +38,12 @@ namespace NoCrast.Server.Controllers
                    {
                        Id = tks.PublicId,
                        IsRunning = state.IsRunning,
-                       ActiveTimeLogItemId = state.ActiveTimeLogItem != null ? state.ActiveTimeLogItem.PublicId : null,
+                       ActiveTimeLogItem = state.ActiveTimeLogItem != null ? new TimeLogItem
+                       {
+                           Id = state.ActiveTimeLogItem.PublicId,
+                           ElapsedMilliseconds = state.ActiveTimeLogItem.ElapsedMilliseconds,
+                           StartTime = new DateTime(state.ActiveTimeLogItem.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
+                       } : null,
                        TimeLogCount = tks.TimeLog.Count,
                        Title = tks.Title,
                        TotalTimeSpent = (from tl in DB.TimeLog
@@ -124,7 +129,7 @@ namespace NoCrast.Server.Controllers
                                   where task.PublicId == id && task.Profile == CurrentProfile
                                   select task).Include(a => a.State).FirstOrDefault();
 
-                if(taskRecord == null)
+                if (taskRecord == null)
                 {
                     return NotFound();
                 }
@@ -192,9 +197,9 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<UpdateTaskParameters> InsertTimerLogAsync(string id, [FromBody] UpdateTaskParameters request)
+        public ActionResult<TaskItem> InsertTimerLogAsync(string id, bool? start, int timeoffset, [FromBody] TimeLogItem request)
         {
-            return HandleWebRequest<UpdateTaskParameters>(() =>
+            return HandleWebRequest<TaskItem>(() =>
             {
                 DateTime now = TimeProvider.CurrentTime;
 
@@ -212,25 +217,25 @@ namespace NoCrast.Server.Controllers
                     PublicId = IdGenerator.New(),
 
                     TaskId = taskRecord.Id,
-                    StartTime = request.Log.StartTime,
-                    ElapsedMilliseconds = request.Log.ElapsedMilliseconds,
+                    StartTime = request.StartTime,
+                    ElapsedMilliseconds = request.ElapsedMilliseconds,
 
                     CreateDate = now,
                     UpdateDate = now,
                 };
                 DB.TimeLog.Add(timeLog);
 
-                taskRecord.State.IsRunning = request.Task.IsRunning;
+                taskRecord.State.IsRunning = start ?? false;
                 taskRecord.UpdateDate = now;
                 taskRecord.State.ActiveTimeLogItem = timeLog;
 
                 DB.SaveChanges();
 
-                request.Log.Id = timeLog.PublicId;
-                request.Task.Id = taskRecord.PublicId;
-                request.Task.ActiveTimeLogItemId = timeLog.PublicId;
+                var response = (from ts in SelectTasks(timeoffset)
+                                where ts.Id == taskRecord.PublicId
+                                select ts).FirstOrDefault();
 
-                return Ok(request);
+                return Ok(response);
             });
         }
 
@@ -240,9 +245,9 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<UpdateTaskParameters> UpdateTimerLogAsync(string id, string timerId, int timeoffset, [FromBody] UpdateTaskParameters request)
+        public ActionResult<TaskItem> UpdateTimerLogAsync(string id, string timerId, bool? start, int timeoffset, [FromBody] TimeLogItem request)
         {
-            return HandleWebRequest<UpdateTaskParameters>(() =>
+            return HandleWebRequest<TaskItem>(() =>
             {
                 DateTime now = TimeProvider.CurrentTime;
 
@@ -256,11 +261,11 @@ namespace NoCrast.Server.Controllers
                     return NotFound();
                 }
 
-                taskRecord.state.IsRunning = request.Task.IsRunning;
+                taskRecord.state.IsRunning = start ?? false;
                 taskRecord.task.UpdateDate = now;
 
-                taskRecord.timeLog.StartTime = request.Log.StartTime;
-                taskRecord.timeLog.ElapsedMilliseconds = request.Log.ElapsedMilliseconds;
+                taskRecord.timeLog.StartTime = request.StartTime;
+                taskRecord.timeLog.ElapsedMilliseconds = request.ElapsedMilliseconds;
 
                 DB.SaveChanges();
 
@@ -270,12 +275,7 @@ namespace NoCrast.Server.Controllers
                                    where t.Id == id
                                    select t).FirstOrDefault();
 
-                UpdateTaskParameters reponse = new UpdateTaskParameters
-                {
-                    Task = updatedTask,
-                    Log = request.Log
-                };
-                return Ok(reponse);
+                return Ok(updatedTask);
             });
         }
 
@@ -290,9 +290,9 @@ namespace NoCrast.Server.Controllers
             return HandleWebRequest<TaskItem>(() =>
             {
                 var timeLogRecord = (from task in DB.Tasks
-                                  join timeLog in DB.TimeLog on task equals timeLog.Task
-                                  where task.PublicId == id && task.Profile == CurrentProfile && timeLog.PublicId == timerId
-                                  select timeLog).FirstOrDefault();
+                                     join timeLog in DB.TimeLog on task equals timeLog.Task
+                                     where task.PublicId == id && task.Profile == CurrentProfile && timeLog.PublicId == timerId
+                                     select timeLog).FirstOrDefault();
                 if (timeLogRecord == null)
                 {
                     return NotFound();

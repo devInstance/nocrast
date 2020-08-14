@@ -1,17 +1,179 @@
 ﻿@page "/task/{id}"
 
-@inject TasksService Service;
+@using System.Timers;
 
-<h3>Task Details</h3>
+@inject TasksService Service;
+@inject ILogProvider LogProvider;
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
+
+@if (Item != null)
+{
+    @if (!String.IsNullOrEmpty(ErrorText))
+    {
+        <label class="text-danger">@ErrorText</label>
+    }
+    <button class="btn btn-default" @onclick="@(() => NavigateBack())">
+        <span class="oi oi-arrow-circle-left" aria-hidden="true"></span> Back
+    </button>
+    <button class="btn btn-default" @onclick="@(() => Remove())">
+        <span class="oi oi-x" aria-hidden="true"></span> Delete
+    </button>
+
+    <ul class="timer-list">
+        <TaskView Item="Item" ShowNavigationButton="false" />
+        <li><span class="timer-text">@String.Format("This Week: {0:F1}", Item.TotalHoursSpentThisWeek) hour(s)</span></li>
+        <li><span class="timer-text">@String.Format("Total: {0:F1}", Item.TotalHoursSpent) hour(s)</span></li>
+    </ul>
+    @if (TimeLog != null)
+    {
+        <ul class="timer-list">
+            @foreach (var tl in TimeLog)
+            {
+                <li class="timer-list-item">
+                    <TimeLogPanelItemView Item="Item" Log="tl" IsActive="IsActive">
+                    </TimeLogPanelItemView>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div>Loading ...</div>
+    }
+}
+else
+{
+    <div>Loading ...</div>
+}
 
 @code {
     [Parameter]
-    public string TaskId { get; set; }
+    public string Id { get; set; }
 
+    private TaskItemView Item { get; set; }
     private List<TimeLogItem> TimeLog { get; set; }
+
+    private System.Timers.Timer timer;
+
+    private ILog log;
+
+    public bool IsActive
+    {
+        get
+        {
+            return Item.Task.IsRunning;
+        }
+    }
+
+    string ErrorText { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
-        //TimeLog = await Service.GetTimeLogItemsAsync(TaskId);
+        log = LogProvider.CreateLogger(this);
+
+        using (var scope = log.DebugScope())
+        {
+
+            Service.DataHasChanged += OnDataHasChanged;
+            Service.ErrorHasOccured += OnError;
+
+            await RefreshData();
+
+            SetUpTimer();
+        }
+    }
+
+    private void SetUpTimer()
+    {
+        timer = new System.Timers.Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            Service.DataHasChanged -= OnDataHasChanged;
+            Service.ErrorHasOccured -= OnError;
+
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private async void Remove()
+    {
+        var tempId = Id;
+        Id = null;
+        if (await Service.RemoveTaskAsync(Item))
+        {
+            NavigateBack();
+        }
+        else
+        {
+            Id = tempId;
+        }
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        using (var scope = log.DebugScope())
+        {
+            RefreshData();
+        }
+    }
+
+    private void OnError(Object sender, ServiceErrorEventArgs e)
+    {
+        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
+
+        if (e.IsUIError)
+        {
+            ErrorText = e.Message;
+        }
+        else
+        {
+            ErrorText = "";
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        using (var scope = log.DebugScope())
+        {
+            if (!String.IsNullOrEmpty(Id))
+            {
+                Item = await Service.GetTaskAsync(Id);
+                if (Item != null)
+                {
+                    TimeLog = await Service.GetTimeLogItemsAsync(Item);
+                }
+                else
+                {
+                    scope.E($"Cannot find task {Id}");
+                    return false;
+                }
+            }
+        }
+        StateHasChanged();
+
+        return true;
     }
 }

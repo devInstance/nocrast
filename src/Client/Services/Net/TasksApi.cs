@@ -47,18 +47,18 @@ namespace NoCrast.Client.Services.Net
             return await httpClient.GetFromJsonAsync<TimeLogItem[]>(Controller + id + "/timelog");
         }
 
-        public async Task<UpdateTaskParameters> InsertTimerAsync(string id, UpdateTaskParameters request)
+        public async Task<TaskItem> InsertTimerAsync(string id, bool startTask, TimeLogItem log, int timeoffset)
         {
-            var result = await httpClient.PostAsJsonAsync(Controller + id + "/timelog", request);
+            var result = await httpClient.PostAsJsonAsync($"{Controller}{id}/timelog?start={startTask}&timeoffset={timeoffset}", log);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
+            return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
-        public async Task<UpdateTaskParameters> UpdateTimerAsync(string id, string timerId, UpdateTaskParameters request, int timeoffset)
+        public async Task<TaskItem> UpdateTimerAsync(string id, string timerId, bool startTask, TimeLogItem log, int timeoffset)
         {
-            var result = await httpClient.PutAsJsonAsync($"{Controller}{id}/timelog/{timerId}?timeoffset={timeoffset}", request);
+            var result = await httpClient.PutAsJsonAsync($"{Controller}{id}/timelog/{timerId}?start={startTask}&timeoffset={timeoffset}", log);
             result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<UpdateTaskParameters>().Result;
+            return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
         public async Task<TaskItem> RemoveTimerAsync(string id, string timerId, int timeoffset)

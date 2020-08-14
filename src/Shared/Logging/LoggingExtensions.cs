@@ -27,17 +27,17 @@ namespace NoCrast.Shared.Logging
 
         public static void E(this ILog log, string message)
         {
-            log.Line(LogLevel.ERROR, message);
+            log.Line(LogLevel.ERROR, $"Error!!!: {message}");
         }
         public static void E(this ILog log, Exception ex)
         {
-            log.Line(LogLevel.ERROR, ex.Message);
+            log.Line(LogLevel.ERROR, $"Exception!!!: {ex.Message}");
             log.Line(LogLevel.ERROR, ex.StackTrace);
         }
 
         public static void E(this ILog log, string message, Exception ex)
         {
-            log.Line(LogLevel.ERROR, message);
+            log.Line(LogLevel.ERROR, $"Exception!!!: {message}");
             log.Line(LogLevel.ERROR, ex.StackTrace);
         }
 

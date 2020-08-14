@@ -21,14 +21,7 @@
 <ul class="timer-list">
     @foreach (var item in TasksList)
     {
-        @if (item.Task.IsRunning)
-        {
-            <ActiveTaskView Item="item" />
-        }
-        else
-        {
-            <TaskView Item="item" />
-        }
+        <TaskView Item="item" ShowNavigationButton="true"/>
     }
 </ul>
 }
@@ -76,10 +69,13 @@
 
     public void Dispose()
     {
-        if (timer != null)
+        using (var scope = log.DebugScope())
         {
-            timer.Elapsed -= OnTimedEvent;
-            timer.Dispose();
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
         }
     }
 
@@ -90,11 +86,13 @@
 
     private void OnError(Object sender, ServiceErrorEventArgs e)
     {
+        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
+
         if(e.IsUIError)
         {
             ErrorText = e.Message;
-        } 
-        else if (e.ResetUIError)
+        }
+        else
         {
             ErrorText = "";
         }

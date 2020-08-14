@@ -18,32 +18,44 @@ namespace NoCrast.Client.Services
 
         protected void NotifyDataHasChanged()
         {
-            if (DataHasChanged != null)
-            {
-                DataHasChanged(this, new EventArgs());
-            }
+            DataHasChanged?.Invoke(this, new EventArgs());
         }
 
-        protected void NotifyUIError(Exception ex)
+        protected void NotifyUIError(string message)
         {
             var arg = new ServiceErrorEventArgs()
             {
-                Message = ex.Message,
+                Message = message,
                 IsUIError = true
             };
 
-            Log.E(ex);
+            Log.E(message);
             NotifyError(arg);
             isUiErrorRisen = true;
         }
 
+        protected void NotifyUIError(Exception ex)
+        {
+            if (!isUiErrorRisen)
+            {
+                var arg = new ServiceErrorEventArgs()
+                {
+                    Message = ex.Message,
+                    IsUIError = true
+                };
+
+                Log.E(ex);
+                NotifyError(arg);
+                isUiErrorRisen = true;
+            }
+        }
         protected void ResetUIError()
         {
             if (isUiErrorRisen)
             {
                 var arg = new ServiceErrorEventArgs()
                 {
-                    ResetUIError = true
+                    IsUIError = false
                 };
                 NotifyError(arg);
                 isUiErrorRisen = false;
@@ -56,7 +68,7 @@ namespace NoCrast.Client.Services
             {
                 var arg = new ServiceErrorEventArgs()
                 {
-                    ResetNetworkError = true
+                    IsNetworkError = false
                 };
                 NotifyError(arg);
                 isNetworkErrorRisen = false;
@@ -71,7 +83,7 @@ namespace NoCrast.Client.Services
                 IsNetworkError = true
             };
 
-            if(Log != null)
+            if (Log != null)
             {
                 Log.E(ex);
             }
@@ -82,10 +94,7 @@ namespace NoCrast.Client.Services
 
         private void NotifyError(ServiceErrorEventArgs arg)
         {
-            if (ErrorHasOccured != null)
-            {
-                ErrorHasOccured(this, arg);
-            }
+            ErrorHasOccured?.Invoke(this, arg);
         }
     }
 }

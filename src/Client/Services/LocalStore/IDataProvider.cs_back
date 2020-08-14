@@ -16,6 +16,8 @@ namespace NoCrast.Client.Services.LocalStore
 
         Task<List<TaskItem>> GetTasksAsync();
 
+        Task<TaskItem> FindTaskAsync(string id);
+
         Task<TaskItem> FindTaskByTitleAsync(string title);
 
         Task<TaskItem> CreateTaskAsync(string title);

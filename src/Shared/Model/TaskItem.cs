@@ -11,7 +11,7 @@ namespace NoCrast.Shared.Model
         [Required]
         public bool IsRunning { get; set; }
 
-        public string ActiveTimeLogItemId { get; set; }
+        public TimeLogItem ActiveTimeLogItem { get; set; }
 
         public int TimeLogCount { get; set; }
 

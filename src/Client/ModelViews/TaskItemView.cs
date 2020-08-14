@@ -9,29 +9,27 @@ namespace NoCrast.Client.ModelViews
         public ITimeProvider Provider { get; set; }
 
         public TaskItem Task { get; set; }
-        public TimeLogItem ActiveTimeLog { get; set; }
 
-        public TaskItemView(ITimeProvider provider, TaskItem task, TimeLogItem timeLog)
+        public TaskItemView(ITimeProvider provider, TaskItem task)
         {
             Provider = provider;
             Task = task;
-            ActiveTimeLog = timeLog;
         }
 
         public long GetElapsedThisPeriod()
         {
-            if (ActiveTimeLog != null)
+            if (Task.ActiveTimeLogItem != null)
             {
-                return (long)(Provider.CurrentTime - ActiveTimeLog.StartTime).TotalMilliseconds;
+                return (long)(Provider.CurrentTime - Task.ActiveTimeLogItem.StartTime).TotalMilliseconds;
             }
             return 0;
         }
 
         private long GetTotalMilliseconds()
         {
-            if (ActiveTimeLog != null)
+            if (Task.ActiveTimeLogItem != null)
             {
-                long result = ActiveTimeLog.ElapsedMilliseconds;
+                long result = Task.ActiveTimeLogItem.ElapsedMilliseconds;
                 if (Task.IsRunning)
                 {
                     result += GetElapsedThisPeriod();
@@ -48,14 +46,19 @@ namespace NoCrast.Client.ModelViews
 
         public void Start()
         {
-            ActiveTimeLog.StartTime = Provider.CurrentTime;
+            TimeLogItem log = new TimeLogItem
+            {
+                StartTime = Provider.CurrentTime
+            };
+
+            Task.ActiveTimeLogItem = log;
             Task.IsRunning = true;
         }
 
         public void Stop()
         {
             Task.IsRunning = false;
-            ActiveTimeLog.ElapsedMilliseconds += GetElapsedThisPeriod();
+            Task.ActiveTimeLogItem.ElapsedMilliseconds += GetElapsedThisPeriod();
         }
 
         public float TotalHoursSpent

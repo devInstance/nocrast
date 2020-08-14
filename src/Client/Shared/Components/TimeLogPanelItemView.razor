@@ -7,28 +7,31 @@
 @if (!IsEditing)
 {
     <span class="timer-list-item">@FormatTime(Log)</span>
-    <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
-        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
-    </button>
+    @if (!IsActive || Item.Task.ActiveTimeLogItem.Id != Log.Id)
+    {
+        <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+            <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+        </button>
+    }
 }
 else
 {
-<EditForm Model="@editLog" OnValidSubmit="@(() => ApplyChangesAsync())">
-    <InputText @bind-Value="@editLog.StartTime"></InputText>
-    <InputText @bind-Value="@editLog.EndTime"></InputText>
-    <button type="submit" class="btn timer-button text-info">
-        <span class="oi oi-circle-check" aria-hidden="true"></span>
-    </button>
-    <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
-        <span class="oi oi-circle-x" aria-hidden="true"></span>
-    </button>
-    @if (!IsActive || Item.ActiveTimeLog.Id != Log.Id)
-    {
-        <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(Log))">
-            <span class="oi oi-delete small-timer-button" aria-hidden="true"></span>
+    <EditForm Model="@editLog" OnValidSubmit="@(() => ApplyChangesAsync())">
+        <InputText @bind-Value="@editLog.StartTime"></InputText>
+        <InputText @bind-Value="@editLog.EndTime"></InputText>
+        <button type="submit" class="btn timer-button text-info">
+            <span class="oi oi-circle-check" aria-hidden="true"></span>
         </button>
-    }
-</EditForm>
+        <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+            <span class="oi oi-circle-x" aria-hidden="true"></span>
+        </button>
+        @if (!IsActive || Item.Task.ActiveTimeLogItem.Id != Log.Id)
+        {
+            <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(Log))">
+                <span class="oi oi-delete small-timer-button" aria-hidden="true"></span>
+            </button>
+        }
+    </EditForm>
 }
 
 @code {

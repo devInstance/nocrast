@@ -4,44 +4,72 @@
 @inject ILogProvider LogProvider;
 
 <li>
-    <div class="alert alert-info timer-item-container" role="document">
-        <div class="timer-item-context">
-            <button class="btn btn-default timer-button" @onclick="@(() => Remove())">
-                <span class="oi oi-x" aria-hidden="true"></span>
-            </button>
-        </div>
-        <div class="timer-item-title left-column">
-            @if (!IsEditing)
+    <div class="alert @(IsActive ? "alert-danger" : "alert-info") container-fluid" role="document">
+        <div class="d-flex flex-row">
+            <div class="d-flex flex-column flex-grow-1">
+                <div class="d-flex flex-row">
+                    <div class="align-self-center">
+                        @if (!IsEditing)
+                        {
+                            <span class="timer-text">
+                                <strong>@Item.Task.Title</strong>
+                                <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+                                    <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                                </button>
+                            </span>
+                        }
+                        else
+                        {
+                            <EditForm Model="@TitleEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+                                <InputText @bind-Value="@TitleEditText"></InputText>
+                                <button type="submit" class="btn timer-button text-info">
+                                    <span class="oi oi-circle-check" aria-hidden="true"></span>
+                                </button>
+                                <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+                                    <span class="oi oi-circle-x" aria-hidden="true"></span>
+                                </button>
+                            </EditForm>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex flex-row">
+                    <div class="align-self-center">
+                        @if (IsActive)
+                        {
+                            <span class="timer-text timer-text-timespan">@FormatTime(Item.GetElapsedTimeSpan())</span>
+                        }
+                        else
+                        {
+                            <span class="timer-text">@String.Format("Today {0:F1}", Item.TotalHoursSpentToday) hour(s)</span>
+                        }
+                    </div>
+                    <div class="align-self-center">
+                        @if (IsActive)
+                        {
+                            <button class="btn btn-default timer-active-button" @onclick="@(() => Stop())">
+                                <span class="oi oi-media-pause" aria-hidden="true"></span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
+                                <span class="oi oi-media-play" aria-hidden="true"></span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+            @if (ShowNavigationButton)
             {
-                <span class="timer-text">
-                    <strong>@Item.Task.Title</strong>
-                    <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
-                        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
-                    </button>
-                </span>
-            }
-            else
-            {
-                <EditForm Model="@TitleEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
-                    <InputText @bind-Value="@TitleEditText"></InputText>
-                    <button type="submit" class="btn timer-button text-info">
-                        <span class="oi oi-circle-check" aria-hidden="true"></span>
-                    </button>
-                    <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
-                        <span class="oi oi-circle-x" aria-hidden="true"></span>
-                    </button>
-                </EditForm>
+            <div class="d-flex">
+                <div class="align-self-center">
+                    <NavLink href="@($"task/{Item.Task.Id}")" Match="NavLinkMatch.All">
+                        <span class="oi oi-chevron-right" aria-hidden="true"></span>
+                    </NavLink>
+                </div>
+            </div>
             }
         </div>
-        <div class="timer-item-time left-column">
-            <span class="timer-text">@String.Format("Today {0:F1}", Item.TotalHoursSpentToday) hour(s)</span>
-        </div>
-        <div class="timer-item-panel">
-            <button class="btn btn-default timer-button" @onclick="@(() => Start())">
-                <span class="oi oi-media-play" aria-hidden="true"></span>
-            </button>
-        </div>
-        <TimeLogPanelView Item="Item"></TimeLogPanelView>
     </div>
 </li>
 
@@ -49,11 +77,21 @@
     [Parameter]
     public TaskItemView Item { get; set; }
 
-    private EditContext editContext;
+    [Parameter]
+    public bool ShowNavigationButton { get; set; }
+
     private bool IsEditing { get; set; }
     private string TitleEditText { get; set; }
 
     private ILog log;
+
+    public bool IsActive
+    {
+        get
+        {
+            return Item.Task.IsRunning;
+        }
+    }
 
     //TODO: Add form validation for title
     protected override void OnInitialized()
@@ -64,14 +102,19 @@
         TitleEditText = Item.Task.Title;
     }
 
-    private async void Remove()
+    private string FormatTime(TimeSpan time)
     {
-        await Service.RemoveTaskAsync(Item);
+        return String.Format("{0:hh}:{0:mm}:{0:ss}", time);
     }
 
     private void Start()
     {
         Service.StartTaskAsync(Item);
+    }
+
+    private void Stop()
+    {
+        Service.StopTaskAsync(Item);
     }
 
     private void StartEditing()
