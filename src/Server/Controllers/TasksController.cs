@@ -19,7 +19,9 @@ namespace NoCrast.Server.Controllers
     {
         public ITimeProvider TimeProvider { get; }
 
-        public TasksController(ApplicationDbContext d, UserManager<ApplicationUser> userManager, ITimeProvider timeProvider)
+        public TasksController(ApplicationDbContext d,
+                                UserManager<ApplicationUser> userManager,
+                                ITimeProvider timeProvider)
             : base(d, userManager)
         {
             TimeProvider = timeProvider;
@@ -28,8 +30,10 @@ namespace NoCrast.Server.Controllers
         private IQueryable<TaskItem> SelectTasks(int timeoffset)
         {
             DateTime now = TimeProvider.CurrentTime;
-            DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset * -1);
-            DateTime startOfTheDay = now.Date.AddDays(-1).AddMinutes(timeoffset * -1);
+            //            DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset * -1);
+            DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset);
+            //            DateTime startOfTheDay = now.Date.AddDays(-1).AddMinutes(timeoffset * -1);
+            DateTime startOfTheDay = now.Date.AddMinutes(timeoffset);
 
             return from tks in DB.Tasks
                    join state in DB.TaskState on tks equals state.Task

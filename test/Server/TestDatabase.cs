@@ -5,14 +5,16 @@ using System;
 using System.IO;
 using System.Linq;
 using NoCrast.Server.Model;
+using NoCrast.Shared.Utils;
 
 namespace NoCrast.ServerTests
 {
     public class TestDatabase : IDisposable
     {
+        ITimeProvider TimeProvider { get; set; }
         public ApplicationDbContext db;
 
-        public TestDatabase()
+        public TestDatabase(ITimeProvider provider)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -39,6 +41,8 @@ namespace NoCrast.ServerTests
                 throw new Exception("Migration failed. Make sure you run CREATE EXTENSION IF NOT EXISTS \"uuid - ossp\";", ex);
             }
             CleanUp();
+
+            TimeProvider = provider;
         }
 
         public void Dispose()
@@ -48,6 +52,8 @@ namespace NoCrast.ServerTests
 
         public void CleanUp()
         {
+            db.TaskState.RemoveRange((from items in db.TaskState select items).ToList());
+            db.SaveChanges();
             db.TimeLog.RemoveRange((from items in db.TimeLog select items).ToList());
             db.SaveChanges();
             db.Tasks.RemoveRange((from items in db.Tasks select items).ToList());
@@ -72,8 +78,8 @@ namespace NoCrast.ServerTests
                 PublicId = email,
                 ApplicationUserId = Guid.NewGuid(),
                 Status = UserStatus.LIVE,
-                CreateDate = DateTime.Now,
-                UpdateDate = DateTime.Now,
+                CreateDate = TimeProvider.CurrentTime,
+                UpdateDate = TimeProvider.CurrentTime,
             };
             db.UserProfiles.Add(profile);
             db.SaveChanges();
@@ -90,8 +96,8 @@ namespace NoCrast.ServerTests
                 Profile = profile,
                 PublicId = name,
                 Title = name,
-                CreateDate = DateTime.Now,
-                UpdateDate = DateTime.Now,
+                CreateDate = TimeProvider.CurrentTime,
+                UpdateDate = TimeProvider.CurrentTime,
             };
             lastTaskState = new TimerTaskState
             {
@@ -111,23 +117,24 @@ namespace NoCrast.ServerTests
         }
 
         TimeLog lastLog;
-        public TestDatabase CreateTimeLog(string name, bool startTask)
+        public TestDatabase CreateTimeLog(DateTime startTime, long elapsedMilliseconds, bool startTask)
         {
-            if(startTask)
-            {
-                lastTaskState.IsRunning = true;
-            }
-
             lastLog = new TimeLog
             {
                 Id = Guid.NewGuid(),
+                PublicId = Guid.NewGuid().ToString(),
                 Task = lastTask,
-                StartTime = DateTime.Now,
-                ElapsedMilliseconds = 0,
-                CreateDate = DateTime.Now,
-                UpdateDate = DateTime.Now,
+                StartTime = startTime,
+                ElapsedMilliseconds = elapsedMilliseconds,
+                CreateDate = TimeProvider.CurrentTime,
+                UpdateDate = TimeProvider.CurrentTime,
             };
             db.TimeLog.Add(lastLog);
+            if (startTask)
+            {
+                lastTaskState.IsRunning = true;
+                lastTaskState.ActiveTimeLogItem = lastLog;
+            }
             db.SaveChanges();
             return this;
         }
