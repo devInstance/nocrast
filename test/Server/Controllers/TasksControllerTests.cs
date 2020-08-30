@@ -92,8 +92,8 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentThisWeek);
-                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentToday);
+                Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+11
                 result = controller.GetTasks(11 * 60);
@@ -108,8 +108,8 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(2 * HOURS, resultList[0].TotalTimeSpentThisWeek);
-                Assert.Equal(2 * HOURS, resultList[0].TotalTimeSpentToday);
+                Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC-7
                 result = controller.GetTasks(-7 * 60);
@@ -124,8 +124,8 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentThisWeek);
-                Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentToday);
+                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentToday);
             }
         }
 
@@ -177,7 +177,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentThisWeek);
                 Assert.Equal(0 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+11
@@ -193,8 +193,8 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(2 * HOURS, resultList[0].TotalTimeSpentThisWeek);
-                Assert.Equal(0 * HOURS, resultList[0].TotalTimeSpentToday);
+                Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(2 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC-7
                 result = controller.GetTasks(-7 * 60);
@@ -209,7 +209,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentThisWeek);
                 Assert.Equal(0 * HOURS, resultList[0].TotalTimeSpentToday);
             }
         }
@@ -296,6 +296,42 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentThisWeek);
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
+            }
+        }
+
+        [Fact()]
+        public void GetTasksTimeOffsetMyTestTest()
+        {
+            var time = new DateTime(2020, 8, 18, 18, 35, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(new DateTime(2020, 8, 18, 16, 35, 0), 1 * HOURS, false)
+                    .CreateTimeLog(new DateTime(2020, 8, 17, 22, 59, 0), 1 * HOURS, false)
+                    .CreateTimeLog(new DateTime(2020, 8, 17, 21, 31, 0), 1 * HOURS, false)
+;
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                // UTC
+                var result = controller.GetTasks(-420);
+
+                Assert.True(result.Result is OkObjectResult);
+
+                var resultList = ((TaskItem[])((OkObjectResult)result.Result).Value);
+
+                Assert.Single(resultList);
+                Assert.False(resultList[0].IsRunning);
+
+                Assert.Equal(3, resultList[0].TimeLogCount);
+
+                Assert.Equal(3 * HOURS, resultList[0].TotalTimeSpent);
+                Assert.Equal(3 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(1 * HOURS, resultList[0].TotalTimeSpentToday);
+
             }
         }
 
