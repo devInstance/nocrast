@@ -21,7 +21,7 @@ namespace NoCrast.ServerTests
                 .AddJsonFile("appsettings.json");
 
             var configuration = builder.Build();
-            var sqlConnectionString = configuration.GetConnectionString("DefaultConnection");
+            var sqlConnectionString = configuration.GetConnectionString("UntiTestConnection");
 
             DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
             options.UseNpgsql(
