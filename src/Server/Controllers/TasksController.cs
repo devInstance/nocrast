@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NoCrast.Server.Database;
 using NoCrast.Server.Model;
+using NoCrast.Server.Utils;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
@@ -30,11 +31,8 @@ namespace NoCrast.Server.Controllers
         private IQueryable<TaskItem> SelectTasks(int timeoffset)
         {
             DateTime now = TimeProvider.CurrentTime;
-            DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset * -1);
-            //            DateTime startOfTheDay = now.Date.AddDays(-1).AddMinutes(timeoffset * -1);
-            // TODO: Due to new day in UTC at 8PM PST the calculation below is wrong. It take only date part of UTC
-            // need a separate function to calculate right start of day and unit test it separately
-            DateTime startOfTheDay = now.Date.AddMinutes(timeoffset * -1);
+            DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
+            DateTime startOfTheDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
 
             return from tks in DB.Tasks
                    join state in DB.TaskState on tks equals state.Task

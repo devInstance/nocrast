@@ -124,8 +124,8 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList[0].TimeLogCount);
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
-                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentThisWeek);
-                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentToday);
+                Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentThisWeek);
+                Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
             }
         }
 
@@ -210,7 +210,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpent);
                 Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentThisWeek);
-                Assert.Equal(0 * HOURS, resultList[0].TotalTimeSpentToday);
+                Assert.Equal(4 * HOURS, resultList[0].TotalTimeSpentToday);
             }
         }
 

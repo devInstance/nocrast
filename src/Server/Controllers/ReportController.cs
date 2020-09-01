@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NoCrast.Server.Database;
 using NoCrast.Server.Model;
+using NoCrast.Server.Utils;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
@@ -44,14 +45,15 @@ namespace NoCrast.Server.Controllers
                 };
 
                 DateTime now = TimeProvider.CurrentTime;
-                DateTime startOfTheWeek = now.StartOfWeek(DayOfWeek.Monday).AddMinutes(timeoffset * -1);
+                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
 
                 var columnDate = startOfTheWeek;
                 result.Columns = new DateTime[DaysCount];
                 var dateRanges = new DateTime[DaysCount + 1];
                 for (int i = 0; i < DaysCount; i ++)
                 {
-                    result.Columns[i] = dateRanges[i] = columnDate;
+                    dateRanges[i] = columnDate;
+                    result.Columns[i] = TimeConverter.ConvertToLocal(columnDate, timeoffset);
                     columnDate = columnDate.AddDays(1);
                 }
                 dateRanges[DaysCount] = columnDate;
