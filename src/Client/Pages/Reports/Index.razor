@@ -2,19 +2,88 @@
 
 @using System.Timers;
 
+@inject ReportService Service;
 @inject ILogProvider LogProvider;
 
 @implements IDisposable
 
-<h1>Reports</h1>
+<div class="btn-toolbar p-2" role="toolbar" aria-label="TODO:">
+    <div class="btn-group btn-group-toggle mr-4" role="group" aria-label="TODO:">
+        <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Daily))">Daily</button>
+        <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Weekly))">Weekly</button>
+        <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Monthly))">Monthly</button>
+    </div>
+    <div class="input-group">
+        <button type="button" class="btn btn-secondary mr-1">
+            <span class="oi oi-chevron-left" aria-hidden="true"></span>
+        </button>
+        <input type="text" aria-label="First name" class="form-control mr-1">
+        <button type="button" class="btn btn-secondary">
+            <span class="oi oi-chevron-right" aria-hidden="true"></span>
+        </button>
+    </div>
+</div>
 
-<p>Under construction :)</p>
+<div class="table-responsive p-2">
+    @if (Report != null)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        Task
+                    </th>
+                    @foreach (var column in Report.Columns)
+                    {
+                        <th>
+                            @if (selectedType == ReportItem.RIType.Daily)
+                            {
+                                @column.ToString("ddd");
+                            }
+                            else
+                            {
+                                @column.ToString()
+                            }
+                        </th>
+                    }
+                    <th>
+                        Total
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var row in Report.Rows)
+                {
+                    <tr>
+                        <td>
+                            @row.TaskTitle
+                        </td>
+                        @foreach (var cell in row.Data)
+                        {
+                            <td>
+                                @String.Format("{0:F1}", cell / (60 * 60 * 1000))
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Loading ...</p>
+    }
+</div>
 
 @code {
 
     string ErrorText { get; set; }
 
     private ILog log;
+
+    private ReportItem.RIType selectedType = ReportItem.RIType.Unknown;
+
+    private ReportItem Report { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
@@ -23,6 +92,7 @@
         {
             using (var scope = log.DebugScope())
             {
+                RequestReportAsync(ReportItem.RIType.Daily);
             }
         }
         catch (Exception ex)
@@ -33,6 +103,14 @@
 
     public void Dispose()
     {
+    }
+
+    public async void RequestReportAsync(ReportItem.RIType type)
+    {
+        Report = null;
+        selectedType = type;
+        Report = await Service.GetReportAsync(type);
+        StateHasChanged();
     }
 
 }

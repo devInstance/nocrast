@@ -18,12 +18,16 @@
 
 @if (TasksList != null)
 {
-<ul class="timer-list">
-    @foreach (var item in TasksList)
-    {
-        <TaskView Item="item" ShowNavigationButton="true"/>
-    }
-</ul>
+    <ul class="timer-list">
+        @foreach (var item in TasksList)
+        {
+            <TaskView Item="item" ShowNavigationButton="true" />
+        }
+    </ul>
+}
+else
+{
+    <p>Loading ...</p>
 }
 
 @code {
@@ -88,7 +92,7 @@
     {
         log.E($"IsUIError {e.IsUIError} Message {e.Message}");
 
-        if(e.IsUIError)
+        if (e.IsUIError)
         {
             ErrorText = e.Message;
         }
