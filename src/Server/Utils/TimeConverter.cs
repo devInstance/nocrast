@@ -22,6 +22,20 @@ namespace NoCrast.Server.Utils
             return ConvertToUtc(locaNow.StartOfWeek(DayOfWeek.Monday), timeoffset);
         }
 
+        public static DateTime GetStartOfTheMonthForTimeOffset(DateTime utcNow, int timeoffset)
+        {
+            DateTime locaNow = ConvertToLocal(utcNow, timeoffset);
+
+            return ConvertToUtc(new DateTime(locaNow.Year, locaNow.Month, 1), timeoffset);
+        }
+
+        public static DateTime GetStartOfTheYearForTimeOffset(DateTime utcNow, int timeoffset)
+        {
+            DateTime locaNow = ConvertToLocal(utcNow, timeoffset);
+
+            return ConvertToUtc(new DateTime(locaNow.Year, 1, 1), timeoffset);
+        }
+
         public static DateTime ConvertToLocal(DateTime utcNow, int timeoffset)
         {
             return utcNow.AddMinutes(timeoffset);

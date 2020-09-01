@@ -35,16 +35,23 @@
                     </th>
                     @foreach (var column in Report.Columns)
                     {
-                        <th>
-                            @if (selectedType == ReportItem.RIType.Daily)
-                            {
-                                @column.ToString("ddd");
-                            }
-                            else
-                            {
-                                @column.ToString()
-                            }
-                        </th>
+                <th>
+                    @switch (selectedType)
+                    {
+                        case ReportItem.RIType.Daily:
+                            @column.ToString("ddd");
+                            break;
+                        case ReportItem.RIType.Weekly:
+                            @column.ToString("MMM d");
+                            break;
+                        case ReportItem.RIType.Monthly:
+                            @column.ToString("MMM");
+                            break;
+                        default:
+                            @column.ToString()
+                            break;
+                    }
+                </th>
                     }
                     <th>
                         Total

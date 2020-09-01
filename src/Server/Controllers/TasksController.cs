@@ -70,7 +70,7 @@ namespace NoCrast.Server.Controllers
         public ActionResult<TaskItem[]> GetTasks(int timeoffset)
         {
             return HandleWebRequest<TaskItem[]>(() =>
-            {
+            { 
                 var tasks = SelectTasks(timeoffset).ToList();
 
                 return Ok(tasks.ToArray());
