@@ -28,7 +28,7 @@ namespace NoCrast.Client.Services
             Log.D("constructor");
         }
 
-        public async Task<ReportItem> GetReportAsync(ReportItem.RIType rIType)
+        public async Task<ReportItem> GetReportAsync(ReportItem.RIType rIType, DateTime start)
         {
             using (var l = Log.DebugScope())
             {
@@ -39,12 +39,12 @@ namespace NoCrast.Client.Services
                     switch (rIType)
                     {
                         case ReportItem.RIType.Weekly:
-                            return await Api.GetWeeklyReportAsync(TimeProvider.UtcTimeOffset, TimeProvider.CurrentTime);
+                            return await Api.GetWeeklyReportAsync(TimeProvider.UtcTimeOffset, start);
                         case ReportItem.RIType.Monthly:
-                            return await Api.GetMonthlyReportAsync(TimeProvider.UtcTimeOffset, TimeProvider.CurrentTime);
+                            return await Api.GetMonthlyReportAsync(TimeProvider.UtcTimeOffset, start);
                         case ReportItem.RIType.Daily:
                         default:
-                            return await Api.GetDailyReportAsync(TimeProvider.UtcTimeOffset, TimeProvider.CurrentTime);
+                            return await Api.GetDailyReportAsync(TimeProvider.UtcTimeOffset, start);
                     }
                 }
                 catch (Exception ex)

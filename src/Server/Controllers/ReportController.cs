@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NoCrast.Server.Database;
 using NoCrast.Server.Model;
-using NoCrast.Server.Utils;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
@@ -39,13 +38,15 @@ namespace NoCrast.Server.Controllers
             {
                 int DaysCount = 7;
                 // initialize result
+
+                DateTime now = start;//TimeProvider.CurrentTime;
+                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
                 var result = new ReportItem()
                 {
-                    RiType = ReportItem.RIType.Daily
+                    RiType = ReportItem.RIType.Daily,
+                    StartDate = startOfTheWeek
                 };
 
-                DateTime now = TimeProvider.CurrentTime;
-                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
 
                 var columnDate = startOfTheWeek;
                 result.Columns = new DateTime[DaysCount];
@@ -53,10 +54,11 @@ namespace NoCrast.Server.Controllers
                 for (int i = 0; i < DaysCount; i ++)
                 {
                     dateRanges[i] = columnDate;
-                    result.Columns[i] = TimeConverter.ConvertToLocal(columnDate, timeoffset);
+                    result.Columns[i] = columnDate;
                     columnDate = columnDate.AddDays(1);
                 }
                 dateRanges[DaysCount] = columnDate;
+                result.EndDate = columnDate.AddDays(-1);
 
                 var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile select tks).ToList();
 
@@ -69,7 +71,7 @@ namespace NoCrast.Server.Controllers
                     {
                         var d = (from tl in DB.TimeLog
                                   where tl.TaskId == tasks[i].Id
-                                  && tl.StartTime >= dateRanges[n] && tl.StartTime <= dateRanges[n + 1]
+                                  && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
                                   select tl.ElapsedMilliseconds).Sum();
 
                         data[n] = d;
@@ -99,13 +101,15 @@ namespace NoCrast.Server.Controllers
             {
                 int DaysCount = 5;
                 // initialize result
+                DateTime now = start;//TimeProvider.CurrentTime;
+                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset).AddDays(-4 * 7);
+
                 var result = new ReportItem()
                 {
-                    RiType = ReportItem.RIType.Weekly
+                    RiType = ReportItem.RIType.Weekly,
+                    StartDate = startOfTheWeek
                 };
 
-                DateTime now = TimeProvider.CurrentTime;
-                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset).AddDays(-4 * 7);
 
                 var columnDate = startOfTheWeek;
                 result.Columns = new DateTime[DaysCount];
@@ -113,10 +117,11 @@ namespace NoCrast.Server.Controllers
                 for (int i = 0; i < DaysCount; i++)
                 {
                     dateRanges[i] = columnDate;
-                    result.Columns[i] = TimeConverter.ConvertToLocal(columnDate, timeoffset);
+                    result.Columns[i] = columnDate;
                     columnDate = columnDate.AddDays(7);
                 }
-                dateRanges[DaysCount] = columnDate;
+                result.EndDate = dateRanges[DaysCount] = columnDate;
+                result.EndDate = columnDate.AddDays(-1);
 
                 var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile select tks).ToList();
 
@@ -129,7 +134,7 @@ namespace NoCrast.Server.Controllers
                     {
                         var d = (from tl in DB.TimeLog
                                  where tl.TaskId == tasks[i].Id
-                                 && tl.StartTime >= dateRanges[n] && tl.StartTime <= dateRanges[n + 1]
+                                 && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
                                  select tl.ElapsedMilliseconds).Sum();
 
                         data[n] = d;
@@ -159,13 +164,14 @@ namespace NoCrast.Server.Controllers
             {
                 int DaysCount = 12;
                 // initialize result
+                DateTime now = start;//TimeProvider.CurrentTime;
+                DateTime startOfTheYear = TimeConverter.GetStartOfTheYearForTimeOffset(now, timeoffset);
+
                 var result = new ReportItem()
                 {
-                    RiType = ReportItem.RIType.Monthly
+                    RiType = ReportItem.RIType.Weekly,
+                    StartDate = startOfTheYear
                 };
-
-                DateTime now = TimeProvider.CurrentTime;
-                DateTime startOfTheYear = TimeConverter.GetStartOfTheYearForTimeOffset(now, timeoffset);
 
                 var columnDate = startOfTheYear;
                 result.Columns = new DateTime[DaysCount];
@@ -173,10 +179,11 @@ namespace NoCrast.Server.Controllers
                 for (int i = 0; i < DaysCount; i++)
                 {
                     dateRanges[i] = columnDate;
-                    result.Columns[i] = TimeConverter.ConvertToLocal(columnDate, timeoffset);
+                    result.Columns[i] = columnDate;
                     columnDate = columnDate.AddMonths(1);
                 }
-                dateRanges[DaysCount] = columnDate;
+                result.EndDate = dateRanges[DaysCount] = columnDate;
+                result.EndDate = columnDate.AddDays(-1);
 
                 var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile select tks).ToList();
 
@@ -189,7 +196,7 @@ namespace NoCrast.Server.Controllers
                     {
                         var d = (from tl in DB.TimeLog
                                  where tl.TaskId == tasks[i].Id
-                                 && tl.StartTime >= dateRanges[n] && tl.StartTime <= dateRanges[n + 1]
+                                 && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
                                  select tl.ElapsedMilliseconds).Sum();
 
                         data[n] = d;

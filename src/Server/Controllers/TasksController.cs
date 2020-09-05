@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NoCrast.Server.Database;
 using NoCrast.Server.Model;
-using NoCrast.Server.Utils;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;

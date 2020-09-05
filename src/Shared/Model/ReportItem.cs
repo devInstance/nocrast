@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NoCrast.Shared.Model
 {
@@ -21,6 +19,9 @@ namespace NoCrast.Shared.Model
         }
 
         public RIType RiType { get; set; }
+
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public DateTime[] Columns { get; set; }
         public Row[] Rows { get; set; }
     }

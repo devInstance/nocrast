@@ -1,10 +1,10 @@
 ﻿using Xunit;
-using NoCrast.Server.Utils;
+using NoCrast.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace NoCrast.Server.Utils.Tests
+namespace NoCrast.Shared.Utils.Tests
 {
     public class TimeConverterTests
     {

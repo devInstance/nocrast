@@ -4,24 +4,30 @@
 
 @inject ReportService Service;
 @inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
 
 @implements IDisposable
 
-<div class="btn-toolbar p-2" role="toolbar" aria-label="TODO:">
-    <div class="btn-group btn-group-toggle mr-4" role="group" aria-label="TODO:">
+<div class="btn-toolbar p-2" role="toolbar">
+    <div class="btn-group btn-group-toggle mr-4" role="group">
         <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Daily))">Daily</button>
         <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Weekly))">Weekly</button>
         <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Monthly))">Monthly</button>
     </div>
     <div class="input-group">
-        <button type="button" class="btn btn-secondary mr-1">
+        <button type="button" class="btn btn-secondary mr-1" @onclick="@(() => PrevAsync())">
             <span class="oi oi-chevron-left" aria-hidden="true"></span>
         </button>
-        <input type="text" aria-label="First name" class="form-control mr-1">
-        <button type="button" class="btn btn-secondary">
+        <input type="text" class="form-control mr-1" @bind="selectedDate" @bind:format="MMM d yyy" readonly/>
+        <button type="button" class="btn btn-secondary mr-2" @onclick="@(() => NextAsync())">
             <span class="oi oi-chevron-right" aria-hidden="true"></span>
         </button>
+        <button type="button" class="btn btn-secondary" @onclick="@(() => TodayAsync())">Today</button>
     </div>
+</div>
+
+<div class="p-2">
+    <h2>@selectedPeriod</h2>
 </div>
 
 <div class="table-responsive p-2">
@@ -35,23 +41,23 @@
                     </th>
                     @foreach (var column in Report.Columns)
                     {
-                <th>
-                    @switch (selectedType)
-                    {
-                        case ReportItem.RIType.Daily:
-                            @column.ToString("ddd");
-                            break;
-                        case ReportItem.RIType.Weekly:
-                            @column.ToString("MMM d");
-                            break;
-                        case ReportItem.RIType.Monthly:
-                            @column.ToString("MMM");
-                            break;
-                        default:
-                            @column.ToString()
-                            break;
-                    }
-                </th>
+                        <th>
+                            @switch (selectedType)
+                            {
+                                case ReportItem.RIType.Daily:
+                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString("ddd");
+                                    break;
+                                case ReportItem.RIType.Weekly:
+                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString("MMM d");
+                                    break;
+                                case ReportItem.RIType.Monthly:
+                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString("MMM");
+                                    break;
+                                default:
+                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString()
+                                    break;
+                            }
+                        </th>
                     }
                     <th>
                         Total
@@ -90,6 +96,12 @@
 
     private ReportItem.RIType selectedType = ReportItem.RIType.Unknown;
 
+    private DateTime selectedDate;
+    private DateTime startDate;
+    private DateTime endDate;
+
+    private string selectedPeriod = "";
+
     private ReportItem Report { get; set; }
 
     protected async override Task OnInitializedAsync()
@@ -97,6 +109,8 @@
         log = LogProvider.CreateLogger(this);
         try
         {
+            selectedDate = TimeProvider.CurrentTime;
+
             using (var scope = log.DebugScope())
             {
                 RequestReportAsync(ReportItem.RIType.Daily);
@@ -116,8 +130,47 @@
     {
         Report = null;
         selectedType = type;
-        Report = await Service.GetReportAsync(type);
+        Report = await Service.GetReportAsync(type, selectedDate.ToUniversalTime());
+        if (Report != null)
+        {
+            startDate = TimeConverter.ConvertToLocal(Report.StartDate, TimeProvider.UtcTimeOffset);
+            endDate = TimeConverter.ConvertToLocal(Report.EndDate, TimeProvider.UtcTimeOffset);
+            selectedPeriod = $"{startDate.ToString("MMM d yyy")} - {endDate.ToString("MMM d yyy")}";
+        }
+
         StateHasChanged();
     }
 
+    private DateTime UpdateStep(DateTime aDate, int sign)
+    {
+        switch (selectedType)
+        {
+            case ReportItem.RIType.Daily:
+                return aDate.AddDays(7 * sign);
+            case ReportItem.RIType.Weekly:
+                return aDate.AddDays(7 * 5 * sign);
+            case ReportItem.RIType.Monthly:
+                return aDate.AddYears(1 * sign);
+            default:
+                return aDate;
+        }
+    }
+
+    public async void PrevAsync()
+    {
+        selectedDate = UpdateStep(selectedDate, - 1);
+        RequestReportAsync(selectedType);
+    }
+
+    public async void NextAsync()
+    {
+        selectedDate = UpdateStep(selectedDate, 1);
+        RequestReportAsync(selectedType);
+    }
+
+    public async void TodayAsync()
+    {
+        selectedDate = TimeProvider.CurrentTime;
+        RequestReportAsync(selectedType);
+    }
 }
