@@ -27,6 +27,66 @@ namespace NoCrast.Server.Controllers
             TimeProvider = timeProvider;
         }
 
+        private ReportItem GetReport(ReportItem.RIType tp, DateTime start, int ColumnsCount)
+        {
+            var result = new ReportItem()
+            {
+                RiType = tp,
+                StartDate = start
+            };
+
+            var columnDate = start;
+            result.Columns = new DateTime[ColumnsCount];
+            var dateRanges = new DateTime[ColumnsCount + 1];
+            for (int i = 0; i < ColumnsCount; i++)
+            {
+                dateRanges[i] = columnDate;
+                result.Columns[i] = columnDate;
+                switch(tp)
+                {
+                    case ReportItem.RIType.Daily:
+                        columnDate = columnDate.AddDays(1);
+                        break;
+                    case ReportItem.RIType.Weekly:
+                        columnDate = columnDate.AddDays(7);
+                        break;
+                    case ReportItem.RIType.Monthly:
+                        columnDate = columnDate.AddMonths(1);
+                        break;
+                }
+            }
+            dateRanges[ColumnsCount] = columnDate;
+            result.EndDate = columnDate.AddDays(-1);
+
+            var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile orderby tks.CreateDate select tks).ToList();
+
+            result.Rows = new ReportItem.Row[tasks.Count];
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                var data = new float[ColumnsCount + 1];
+                float total = 0F;
+                for (int n = 0; n < ColumnsCount; n++)
+                {
+                    var d = (from tl in DB.TimeLog
+                             where tl.TaskId == tasks[i].Id
+                             && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
+                             select tl.ElapsedMilliseconds).Sum();
+
+                    data[n] = d;
+                    total += d;
+                }
+                data[ColumnsCount] = total;
+
+                result.Rows[i] = new ReportItem.Row
+                {
+                    TaskTitle = tasks[i].Title,
+                    Data = data
+                };
+            }
+
+            return result;
+        }
+
         [Authorize]
         [HttpGet]
         [Route("daily")]
@@ -36,55 +96,9 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                int DaysCount = 7;
-                // initialize result
+                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset);
 
-                DateTime now = start;//TimeProvider.CurrentTime;
-                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
-                var result = new ReportItem()
-                {
-                    RiType = ReportItem.RIType.Daily,
-                    StartDate = startOfTheWeek
-                };
-
-
-                var columnDate = startOfTheWeek;
-                result.Columns = new DateTime[DaysCount];
-                var dateRanges = new DateTime[DaysCount + 1];
-                for (int i = 0; i < DaysCount; i ++)
-                {
-                    dateRanges[i] = columnDate;
-                    result.Columns[i] = columnDate;
-                    columnDate = columnDate.AddDays(1);
-                }
-                dateRanges[DaysCount] = columnDate;
-                result.EndDate = columnDate.AddDays(-1);
-
-                var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile select tks).ToList();
-
-                result.Rows = new ReportItem.Row[tasks.Count];
-                for(int i =0; i < tasks.Count; i ++)
-                {
-                    var data = new float[DaysCount + 1];
-                    float total = 0F;
-                    for(int n = 0; n < DaysCount; n++)
-                    {
-                        var d = (from tl in DB.TimeLog
-                                  where tl.TaskId == tasks[i].Id
-                                  && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
-                                  select tl.ElapsedMilliseconds).Sum();
-
-                        data[n] = d;
-                        total += d;
-                    }
-                    data[DaysCount] = total;
-
-                    result.Rows[i] = new ReportItem.Row
-                    {
-                        TaskTitle = tasks[i].Title,
-                        Data = data
-                    };
-                }
+                var result = GetReport(ReportItem.RIType.Daily, startOfTheWeek, 7);
 
                 return Ok(result);
             });
@@ -99,55 +113,10 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                int DaysCount = 5;
-                // initialize result
-                DateTime now = start;//TimeProvider.CurrentTime;
-                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset).AddDays(-4 * 7);
 
-                var result = new ReportItem()
-                {
-                    RiType = ReportItem.RIType.Weekly,
-                    StartDate = startOfTheWeek
-                };
+                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset).AddDays(-4 * 7);
 
-
-                var columnDate = startOfTheWeek;
-                result.Columns = new DateTime[DaysCount];
-                var dateRanges = new DateTime[DaysCount + 1];
-                for (int i = 0; i < DaysCount; i++)
-                {
-                    dateRanges[i] = columnDate;
-                    result.Columns[i] = columnDate;
-                    columnDate = columnDate.AddDays(7);
-                }
-                result.EndDate = dateRanges[DaysCount] = columnDate;
-                result.EndDate = columnDate.AddDays(-1);
-
-                var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile select tks).ToList();
-
-                result.Rows = new ReportItem.Row[tasks.Count];
-                for (int i = 0; i < tasks.Count; i++)
-                {
-                    var data = new float[DaysCount + 1];
-                    float total = 0F;
-                    for (int n = 0; n < DaysCount; n++)
-                    {
-                        var d = (from tl in DB.TimeLog
-                                 where tl.TaskId == tasks[i].Id
-                                 && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
-                                 select tl.ElapsedMilliseconds).Sum();
-
-                        data[n] = d;
-                        total += d;
-                    }
-                    data[DaysCount] = total;
-
-                    result.Rows[i] = new ReportItem.Row
-                    {
-                        TaskTitle = tasks[i].Title,
-                        Data = data
-                    };
-                }
+                var result = GetReport(ReportItem.RIType.Weekly, startOfTheWeek, 5);
 
                 return Ok(result);
             });
@@ -162,54 +131,9 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                int DaysCount = 12;
-                // initialize result
-                DateTime now = start;//TimeProvider.CurrentTime;
-                DateTime startOfTheYear = TimeConverter.GetStartOfTheYearForTimeOffset(now, timeoffset);
+                DateTime startOfTheYear = TimeConverter.GetStartOfTheYearForTimeOffset(start, timeoffset);
 
-                var result = new ReportItem()
-                {
-                    RiType = ReportItem.RIType.Weekly,
-                    StartDate = startOfTheYear
-                };
-
-                var columnDate = startOfTheYear;
-                result.Columns = new DateTime[DaysCount];
-                var dateRanges = new DateTime[DaysCount + 1];
-                for (int i = 0; i < DaysCount; i++)
-                {
-                    dateRanges[i] = columnDate;
-                    result.Columns[i] = columnDate;
-                    columnDate = columnDate.AddMonths(1);
-                }
-                result.EndDate = dateRanges[DaysCount] = columnDate;
-                result.EndDate = columnDate.AddDays(-1);
-
-                var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile select tks).ToList();
-
-                result.Rows = new ReportItem.Row[tasks.Count];
-                for (int i = 0; i < tasks.Count; i++)
-                {
-                    var data = new float[DaysCount + 1];
-                    float total = 0F;
-                    for (int n = 0; n < DaysCount; n++)
-                    {
-                        var d = (from tl in DB.TimeLog
-                                 where tl.TaskId == tasks[i].Id
-                                 && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
-                                 select tl.ElapsedMilliseconds).Sum();
-
-                        data[n] = d;
-                        total += d;
-                    }
-                    data[DaysCount] = total;
-
-                    result.Rows[i] = new ReportItem.Row
-                    {
-                        TaskTitle = tasks[i].Title,
-                        Data = data
-                    };
-                }
+                var result = GetReport(ReportItem.RIType.Monthly, startOfTheYear, 12);
 
                 return Ok(result);
             });

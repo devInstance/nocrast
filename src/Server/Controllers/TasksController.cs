@@ -36,6 +36,7 @@ namespace NoCrast.Server.Controllers
             return from tks in DB.Tasks
                    join state in DB.TaskState on tks equals state.Task
                    where tks.Profile == CurrentProfile
+                   orderby tks.CreateDate
                    select new TaskItem
                    {
                        Id = tks.PublicId,
