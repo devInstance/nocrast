@@ -2,7 +2,8 @@
 @inject NavigationManager navigationManager
 @inject IdentityAuthenticationStateProvider authStateProvider
 @inject TasksService TService;
-@inject TasksService RService;
+@inject ReportService RService;
+@inject TagsService GService;
 
 <AuthorizeView>
     <Authorized>
@@ -45,6 +46,7 @@
     {
         TService.ErrorHasOccured += OnError;
         RService.ErrorHasOccured += OnError;
+        GService.ErrorHasOccured += OnError;
     }
 
     private void OnError(Object sender, ServiceErrorEventArgs e)

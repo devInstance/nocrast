@@ -1,12 +1,8 @@
 ﻿@page "/reports"
 
-@using System.Timers;
-
 @inject ReportService Service;
 @inject ILogProvider LogProvider;
 @inject ITimeProvider TimeProvider;
-
-@implements IDisposable
 
 <div class="btn-toolbar p-2" role="toolbar">
     <div class="btn-group btn-group-toggle mr-4" role="group">
@@ -120,10 +116,6 @@
         {
             log.E(ex);
         }
-    }
-
-    public void Dispose()
-    {
     }
 
     public async void RequestReportAsync(ReportItem.RIType type)

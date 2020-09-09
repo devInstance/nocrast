@@ -31,6 +31,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<IAuthorizationApi, AuthorizationApi>();
             builder.Services.AddScoped<ITasksApi, TasksApi>();
             builder.Services.AddScoped<IReportApi, ReportApi>();
+            builder.Services.AddScoped<ITagsApi, TagsApi>();
 
             //builder.Services.AddScoped<IDataProvider, DataProvider>();
 
@@ -40,6 +41,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<AuthorizationService>();
             builder.Services.AddScoped<TasksService>();
             builder.Services.AddScoped<ReportService>();
+            builder.Services.AddScoped<TagsService>();
 
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             //builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5000") });

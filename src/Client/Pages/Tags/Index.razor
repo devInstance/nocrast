@@ -1,0 +1,92 @@
+﻿@page "/tags"
+
+@inject TagsService Service;
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
+
+
+<input class="new-timer-edit" @bind="newTagName" type="text" />
+
+<button class="btn btn-primary" @onclick="AddTag">Add Tag</button>
+
+@if (!String.IsNullOrEmpty(ErrorText))
+{
+    <label class="text-danger">@ErrorText</label>
+}
+
+@if (Tags != null)
+{
+    <ul>
+        @foreach (var item in Tags)
+        {
+            <li>@item.Name</li>
+        }
+    </ul>
+}
+else
+{
+    <p>Loading ...</p>
+}
+
+@code {
+
+    string ErrorText { get; set; }
+
+    private ILog log;
+
+    private string newTagName = "";
+
+    private TagItem[] Tags;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        try
+        {
+            using (var scope = log.DebugScope())
+            {
+                Service.DataHasChanged += OnDataHasChanged;
+                Service.ErrorHasOccured += OnError;
+
+                await RefreshData();
+            }
+        }
+        catch (Exception ex)
+        {
+            log.E(ex);
+        }
+    }
+
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        RefreshData();
+    }
+
+    private void OnError(Object sender, ServiceErrorEventArgs e)
+    {
+        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
+
+        if (e.IsUIError)
+        {
+            ErrorText = e.Message;
+        }
+        else
+        {
+            ErrorText = "";
+        }
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        Tags = await Service.GetTagsAsync();
+        StateHasChanged();
+
+        return true;
+    }
+
+    private async void AddTag()
+    {
+        await Service.AddNewTagAsync(newTagName);
+    }
+}

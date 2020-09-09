@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace NoCrast.Server.Model
 {
-    public class DatabaseObject
+    public class DatabaseObject : InternalDatabaseObject
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [Required]
         public string PublicId { get; set; }
 

@@ -89,16 +89,26 @@ namespace NoCrast.Client.Services
             using (var l = Log.DebugScope())
             {
                 ResetUIError();
-
-                var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
-                var result = new List<TaskItemView>();
-                for (int i = 0; i < tasks.Length; i++)
+                try
                 {
-                    var task = tasks[i];
-                    var itemView = new TaskItemView(TimeProvider, task);
-                    result.Add(itemView);
+                    var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
+
+                    ResetNetworkError();
+
+                    var result = new List<TaskItemView>();
+                    for (int i = 0; i < tasks.Length; i++)
+                    {
+                        var task = tasks[i];
+                        var itemView = new TaskItemView(TimeProvider, task);
+                        result.Add(itemView);
+                    }
+                    return result;
                 }
-                return result;
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
             }
         }
 
@@ -107,16 +117,27 @@ namespace NoCrast.Client.Services
             using (var l = Log.DebugScope())
             {
                 ResetUIError();
-
-                //TODO: optimize, don't fetch full list, create back local store
-                var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
-                var task = (from t in tasks where t.Id == taskId select t).FirstOrDefault();
-                if(task == null)
+                try
                 {
-                    NotifyUIError($"Cannot find task with id {taskId}");
-                    return null;
+
+                    //TODO: optimize, don't fetch full list, create back local store
+                    var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
+
+                    ResetNetworkError();
+
+                    var task = (from t in tasks where t.Id == taskId select t).FirstOrDefault();
+                    if (task == null)
+                    {
+                        NotifyUIError($"Cannot find task with id {taskId}");
+                        return null;
+                    }
+                    return new TaskItemView(TimeProvider, task);
                 }
-                return new TaskItemView(TimeProvider, task);
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
             }
         }
 
