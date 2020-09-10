@@ -52,6 +52,10 @@ namespace NoCrast.ServerTests
 
         public void CleanUp()
         {
+            db.TagToTimerTasks.RemoveRange((from items in db.TagToTimerTasks select items).ToList());
+            db.SaveChanges();
+            db.TimerTags.RemoveRange((from items in db.TimerTags select items).ToList());
+            db.SaveChanges();
             db.TaskState.RemoveRange((from items in db.TaskState select items).ToList());
             db.SaveChanges();
             db.TimeLog.RemoveRange((from items in db.TimeLog select items).ToList());
@@ -139,6 +143,40 @@ namespace NoCrast.ServerTests
             return this;
         }
 
+        public TimerTag lastTag;
+        public TestDatabase CreateTag(string name)
+        {
+            lastTag = new TimerTag
+            {
+                Id = Guid.NewGuid(),
+                PublicId = Guid.NewGuid().ToString(),
+                Profile = profile,
 
+                Name = name,
+
+                CreateDate = TimeProvider.CurrentTime,
+                UpdateDate = TimeProvider.CurrentTime,
+            };
+
+            db.TimerTags.Add(lastTag);
+            db.SaveChanges();
+
+            return this;
+        }
+
+        public TestDatabase AssignTag()
+        {
+            var taskToTag = new TagToTimerTask
+            {
+                Id = Guid.NewGuid(),
+                Tag = lastTag,
+                Task = lastTask
+            };
+
+            db.TagToTimerTasks.Add(taskToTag);
+            db.SaveChanges();
+
+            return this;
+        }
     }
 }

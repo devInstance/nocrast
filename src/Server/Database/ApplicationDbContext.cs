@@ -13,6 +13,7 @@ namespace NoCrast.Server.Database
         public DbSet<TimerTaskState> TaskState { get; set; }
         public DbSet<TimeLog> TimeLog { get; set; }
         public DbSet<TimerTag> TimerTags { get; set; }
+        public DbSet<TagToTimerTask> TagToTimerTasks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

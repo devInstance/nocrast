@@ -6,6 +6,7 @@ using System;
 
 namespace NoCrast.Server.Controllers.Tests
 {
+    [Collection("DBTests")]
     public class TasksControllerTests
     {
         [Fact()]

@@ -10,6 +10,7 @@ using static NoCrast.Shared.Model.ReportItem;
 
 namespace NoCrast.Server.Controllers.Tests
 {
+    [Collection("DBTests")]
     public class ReportControllerTests
     {
         long HOURS = 60 * 60 * 1000;

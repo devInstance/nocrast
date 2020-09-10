@@ -74,6 +74,7 @@ namespace NoCrast.Server.Controllers
                     PublicId = IdGenerator.New(),
 
                     Name = tag.Name,
+                    Profile = CurrentProfile,
 
                     CreateDate = now,
                     UpdateDate = now,
