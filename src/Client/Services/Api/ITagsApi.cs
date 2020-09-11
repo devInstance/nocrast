@@ -8,11 +8,11 @@ namespace NoCrast.Client.Services.Api
 {
     public interface ITagsApi
     {
-        Task<TagItem[]> GetTagsAsync(int timeoffset);
+        Task<TagItem[]> GetTagsAsync();
 
-        Task<TagItem> AddTagAsync(TagItem tag, int timeoffset);
+        Task<TagItem> AddTagAsync(TagItem tag);
 
-        Task<TagItem> UpdateTagAsync(string id, TagItem task, int timeoffset);
+        Task<TagItem> UpdateTagAsync(string id, TagItem task);
 
         Task<bool> RemoveTagAsync(string id);
     }

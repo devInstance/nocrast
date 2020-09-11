@@ -19,7 +19,12 @@
     <ul>
         @foreach (var item in Tags)
         {
-            <li>@item.Name</li>
+        <li>
+            <NavLink class="nav-link" href="@($"tags/{item.Id}")">
+                <span class="timer-text">@item.Name
+                </span>
+            </NavLink>
+        </li>
         }
     </ul>
 }

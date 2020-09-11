@@ -3,7 +3,6 @@ using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,7 +31,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var response = await Api.GetTagsAsync(TimeProvider.UtcTimeOffset);
+                    var response = await Api.GetTagsAsync();
                     ResetNetworkError();
                     return response;
                 }
@@ -43,6 +42,26 @@ namespace NoCrast.Client.Services
                 return null;
             }
         }
+
+        public async Task<TagItem> GetTagAsync(string id)
+        {
+            using (var l = Log.DebugScope())
+            {
+                ResetUIError();
+                try
+                {
+                    var response = await Api.GetTagsAsync();
+                    ResetNetworkError();
+                    return response.Where(f => f.Id == id).FirstOrDefault(); //TODO: Fix me
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
 
         public async Task<TagItem> AddNewTagAsync(string newTag)
         {
@@ -57,7 +76,7 @@ namespace NoCrast.Client.Services
 
                 try
                 {
-                    var response = await Api.AddTagAsync(tag, TimeProvider.UtcTimeOffset);
+                    var response = await Api.AddTagAsync(tag);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                     return response;
@@ -69,5 +88,46 @@ namespace NoCrast.Client.Services
                 return null;
             }
         }
+
+        public async Task<TagItem> UpdateTagNameAsync(TagItem tag, string newName)
+        {
+            using (var l = Log.DebugScope())
+            {
+                TagItem newTag;
+                try
+                {
+                    tag.Name = newName;
+                    newTag = await Api.UpdateTagAsync(tag.Id, tag);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    newTag = tag;
+                    NotifyNetworkError(ex);
+                }
+
+                return newTag;
+            }
+        }
+
+        public async Task<bool> RemoveTagAsync(TagItem item)
+        {
+            using (var l = Log.DebugScope())
+            {
+                try
+                {
+                    await Api.RemoveTagAsync(item.Id);
+                    ResetNetworkError();
+                    NotifyDataHasChanged();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                    return false;
+                }
+            }
+        }
+
     }
 }

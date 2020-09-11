@@ -16,19 +16,19 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<TagItem[]> GetTagsAsync(int timeoffset)
+        public async Task<TagItem[]> GetTagsAsync()
         {
             return await httpClient.GetFromJsonAsync<TagItem[]>($"{Controller}");
         }
 
-        public async Task<TagItem> AddTagAsync(TagItem tag, int timeoffset)
+        public async Task<TagItem> AddTagAsync(TagItem tag)
         {
             var result = await httpClient.PostAsJsonAsync($"{Controller}", tag);
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<TagItem>().Result;
         }
 
-        public async Task<TagItem> UpdateTagAsync(string id, TagItem tag, int timeoffset)
+        public async Task<TagItem> UpdateTagAsync(string id, TagItem tag)
         {
             var result = await httpClient.PutAsJsonAsync($"{Controller}{id}", tag);
             result.EnsureSuccessStatusCode();

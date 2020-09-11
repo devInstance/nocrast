@@ -1,0 +1,211 @@
+﻿@page "/tags/{id}"
+
+@using System.Timers;
+
+@inject TagsService Service;
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
+
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
+
+@if (Item != null)
+{
+    @if (!String.IsNullOrEmpty(ErrorText))
+    {
+        <label class="text-danger">@ErrorText</label>
+    }
+
+    @if (!IsEditing)
+    {
+        <span class="timer-text">
+            <strong>@Item.Name</strong>
+            <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+                <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+            </button>
+        </span>
+    }
+    else
+    {
+        <EditForm Model="@NameEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+            <InputText @bind-Value="@NameEditText"></InputText>
+            <button type="submit" class="btn timer-button text-info">
+                <span class="oi oi-circle-check" aria-hidden="true"></span>
+            </button>
+            <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+                <span class="oi oi-circle-x" aria-hidden="true"></span>
+            </button>
+        </EditForm>
+    }
+
+    <button class="btn btn-default" @onclick="@(() => NavigateBack())">
+        <span class="oi oi-arrow-circle-left" aria-hidden="true"></span> Back
+    </button>
+    <button class="btn btn-default" @onclick="@(() => Remove())">
+        <span class="oi oi-x" aria-hidden="true"></span> Delete
+    </button>
+
+    @if (Tasks != null)
+    {
+        <ul class="timer-list">
+            @foreach (var tl in Tasks)
+            {
+                <li class="timer-list-item"><TaskView Item="tl" ShowNavigationButton="true" /></li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div>Loading Tasks...</div>
+    }
+}
+else
+{
+    <div>Loading ...</div>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private TagItem Item { get; set; }
+
+    private TaskItemView[] Tasks { get; set; }
+
+    private System.Timers.Timer timer;
+
+    private ILog log;
+
+    string ErrorText { get; set; }
+
+    private bool IsEditing { get; set; }
+    private string NameEditText { get; set; }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+
+        using (var scope = log.DebugScope())
+        {
+
+            Service.DataHasChanged += OnDataHasChanged;
+            Service.ErrorHasOccured += OnError;
+
+            await RefreshData();
+
+            //SetUpTimer();
+        }
+    }
+
+    private void SetUpTimer()
+    {
+        timer = new System.Timers.Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            Service.DataHasChanged -= OnDataHasChanged;
+            Service.ErrorHasOccured -= OnError;
+
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private async void Remove()
+    {
+        var tempId = Id;
+        Id = null;
+        if (await Service.RemoveTagAsync(Item))
+        {
+            NavigateBack();
+        }
+        else
+        {
+            Id = tempId;
+        }
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        using (var scope = log.DebugScope())
+        {
+            RefreshData();
+        }
+    }
+
+    private void OnError(Object sender, ServiceErrorEventArgs e)
+    {
+        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
+
+        if (e.IsUIError)
+        {
+            ErrorText = e.Message;
+        }
+        else
+        {
+            ErrorText = "";
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/tags");
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        using (var scope = log.DebugScope())
+        {
+            if (!String.IsNullOrEmpty(Id))
+            {
+                Item = await Service.GetTagAsync(Id);
+                if (Item == null)
+                {
+                    return false;
+                }
+            }
+        }
+        StateHasChanged();
+
+        return true;
+    }
+
+    private void StartEditing()
+    {
+        NameEditText = Item.Name;
+        IsEditing = true;
+    }
+
+    private async void ApplyChangesAsync()
+    {
+        IsEditing = false;
+        log.D("ApplyChanges");
+
+        Item = await Service.UpdateTagNameAsync(Item, NameEditText);
+        StateHasChanged();
+    }
+
+    private void ResetChanges()
+    {
+        IsEditing = false;
+        NameEditText = Item.Name;
+        log.D("ResetChanges");
+    }
+
+}

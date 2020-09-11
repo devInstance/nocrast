@@ -1,6 +1,4 @@
-﻿using Blazored.LocalStorage;
-using NoCrast.Client.ModelExtensions;
-using NoCrast.Client.ModelViews;
+﻿using NoCrast.Client.ModelViews;
 using NoCrast.Client.Services.Api;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
@@ -8,7 +6,6 @@ using NoCrast.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services
