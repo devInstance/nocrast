@@ -71,7 +71,7 @@ else
 
     private TagItem Item { get; set; }
 
-    private TaskItemView[] Tasks { get; set; }
+    private TaskItem[] Tasks { get; set; }
 
     private System.Timers.Timer timer;
 
@@ -95,7 +95,7 @@ else
 
             await RefreshData();
 
-            //SetUpTimer();
+            SetUpTimer();
         }
     }
 
@@ -176,6 +176,12 @@ else
             {
                 Item = await Service.GetTagAsync(Id);
                 if (Item == null)
+                {
+                    return false;
+                }
+
+                Tasks = await Service.GetTasksAsync(Id);
+                if (Tasks == null)
                 {
                     return false;
                 }

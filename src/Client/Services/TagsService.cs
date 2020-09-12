@@ -12,13 +12,16 @@ namespace NoCrast.Client.Services
     {
         public ITimeProvider TimeProvider { get; }
 
-        protected ITagsApi Api { get; }
+        protected ITagsApi TagsApi { get; }
+        protected ITasksApi TasksApi { get; }
 
         public TagsService(ITimeProvider provider,
                             ILogProvider logProvider,
-                            ITagsApi api)
+                            ITagsApi tagsApi,
+                            ITasksApi tasksApi)
         {
-            Api = api;
+            TagsApi = tagsApi;
+            TasksApi = tasksApi;
             TimeProvider = provider;
             Log = logProvider.CreateLogger(this);
             Log.D("constructor");
@@ -31,7 +34,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var response = await Api.GetTagsAsync();
+                    var response = await TagsApi.GetTagsAsync();
                     ResetNetworkError();
                     return response;
                 }
@@ -50,9 +53,9 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var response = await Api.GetTagsAsync();
+                    var response = await TagsApi.GetTagAsync(id);
                     ResetNetworkError();
-                    return response.Where(f => f.Id == id).FirstOrDefault(); //TODO: Fix me
+                    return response;
                 }
                 catch (Exception ex)
                 {
@@ -62,6 +65,24 @@ namespace NoCrast.Client.Services
             }
         }
 
+        public async Task<TaskItem[]> GetTasksAsync(string id)
+        {
+            using (var l = Log.DebugScope())
+            {
+                ResetUIError();
+                try
+                {
+                    var response = await TasksApi.GetTasksByTagIdAsync(id, TimeProvider.UtcTimeOffset);
+                    ResetNetworkError();
+                    return response;
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
 
         public async Task<TagItem> AddNewTagAsync(string newTag)
         {
@@ -76,7 +97,7 @@ namespace NoCrast.Client.Services
 
                 try
                 {
-                    var response = await Api.AddTagAsync(tag);
+                    var response = await TagsApi.AddTagAsync(tag);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                     return response;
@@ -97,7 +118,7 @@ namespace NoCrast.Client.Services
                 try
                 {
                     tag.Name = newName;
-                    newTag = await Api.UpdateTagAsync(tag.Id, tag);
+                    newTag = await TagsApi.UpdateTagAsync(tag.Id, tag);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -116,7 +137,7 @@ namespace NoCrast.Client.Services
             {
                 try
                 {
-                    await Api.RemoveTagAsync(item.Id);
+                    await TagsApi.RemoveTagAsync(item.Id);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                     return true;

@@ -10,6 +10,8 @@ namespace NoCrast.Client.Services.Api
     {
         Task<TaskItem[]> GetTasksAsync(int timeoffset);
 
+        Task<TaskItem[]> GetTasksByTagIdAsync(string id, int timeoffset);
+
         Task<TaskItem> AddTaskAsync(TaskItem task, int timeoffset);
 
         Task<TaskItem> UpdateTaskAsync(string id, TaskItem task, int timeoffset);

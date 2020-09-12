@@ -7,7 +7,7 @@
 @if (!IsEditing)
 {
     <span class="timer-list-item">@FormatTime(Log)</span>
-    @if (!IsActive || Item.Task.ActiveTimeLogItem.Id != Log.Id)
+    @if (!IsActive || Item.ActiveTimeLogItem.Id != Log.Id)
     {
         <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
             <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
@@ -25,7 +25,7 @@ else
         <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
             <span class="oi oi-circle-x" aria-hidden="true"></span>
         </button>
-        @if (!IsActive || Item.Task.ActiveTimeLogItem.Id != Log.Id)
+        @if (!IsActive || Item.ActiveTimeLogItem.Id != Log.Id)
         {
             <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(Log))">
                 <span class="oi oi-delete small-timer-button" aria-hidden="true"></span>
@@ -36,7 +36,7 @@ else
 
 @code {
     [Parameter]
-    public TaskItemView Item { get; set; }
+    public TaskItem Item { get; set; }
 
     [Parameter]
     public TimeLogItem Log { get; set; }
@@ -71,7 +71,7 @@ else
 
     private async void RemoveLog(TimeLogItem log)
     {
-        Item.Task = await Service.RemoveTimelogAsync(Item, log);
+        Item = await Service.RemoveTimelogAsync(Item, log);
         StateHasChanged();
     }
 
@@ -96,7 +96,7 @@ else
             Id = Log.Id
         };
 
-        Item.Task = await Service.UpdateTimelogAsync(Item, newTimelog);
+        Item = await Service.UpdateTimelogAsync(Item, newTimelog);
         Log = newTimelog;
 
         StateHasChanged();

@@ -1,4 +1,4 @@
-﻿using NoCrast.Client.ModelViews;
+﻿using NoCrast.Client.ModelExtensions;
 using NoCrast.Client.Services.Api;
 using NoCrast.Shared.Logging;
 using NoCrast.Shared.Model;
@@ -81,7 +81,7 @@ namespace NoCrast.Client.Services
         }
         */
 
-        public async Task<List<TaskItemView>> GetTasksAsync()
+        public async Task<TaskItem[]> GetTasksAsync()
         {
             using (var l = Log.DebugScope())
             {
@@ -92,14 +92,7 @@ namespace NoCrast.Client.Services
 
                     ResetNetworkError();
 
-                    var result = new List<TaskItemView>();
-                    for (int i = 0; i < tasks.Length; i++)
-                    {
-                        var task = tasks[i];
-                        var itemView = new TaskItemView(TimeProvider, task);
-                        result.Add(itemView);
-                    }
-                    return result;
+                    return tasks;
                 }
                 catch (Exception ex)
                 {
@@ -109,7 +102,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<TaskItemView> GetTaskAsync(string taskId)
+        public async Task<TaskItem> GetTaskAsync(string taskId)
         {
             using (var l = Log.DebugScope())
             {
@@ -128,7 +121,7 @@ namespace NoCrast.Client.Services
                         NotifyUIError($"Cannot find task with id {taskId}");
                         return null;
                     }
-                    return new TaskItemView(TimeProvider, task);
+                    return task;
                 }
                 catch (Exception ex)
                 {
@@ -138,7 +131,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<TaskItemView> AddNewTaskAsync(string title)
+        public async Task<TaskItem> AddNewTaskAsync(string title)
         {
             using (var l = Log.DebugScope())
             {
@@ -187,7 +180,7 @@ namespace NoCrast.Client.Services
 
                 NotifyDataHasChanged();
 
-                return new TaskItemView(TimeProvider, response);
+                return response;
             }
         }
 
@@ -214,13 +207,13 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<bool> RemoveTaskAsync(TaskItemView item)
+        public async Task<bool> RemoveTaskAsync(TaskItem item)
         {
             using (var l = Log.DebugScope())
             {
                 try
                 {
-                    await Api.RemoveTaskAsync(item.Task.Id);
+                    await Api.RemoveTaskAsync(item.Id);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -233,7 +226,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async void StartTaskAsync(TaskItemView item)
+        public async void StartTaskAsync(TaskItem item)
         {
             using (var l = Log.DebugScope())
             {
@@ -242,13 +235,13 @@ namespace NoCrast.Client.Services
                     throw new ArgumentNullException(nameof(item));
                 }
 
-                if (item.Task.IsRunning) return;
+                if (item.IsRunning) return;
 
-                item.Start();
+                item.Start(TimeProvider);
 
                 try
                 {
-                    item.Task = await Api.InsertTimerAsync(item.Task.Id, true, item.Task.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
+                    item = await Api.InsertTimerAsync(item.Id, true, item.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                 }
@@ -260,7 +253,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async void StopTaskAsync(TaskItemView item)
+        public async void StopTaskAsync(TaskItem item)
         {
             using (var l = Log.DebugScope())
             {
@@ -269,13 +262,13 @@ namespace NoCrast.Client.Services
                     throw new ArgumentNullException(nameof(item));
                 }
 
-                if (!item.Task.IsRunning) return;
+                if (!item.IsRunning) return;
 
-                item.Stop();
+                item.Stop(TimeProvider);
 
                 try
                 {
-                    item.Task = await Api.UpdateTimerAsync(item.Task.Id, item.Task.ActiveTimeLogItem.Id, false, item.Task.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
+                    item = await Api.UpdateTimerAsync(item.Id, item.ActiveTimeLogItem.Id, false, item.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                 }
@@ -286,7 +279,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItemView item)
+        public async Task<List<TimeLogItem>> GetTimeLogItemsAsync(TaskItem item)
         {
             using (var l = Log.DebugScope())
             {
@@ -297,7 +290,7 @@ namespace NoCrast.Client.Services
                 List<TimeLogItem> response = new List<TimeLogItem>();
                 try
                 {
-                    response.AddRange(await Api.GetTimelogAsync(item.Task.Id));
+                    response.AddRange(await Api.GetTimelogAsync(item.Id));
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -309,13 +302,13 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<TaskItem> UpdateTimelogAsync(TaskItemView item, TimeLogItem log)
+        public async Task<TaskItem> UpdateTimelogAsync(TaskItem item, TimeLogItem log)
         {
             using (var l = Log.DebugScope())
             {
                 try
                 {
-                    item.Task = await Api.UpdateTimerAsync(item.Task.Id, log.Id, item.Task.IsRunning, log, TimeProvider.UtcTimeOffset);
+                    item = await Api.UpdateTimerAsync(item.Id, log.Id, item.IsRunning, log, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
 
                     NotifyDataHasChanged();
@@ -325,17 +318,17 @@ namespace NoCrast.Client.Services
                     l.E(ex);
                     NotifyNetworkError(ex);
                 }
-                return item.Task;
+                return item;
             }
         }
 
-        public async Task<TaskItem> RemoveTimelogAsync(TaskItemView item, TimeLogItem log)
+        public async Task<TaskItem> RemoveTimelogAsync(TaskItem item, TimeLogItem log)
         {
             using (var l = Log.DebugScope())
             {
                 try
                 {
-                    var result = await Api.RemoveTimerAsync(item.Task.Id, log.Id, TimeProvider.UtcTimeOffset);
+                    var result = await Api.RemoveTimerAsync(item.Id, log.Id, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                     return result;
@@ -345,7 +338,7 @@ namespace NoCrast.Client.Services
                     l.E(ex);
                     NotifyNetworkError(ex);
                 }
-                return item.Task;
+                return item;
             }
         }
 

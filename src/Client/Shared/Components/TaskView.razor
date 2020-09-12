@@ -12,7 +12,7 @@
                         @if (!IsEditing)
                         {
                             <span class="timer-text">
-                                <strong>@Item.Task.Title</strong>
+                                <strong>@Item.Title</strong>
                                 <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
                                     <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
                                 </button>
@@ -36,11 +36,11 @@
                     <div class="align-self-center">
                         @if (IsActive)
                         {
-                            <span class="timer-text timer-text-timespan">@FormatTime(Item.GetElapsedTimeSpan())</span>
+                            <span class="timer-text timer-text-timespan">@FormatTime(Item.GetElapsedTimeSpan(TimeProvider))</span>
                         }
                         else
                         {
-                            <span class="timer-text">@String.Format("Today {0:F1}", Item.TotalHoursSpentToday) hour(s)</span>
+                            <span class="timer-text">@String.Format("Today {0:F1}", Item.GetTotalHoursSpentToday()) hour(s)</span>
                         }
                     </div>
                     <div class="align-self-center">
@@ -63,7 +63,7 @@
             {
             <div class="d-flex">
                 <div class="align-self-center">
-                    <NavLink href="@($"task/{Item.Task.Id}")" Match="NavLinkMatch.All">
+                    <NavLink href="@($"task/{Item.Id}")" Match="NavLinkMatch.All">
                         <span class="oi oi-chevron-right" aria-hidden="true"></span>
                     </NavLink>
                 </div>
@@ -75,7 +75,7 @@
 
 @code {
     [Parameter]
-    public TaskItemView Item { get; set; }
+    public TaskItem Item { get; set; }
 
     [Parameter]
     public bool ShowNavigationButton { get; set; }
@@ -89,7 +89,7 @@
     {
         get
         {
-            return Item.Task.IsRunning;
+            return Item.IsRunning;
         }
     }
 
@@ -98,8 +98,6 @@
     {
         IsEditing = false;
         log = LogProvider.CreateLogger(this);
-
-        TitleEditText = Item.Task.Title;
     }
 
     private string FormatTime(TimeSpan time)
@@ -119,6 +117,7 @@
 
     private void StartEditing()
     {
+        TitleEditText = Item.Title;
         IsEditing = true;
     }
 
@@ -127,14 +126,14 @@
         IsEditing = false;
         log.D("ApplyChanges");
 
-        Item.Task = await Service.UpdateTaskTitleAsync(Item.Task, TitleEditText);
+        Item = await Service.UpdateTaskTitleAsync(Item, TitleEditText);
         StateHasChanged();
     }
 
     private void ResetChanges()
     {
         IsEditing = false;
-        TitleEditText = Item.Task.Title;
+        TitleEditText = Item.Title;
         log.D("ResetChanges");
     }
 }

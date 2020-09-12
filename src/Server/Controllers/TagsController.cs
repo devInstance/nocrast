@@ -59,6 +59,20 @@ namespace NoCrast.Server.Controllers
         }
 
         [Authorize]
+        [HttpGet]
+        [Route("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<TagItem> GetTag(string id)
+        {
+            return HandleWebRequest((WebHandler<TagItem>)(() =>
+            {
+                List<TagItem> result = DecorateTagItems(SelectTags(id));
+                return Ok(result.FirstOrDefault());
+            }));
+        }
+
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -87,7 +101,6 @@ namespace NoCrast.Server.Controllers
 
                 return Ok(response);
             });
-
         }
 
         [Authorize]

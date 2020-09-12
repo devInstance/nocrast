@@ -67,5 +67,10 @@ namespace NoCrast.Client.Services.Net
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
+
+        public Task<TaskItem[]> GetTasksByTagIdAsync(string id, int timeoffset)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

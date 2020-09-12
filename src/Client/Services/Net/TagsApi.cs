@@ -1,7 +1,5 @@
 ﻿using NoCrast.Client.Services.Api;
 using NoCrast.Shared.Model;
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -19,6 +17,11 @@ namespace NoCrast.Client.Services.Net
         public async Task<TagItem[]> GetTagsAsync()
         {
             return await httpClient.GetFromJsonAsync<TagItem[]>($"{Controller}");
+        }
+
+        public async Task<TagItem> GetTagAsync(string id)
+        {
+            return await httpClient.GetFromJsonAsync<TagItem>($"{Controller}{id}");
         }
 
         public async Task<TagItem> AddTagAsync(TagItem tag)
@@ -41,6 +44,5 @@ namespace NoCrast.Client.Services.Net
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<bool>().Result;
         }
-
     }
 }
