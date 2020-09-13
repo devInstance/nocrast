@@ -38,7 +38,7 @@ namespace NoCrast.ServerTests
             {
                 //Due to some bug in Npgsql we need to run
                 //CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
-                throw new Exception("Migration failed. Make sure you run CREATE EXTENSION IF NOT EXISTS \"uuid - ossp\";", ex);
+                throw new Exception("Migration failed. Make sure you run CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";", ex);
             }
             CleanUp();
 
