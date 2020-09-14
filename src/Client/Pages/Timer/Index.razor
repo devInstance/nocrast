@@ -4,6 +4,7 @@
 
 @inject TasksService Service;
 @inject ILogProvider LogProvider;
+@inject NotificationService NotificationServ;
 
 @implements IDisposable
 
@@ -51,8 +52,8 @@ else
             {
                 SetUpTimer();
 
-                Service.DataHasChanged += OnDataHasChanged;
-                Service.ErrorHasOccured += OnError;
+                NotificationServ.DataHasChanged += OnDataHasChanged;
+                NotificationServ.ErrorHasOccured += OnError;
 
                 await RefreshData();
             }

@@ -10,91 +10,45 @@ namespace NoCrast.Client.Services
     {
         public ILog Log { get; protected set; }
 
-        public event EventHandler DataHasChanged;
-        public event ServiceErrorEventHandler ErrorHasOccured;
+        protected NotificationService NotificationServ { get; }
 
-        private bool isNetworkErrorRisen = false;
-        private bool isUiErrorRisen = false;
+        public BaseService(NotificationService notificationService)
+        {
+            this.NotificationServ = notificationService;
+        }
 
         protected void NotifyDataHasChanged()
         {
-            DataHasChanged?.Invoke(this, new EventArgs());
+            NotificationServ.NotifyDataHasChanged();
         }
 
         protected void NotifyUIError(string message)
         {
-            var arg = new ServiceErrorEventArgs()
-            {
-                Message = message,
-                IsUIError = true
-            };
-
-            Log.E(message);
-            NotifyError(arg);
-            isUiErrorRisen = true;
+            NotificationServ.NotifyUIError(message);
         }
 
         protected void NotifyUIError(Exception ex)
         {
-            if (!isUiErrorRisen)
-            {
-                var arg = new ServiceErrorEventArgs()
-                {
-                    Message = ex.Message,
-                    IsUIError = true
-                };
-
-                Log.E(ex);
-                NotifyError(arg);
-                isUiErrorRisen = true;
-            }
+            NotificationServ.NotifyUIError(ex);
         }
         protected void ResetUIError()
         {
-            if (isUiErrorRisen)
-            {
-                var arg = new ServiceErrorEventArgs()
-                {
-                    IsUIError = false
-                };
-                NotifyError(arg);
-                isUiErrorRisen = false;
-            }
+            NotificationServ.ResetUIError();
         }
 
         protected void ResetNetworkError()
         {
-            if (isNetworkErrorRisen)
-            {
-                var arg = new ServiceErrorEventArgs()
-                {
-                    IsNetworkError = false
-                };
-                NotifyError(arg);
-                isNetworkErrorRisen = false;
-            }
+            NotificationServ.ResetNetworkError();
         }
 
         protected void NotifyNetworkError(Exception ex)
         {
-            var arg = new ServiceErrorEventArgs()
-            {
-                Message = ex.Message,
-                IsNetworkError = true
-            };
-
-            if (Log != null)
-            {
-                Log.E(ex);
-            }
-
-            NotifyError(arg);
-            isNetworkErrorRisen = true;
+            NotificationServ.NotifyNetworkError(ex);
         }
 
         private void NotifyError(ServiceErrorEventArgs arg)
         {
-            ErrorHasOccured?.Invoke(this, arg);
+            NotificationServ.NotifyError(arg);
         }
     }
 }

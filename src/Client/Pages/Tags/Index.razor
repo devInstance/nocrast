@@ -1,10 +1,5 @@
 ﻿@page "/tags"
 
-@inject TagsService Service;
-@inject ILogProvider LogProvider;
-@inject ITimeProvider TimeProvider;
-
-
 <input class="new-timer-edit" @bind="newTagName" type="text" />
 
 <button class="btn btn-primary" @onclick="AddTag">Add Tag</button>
@@ -19,12 +14,13 @@
     <ul>
         @foreach (var item in Tags)
         {
-        <li>
-            <NavLink class="nav-link" href="@($"tags/{item.Id}")">
-                <span class="timer-text">@item.Name
-                </span>
-            </NavLink>
-        </li>
+            <li>
+                <NavLink class="nav-link" href="@($"tags/{item.Id}")">
+                    <span class="timer-text">
+                        @item.Name
+                    </span>
+                </NavLink>
+            </li>
         }
     </ul>
 }
@@ -32,6 +28,11 @@ else
 {
     <p>Loading ...</p>
 }
+
+@inject TagsService Service;
+@inject NotificationService NotificationServ;
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
 
 @code {
 
@@ -50,8 +51,8 @@ else
         {
             using (var scope = log.DebugScope())
             {
-                Service.DataHasChanged += OnDataHasChanged;
-                Service.ErrorHasOccured += OnError;
+                NotificationServ.DataHasChanged += OnDataHasChanged;
+                NotificationServ.ErrorHasOccured += OnError;
 
                 await RefreshData();
             }

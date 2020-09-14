@@ -18,7 +18,8 @@ namespace NoCrast.Client.Services
         public TagsService(ITimeProvider provider,
                             ILogProvider logProvider,
                             ITagsApi tagsApi,
-                            ITasksApi tasksApi)
+                            ITasksApi tasksApi,
+                            NotificationService notificationServ) : base(notificationServ)
         {
             TagsApi = tagsApi;
             TasksApi = tasksApi;

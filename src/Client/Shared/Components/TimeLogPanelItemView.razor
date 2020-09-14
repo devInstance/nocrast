@@ -1,10 +1,4 @@
-﻿
-@inject TasksService Service;
-@inject ITimeProvider TimeProvider;
-
-@using NoCrast.Client.ModelExtensions;
-
-@if (!IsEditing)
+﻿@if (!IsEditing)
 {
     <span class="timer-list-item">@FormatTime(Log)</span>
     @if (!IsActive || Item.ActiveTimeLogItem.Id != Log.Id)
@@ -34,6 +28,10 @@ else
     </EditForm>
 }
 
+@inject TasksService Service;
+@inject NotificationService NotificationServ;
+@inject ITimeProvider TimeProvider;
+
 @code {
     [Parameter]
     public TaskItem Item { get; set; }
@@ -56,7 +54,7 @@ else
 
     protected override void OnInitialized()
     {
-        Service.DataHasChanged += OnDataHasChanged;
+        NotificationServ.DataHasChanged += OnDataHasChanged;
     }
 
     private void OnDataHasChanged(Object sender, EventArgs e)

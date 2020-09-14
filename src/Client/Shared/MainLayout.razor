@@ -1,10 +1,4 @@
-﻿@inherits LayoutComponentBase
-@inject NavigationManager navigationManager
-@inject IdentityAuthenticationStateProvider authStateProvider
-@inject TasksService TService;
-@inject ReportService RService;
-@inject TagsService GService;
-
+﻿
 <AuthorizeView>
     <Authorized>
         <div class="sidebar">
@@ -27,6 +21,11 @@
     </Authorized>
 </AuthorizeView>
 
+@inherits LayoutComponentBase
+@inject NavigationManager navigationManager
+@inject IdentityAuthenticationStateProvider authStateProvider
+@inject NotificationService NotificationServ;
+
 @functions{
 
     [CascadingParameter]
@@ -44,9 +43,9 @@
 
     protected override void OnInitialized()
     {
-        TService.ErrorHasOccured += OnError;
-        RService.ErrorHasOccured += OnError;
-        GService.ErrorHasOccured += OnError;
+        NotificationServ.ErrorHasOccured += OnError;
+        NotificationServ.ErrorHasOccured += OnError;
+        NotificationServ.ErrorHasOccured += OnError;
     }
 
     private void OnError(Object sender, ServiceErrorEventArgs e)

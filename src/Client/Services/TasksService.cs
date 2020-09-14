@@ -14,10 +14,10 @@ namespace NoCrast.Client.Services
     {
         public ITimeProvider TimeProvider { get; }
         protected ITasksApi Api { get; }
-
-        public TasksService(ITimeProvider provider,
+        public TasksService(NotificationService notification,
+                        ITimeProvider provider,
                             ILogProvider logProvider,
-                            ITasksApi api)
+                            ITasksApi api) : base(notification)
         {
             Api = api;
             TimeProvider = provider;

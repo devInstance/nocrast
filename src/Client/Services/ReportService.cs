@@ -12,9 +12,10 @@ namespace NoCrast.Client.Services
         public ITimeProvider TimeProvider { get; }
         protected IReportApi Api { get; }
 
-        public ReportService(ITimeProvider provider,
+        public ReportService(NotificationService notificationServ,
+                            ITimeProvider provider,
                             ILogProvider logProvider,
-                            IReportApi api)
+                            IReportApi api) : base(notificationServ)
         {
             Api = api;
             TimeProvider = provider;

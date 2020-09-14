@@ -1,15 +1,5 @@
 ﻿@page "/tags/{id}"
 
-@using System.Timers;
-
-@inject TagsService Service;
-@inject ILogProvider LogProvider;
-@inject ITimeProvider TimeProvider;
-
-@inject NavigationManager NavigationManager
-
-@implements IDisposable
-
 @if (Item != null)
 {
     @if (!String.IsNullOrEmpty(ErrorText))
@@ -65,6 +55,18 @@ else
     <div>Loading ...</div>
 }
 
+@using System.Timers;
+
+@inject TagsService Service;
+@inject NotificationService NotificationServ;
+
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
+
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
+
 @code {
     [Parameter]
     public string Id { get; set; }
@@ -90,8 +92,8 @@ else
         using (var scope = log.DebugScope())
         {
 
-            Service.DataHasChanged += OnDataHasChanged;
-            Service.ErrorHasOccured += OnError;
+            NotificationServ.DataHasChanged += OnDataHasChanged;
+            NotificationServ.ErrorHasOccured += OnError;
 
             await RefreshData();
 
@@ -111,8 +113,8 @@ else
     {
         using (var scope = log.DebugScope())
         {
-            Service.DataHasChanged -= OnDataHasChanged;
-            Service.ErrorHasOccured -= OnError;
+            NotificationServ.DataHasChanged -= OnDataHasChanged;
+            NotificationServ.ErrorHasOccured -= OnError;
 
             if (timer != null)
             {

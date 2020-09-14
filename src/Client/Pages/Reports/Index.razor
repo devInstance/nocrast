@@ -1,9 +1,5 @@
 ﻿@page "/reports"
 
-@inject ReportService Service;
-@inject ILogProvider LogProvider;
-@inject ITimeProvider TimeProvider;
-
 <div class="btn-toolbar p-2" role="toolbar">
     <div class="btn-group btn-group-toggle mr-4" role="group">
         <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Daily))">Daily</button>
@@ -14,7 +10,7 @@
         <button type="button" class="btn btn-secondary mr-1" @onclick="@(() => PrevAsync())">
             <span class="oi oi-chevron-left" aria-hidden="true"></span>
         </button>
-        <input type="text" class="form-control mr-1" @bind="selectedDate" @bind:format="MMM d yyy" readonly/>
+        <input type="text" class="form-control mr-1" @bind="selectedDate" @bind:format="MMM d yyy" readonly />
         <button type="button" class="btn btn-secondary mr-2" @onclick="@(() => NextAsync())">
             <span class="oi oi-chevron-right" aria-hidden="true"></span>
         </button>
@@ -84,6 +80,10 @@
     }
 </div>
 
+@inject ReportService Service;
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
+
 @code {
 
     string ErrorText { get; set; }
@@ -150,7 +150,7 @@
 
     public async void PrevAsync()
     {
-        selectedDate = UpdateStep(selectedDate, - 1);
+        selectedDate = UpdateStep(selectedDate, -1);
         RequestReportAsync(selectedType);
     }
 
