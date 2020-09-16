@@ -23,6 +23,11 @@
                                     <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
                                 </button>
                             </span>
+                            <span>
+                                <small class="text-muted ml-1">
+                                    @String.Format("{0:F1} hour(s) today", Item.GetTotalHoursSpentTodayTillNow(TimeProvider))
+                                </small>
+                            </span>
                         }
                         else
                         {

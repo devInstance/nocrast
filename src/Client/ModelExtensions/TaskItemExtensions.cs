@@ -64,5 +64,15 @@ namespace NoCrast.Client.ModelExtensions
         {
             return (float)item.TotalTimeSpentToday / (60 * 60 * 1000);
         }
+
+        public static float GetTotalHoursSpentTodayTillNow(this TaskItem item, ITimeProvider provider)
+        {
+            var result = item.GetTotalHoursSpentToday();
+            if (item.IsRunning)
+            {
+                return result + ((float)item.GetElapsedThisPeriod(provider) / (60 * 60 * 1000));
+            }
+            return result;
+        }
     }
 }
