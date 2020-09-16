@@ -44,5 +44,24 @@ namespace NoCrast.Client.Services.Net
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<bool>().Result;
         }
+
+        public async Task<TagItem[]> GetTagsByTaskIdAsync(string id)
+        {
+            return await httpClient.GetFromJsonAsync<TagItem[]>($"{Controller}task/{id}");
+        }
+
+        public async Task<TagItem> AddTagTaskAsync(string taskId, string tagId)
+        {
+            var result = await httpClient.PostAsJsonAsync($"{Controller}{tagId}/task", taskId);
+            result.EnsureSuccessStatusCode();
+            return result.Content.ReadFromJsonAsync<TagItem>().Result;
+        }
+
+        public async Task<bool> RemoveTagTaskAsync(string taskId, string tagId)
+        {
+            var result = await httpClient.DeleteAsync($"{Controller}{tagId}/task/{taskId}");
+            result.EnsureSuccessStatusCode();
+            return result.Content.ReadFromJsonAsync<bool>().Result;
+        }
     }
 }

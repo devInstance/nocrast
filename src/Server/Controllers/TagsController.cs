@@ -155,5 +155,95 @@ namespace NoCrast.Server.Controllers
             });
         }
 
+        [Authorize]
+        [HttpGet]
+        [Route("task/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<TagItem[]> GetTagsByTaskIdAsync(string id)
+        {
+            return HandleWebRequest<TagItem[]>(() =>
+            {
+                var tags = SelectTags(null);
+
+                var dtags = (from tag in tags
+                                join ttt in DB.TagToTimerTasks on tag equals ttt.Tag
+                                join tsk in DB.Tasks on ttt.Task equals tsk
+                                where tsk.PublicId == id && tsk.Profile == CurrentProfile
+                                select tag);
+
+                List<TagItem> result = DecorateTagItems(dtags);
+                return Ok(result.ToArray());
+            });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("{tagId}/task")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<TagItem> AddTagTaskAsync([FromBody]string taskId, string tagId)
+        {
+            return HandleWebRequest<TagItem>(() =>
+            {
+                var tag = SelectTags(tagId).FirstOrDefault();
+                if(tag == null)
+                {
+                    return NotFound();
+                }
+
+                var taskDbId = (from task in DB.Tasks
+                            where task.PublicId == taskId && task.Profile == CurrentProfile
+                            select task.Id).FirstOrDefault();
+                if(taskDbId == null)
+                {
+                    return NotFound();
+                }
+
+                var tagRecord = new TagToTimerTask
+                {
+                    Id = Guid.NewGuid(),
+                    TagId = tag.Id,
+                    TaskId = taskDbId
+                };
+
+                DB.TagToTimerTasks.Add(tagRecord);
+
+                DB.SaveChanges();
+
+                var response = DecorateTagItems(SelectTags(tagId)).FirstOrDefault();
+
+                return Ok(response);
+            });
+        }
+
+        [Authorize]
+        [HttpDelete]
+        [Route("{tagId}/task/{taskId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<bool> RemoveTagTaskAsync(string taskId, string tagId)
+        {
+            return HandleWebRequest<bool>(() =>
+            {
+                var record = (from ttt in DB.TagToTimerTasks
+                              join task in DB.Tasks on ttt.Task equals task
+                              join tag in DB.TimerTags on ttt.Tag equals tag
+                              where task.PublicId == taskId && task.Profile == CurrentProfile
+                                    && tag.PublicId == tagId && tag.Profile == CurrentProfile
+                              select ttt).FirstOrDefault();
+                if (record == null)
+                {
+                    return NotFound();
+                }
+
+                DB.TagToTimerTasks.Remove(record);
+                DB.SaveChanges();
+
+                return Ok(true);
+            });
+        }
+
     }
 }

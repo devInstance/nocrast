@@ -1,17 +1,23 @@
 ﻿
-@inject TasksService Service;
-@inject ITimeProvider TimeProvider;
-@inject ILogProvider LogProvider;
-
 <li>
-    <div class="alert @(IsActive ? "alert-danger" : "alert-info") container-fluid" role="document">
+    <div class="alert @(IsActive ? "alert-danger" : "alert-info") container-fluid timer-link" role="document">
         <div class="d-flex flex-row">
+            @if (ShowNavigationButton)
+            {
+                <div class="d-flex mr-3">
+                    <div class="align-self-center">
+                        <NavLink href="@($"task/{Item.Id}")" Match="NavLinkMatch.All">
+                            <span class="oi oi-chevron-right" aria-hidden="true"></span>
+                        </NavLink>
+                    </div>
+                </div>
+            }
             <div class="d-flex flex-column flex-grow-1">
                 <div class="d-flex flex-row">
                     <div class="align-self-center">
                         @if (!IsEditing)
                         {
-                            <span class="timer-text">
+                            <span class="timer-text-title">
                                 <strong>@Item.Title</strong>
                                 <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
                                     <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
@@ -33,6 +39,43 @@
                     </div>
                 </div>
                 <div class="d-flex flex-row">
+                    <button class="btn btn-default timer-button" data-toggle="dropdown">
+                        @if (TagLabels != null && TagLabels.Length > 0)
+                        {
+                            @foreach (var label in TagLabels)
+                            {
+                                <span class="badge badge-info">@label</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="badge badge-info">+ Tag</span>
+                        }
+                    </button>
+                    <div class="dropdown-menu">
+                        @if (Tags != null && Tags.Length > 0)
+                        {
+                            <ul>
+                                @foreach (var tag in Tags)
+                                {
+                                    <li><button class="btn btn-default timer-button"><span class="badge badge-info">@tag.Name</span></button></li>
+                                }
+                            </ul>
+                        }
+                        <EditForm Model="@NewTagLabel" OnValidSubmit="@(() => AddTagAsync())" class="px-4 py-3">
+                            <div class="form-group">
+                                <label class="form-check-label" for="newTagEdit">
+                                    New tag
+                                </label>
+                                <InputText @bind-Value="@NewTagLabel" class="form-control" placeholder="tag name" id="newTagEdit"></InputText>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex">
+                <div class="d-flex flex-row">
                     <div class="align-self-center">
                         @if (IsActive)
                         {
@@ -40,7 +83,7 @@
                         }
                         else
                         {
-                            <span class="timer-text">@String.Format("Today {0:F1}", Item.GetTotalHoursSpentToday()) hour(s)</span>
+                            <span class="timer-text">@String.Format("{0:F1} hour(s) today", Item.GetTotalHoursSpentToday())</span>
                         }
                     </div>
                     <div class="align-self-center">
@@ -59,19 +102,13 @@
                     </div>
                 </div>
             </div>
-            @if (ShowNavigationButton)
-            {
-            <div class="d-flex">
-                <div class="align-self-center">
-                    <NavLink href="@($"task/{Item.Id}")" Match="NavLinkMatch.All">
-                        <span class="oi oi-chevron-right" aria-hidden="true"></span>
-                    </NavLink>
-                </div>
-            </div>
-            }
         </div>
     </div>
 </li>
+
+@inject TasksService Service;
+@inject ITimeProvider TimeProvider;
+@inject ILogProvider LogProvider;
 
 @code {
     [Parameter]
@@ -85,6 +122,25 @@
 
     private ILog log;
 
+    private TagItem[] Tags { get; set; } //TODO; should be only excluded tags
+
+    private string[] TagLabels
+    {
+        get
+        {
+            //TODO: run only once and cache, optimize
+            var result = new List<string>();
+            if (Tags == null) return null;
+            for(int i =  0; i < Tags.Length && i < 5; i ++) //TODO: make limit configurable
+            {
+                result.Add(Tags[i].Name);
+            }
+            return result.ToArray();
+        }
+    }
+
+    private string NewTagLabel { get; set; }
+
     public bool IsActive
     {
         get
@@ -94,10 +150,27 @@
     }
 
     //TODO: Add form validation for title
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
         IsEditing = false;
         log = LogProvider.CreateLogger(this);
+
+        await RefreshDataAsync();
+    }
+
+    public async Task RefreshDataAsync()
+    {
+        NewTagLabel = "";
+        if (Item != null)
+        {
+            Tags = await Service.GetTagsAsync(Item);
+            log.D($"{Tags.Length}");
+            //Tags = new TagItem[] { new TagItem { Name = "Tag 1" }, new TagItem { Name = "Tag 2" } };
+
+            //TagLabels = new string[] { "Tag 1", "Tag 2" };
+
+            StateHasChanged();
+        }
     }
 
     private string FormatTime(TimeSpan time)
@@ -135,5 +208,13 @@
         IsEditing = false;
         TitleEditText = Item.Title;
         log.D("ResetChanges");
+    }
+
+    private async void AddTagAsync()
+    {
+        log.D("ApplyChanges");
+
+        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
+        await RefreshDataAsync();
     }
 }

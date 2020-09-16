@@ -27,25 +27,32 @@ namespace NoCrast.Server.Controllers
             TimeProvider = timeProvider;
         }
 
-        private IQueryable<TaskItem> SelectTasks(int timeoffset)
+        private IQueryable<TimerTask> SelectTasks()
+        {
+            return (from tks in DB.Tasks
+                   where tks.Profile == CurrentProfile
+                   orderby tks.CreateDate
+                   select tks).Include(q => q.State);
+        }
+
+        private IQueryable<TaskItem> DecorateTasks(IQueryable<TimerTask> q, int timeoffset)
         {
             DateTime now = TimeProvider.CurrentTime;
             DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
             DateTime startOfTheDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
 
-            return from tks in DB.Tasks
-                   join state in DB.TaskState on tks equals state.Task
+            return from tks in q
                    where tks.Profile == CurrentProfile
                    orderby tks.CreateDate
                    select new TaskItem
                    {
                        Id = tks.PublicId,
-                       IsRunning = state.IsRunning,
-                       ActiveTimeLogItem = state.ActiveTimeLogItem != null ? new TimeLogItem
+                       IsRunning = tks.State.IsRunning,
+                       ActiveTimeLogItem = tks.State.ActiveTimeLogItem != null ? new TimeLogItem
                        {
-                           Id = state.ActiveTimeLogItem.PublicId,
-                           ElapsedMilliseconds = state.ActiveTimeLogItem.ElapsedMilliseconds,
-                           StartTime = new DateTime(state.ActiveTimeLogItem.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
+                           Id = tks.State.ActiveTimeLogItem.PublicId,
+                           ElapsedMilliseconds = tks.State.ActiveTimeLogItem.ElapsedMilliseconds,
+                           StartTime = new DateTime(tks.State.ActiveTimeLogItem.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
                        } : null,
                        TimeLogCount = tks.TimeLog.Count,
                        Title = tks.Title,
@@ -63,6 +70,7 @@ namespace NoCrast.Server.Controllers
                    };
         }
 
+
         [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -71,7 +79,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem[]>(() =>
             { 
-                var tasks = SelectTasks(timeoffset).ToList();
+                var tasks = DecorateTasks(SelectTasks(), timeoffset).ToList();
 
                 return Ok(tasks.ToArray());
             });
@@ -234,7 +242,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = (from ts in SelectTasks(timeoffset)
+                var response = (from ts in DecorateTasks(SelectTasks(), timeoffset)
                                 where ts.Id == taskRecord.PublicId
                                 select ts).FirstOrDefault();
 
@@ -272,7 +280,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var selectTasks = SelectTasks(timeoffset);
+                var selectTasks = DecorateTasks(SelectTasks(), timeoffset);
 
                 var updatedTask = (from t in selectTasks
                                    where t.Id == id
@@ -304,13 +312,34 @@ namespace NoCrast.Server.Controllers
                 DB.TimeLog.Remove(timeLogRecord);
                 DB.SaveChanges();
 
-                var selectTasks = SelectTasks(timeoffset);
+                var selectTasks = DecorateTasks(SelectTasks(), timeoffset);
 
                 var updatedTask = (from t in selectTasks
                                    where t.Id == id
                                    select t).FirstOrDefault();
 
                 return Ok(updatedTask);
+            });
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("tag/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<TaskItem[]> GetTasksByTagIdAsync(string id, int timeoffset)
+        {
+            return HandleWebRequest<TaskItem[]>(() =>
+            {
+                var tasks = SelectTasks();
+
+                var result = (from tsk in tasks
+                              join ttt in DB.TagToTimerTasks on tsk equals ttt.Task
+                              join tag in DB.TimerTags on ttt.Tag equals tag
+                              where tag.PublicId == id && tag.Profile == CurrentProfile
+                              select tsk);
+
+                return Ok(DecorateTasks(result, timeoffset).ToArray());
             });
         }
     }

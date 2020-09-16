@@ -14,8 +14,15 @@ namespace NoCrast.Client.Services.Api
 
         Task<TagItem> AddTagAsync(TagItem tag);
 
-        Task<TagItem> UpdateTagAsync(string id, TagItem task);
+        Task<TagItem> UpdateTagAsync(string id, TagItem tag);
 
         Task<bool> RemoveTagAsync(string id);
+
+        Task<TagItem[]> GetTagsByTaskIdAsync(string id);
+
+        Task<TagItem> AddTagTaskAsync(string taskId, string tagId);
+
+        Task<bool> RemoveTagTaskAsync(string taskId, string tagId);
+
     }
 }

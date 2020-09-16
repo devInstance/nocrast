@@ -68,9 +68,9 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<TaskItem>().Result;
         }
 
-        public Task<TaskItem[]> GetTasksByTagIdAsync(string id, int timeoffset)
+        public async Task<TaskItem[]> GetTasksByTagIdAsync(string id, int timeoffset)
         {
-            throw new NotImplementedException();
+            return await httpClient.GetFromJsonAsync<TaskItem[]>($"{Controller}tag/{id}?timeoffset={timeoffset}");
         }
     }
 }

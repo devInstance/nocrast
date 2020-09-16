@@ -13,13 +13,17 @@ namespace NoCrast.Client.Services
     public class TasksService : BaseService
     {
         public ITimeProvider TimeProvider { get; }
-        protected ITasksApi Api { get; }
+        protected ITasksApi TaskApi { get; }
+        protected ITagsApi TagsApi { get; }
+
         public TasksService(NotificationService notification,
                         ITimeProvider provider,
-                            ILogProvider logProvider,
-                            ITasksApi api) : base(notification)
+                        ILogProvider logProvider,
+                        ITasksApi tasksApi,
+                        ITagsApi tagsApi) : base(notification)
         {
-            Api = api;
+            TaskApi = tasksApi;
+            TagsApi = tagsApi;
             TimeProvider = provider;
             Log = logProvider.CreateLogger(this);
             Log.D("constructor");
@@ -88,7 +92,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset);
 
                     ResetNetworkError();
 
@@ -111,7 +115,7 @@ namespace NoCrast.Client.Services
                 {
 
                     //TODO: optimize, don't fetch full list, create back local store
-                    var tasks = await Api.GetTasksAsync(TimeProvider.UtcTimeOffset);
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset);
 
                     ResetNetworkError();
 
@@ -159,7 +163,7 @@ namespace NoCrast.Client.Services
                 TaskItem response = null;
                 try
                 {
-                    response = await Api.AddTaskAsync(task, TimeProvider.UtcTimeOffset);
+                    response = await TaskApi.AddTaskAsync(task, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -192,7 +196,7 @@ namespace NoCrast.Client.Services
                 try
                 {
                     task.Title = newTitle;
-                    newTask = await Api.UpdateTaskAsync(task.Id, task, TimeProvider.UtcTimeOffset);
+                    newTask = await TaskApi.UpdateTaskAsync(task.Id, task, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -213,7 +217,7 @@ namespace NoCrast.Client.Services
             {
                 try
                 {
-                    await Api.RemoveTaskAsync(item.Id);
+                    await TaskApi.RemoveTaskAsync(item.Id);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -241,7 +245,7 @@ namespace NoCrast.Client.Services
 
                 try
                 {
-                    item = await Api.InsertTimerAsync(item.Id, true, item.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
+                    item = await TaskApi.InsertTimerAsync(item.Id, true, item.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                 }
@@ -268,7 +272,7 @@ namespace NoCrast.Client.Services
 
                 try
                 {
-                    item = await Api.UpdateTimerAsync(item.Id, item.ActiveTimeLogItem.Id, false, item.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
+                    item = await TaskApi.UpdateTimerAsync(item.Id, item.ActiveTimeLogItem.Id, false, item.ActiveTimeLogItem, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                 }
@@ -290,7 +294,7 @@ namespace NoCrast.Client.Services
                 List<TimeLogItem> response = new List<TimeLogItem>();
                 try
                 {
-                    response.AddRange(await Api.GetTimelogAsync(item.Id));
+                    response.AddRange(await TaskApi.GetTimelogAsync(item.Id));
                     ResetNetworkError();
                 }
                 catch (Exception ex)
@@ -308,7 +312,7 @@ namespace NoCrast.Client.Services
             {
                 try
                 {
-                    item = await Api.UpdateTimerAsync(item.Id, log.Id, item.IsRunning, log, TimeProvider.UtcTimeOffset);
+                    item = await TaskApi.UpdateTimerAsync(item.Id, log.Id, item.IsRunning, log, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
 
                     NotifyDataHasChanged();
@@ -328,7 +332,7 @@ namespace NoCrast.Client.Services
             {
                 try
                 {
-                    var result = await Api.RemoveTimerAsync(item.Id, log.Id, TimeProvider.UtcTimeOffset);
+                    var result = await TaskApi.RemoveTimerAsync(item.Id, log.Id, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                     NotifyDataHasChanged();
                     return result;
@@ -342,5 +346,67 @@ namespace NoCrast.Client.Services
             }
         }
 
+        public async Task<TagItem[]> GetTagsAsync(TaskItem item)
+        {
+            using (var l = Log.DebugScope())
+            {
+                try
+                {
+                    var result = await TagsApi.GetTagsByTaskIdAsync(item.Id);
+                    ResetNetworkError();
+                    NotifyDataHasChanged();
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
+        public async Task<TagItem> AddOrCreateTagAsync(TaskItem item, string name)
+        {
+            using (var l = Log.DebugScope())
+            {
+                var tag = new TagItem
+                {
+                    Name = name
+                };
+
+                try
+                {
+                    var response = await TagsApi.AddTagAsync(tag);
+
+                    await TagsApi.AddTagTaskAsync(item.Id, response.Id);
+
+                    return response;
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
+        public async Task<TagItem> RemoveTagAsync(TaskItem item, TagItem tag)
+        {
+            using (var l = Log.DebugScope())
+            {
+                try
+                {
+                    return await TagsApi.AddTagTaskAsync(item.Id, tag.Id);
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return tag;
+            }
+        }
     }
 }

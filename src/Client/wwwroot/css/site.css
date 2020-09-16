@@ -199,11 +199,18 @@ ul {
 /* Timer section */
 
 /* TODO: needed better solution to deal with colors (e,g Sass) */
-.timer-text {
+.timer-text, .timer-text-title {
     color: #000000;
-    margin-bottom: .5rem;
     font-weight: 400;
     font-size: 1rem;
+}
+
+.timer-text {
+    margin-bottom: .5rem;
+}
+
+.timer-text-title {
+    vertical-align: sub;
 }
 
 .timer-text-timespan {
@@ -215,6 +222,19 @@ ul {
     padding: 0px;
     color: #757575;
 }
+
+    .timer-button a {
+        text-decoration: none;
+    }
+
+
+.timer-item-background {
+    transition: all 0.5s;
+    /*cursor: pointer;*/
+}
+    .timer-item-background:hover {
+        background: rgba(255,0,0,0.1);
+    }
 
 .small-timer-button {
     font-size: 14px !important;
