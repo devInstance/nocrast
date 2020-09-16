@@ -53,12 +53,12 @@
                         }
                     </button>
                     <div class="dropdown-menu">
-                        @if (Tags != null && Tags.Length > 0)
+                        @if (NotAssignedTags != null && NotAssignedTags.Length > 0)
                         {
                             <ul>
-                                @foreach (var tag in Tags)
+                                @foreach (var tag in NotAssignedTags)
                                 {
-                                    <li><button class="btn btn-default timer-button"><span class="badge badge-info">@tag.Name</span></button></li>
+                                    <li><button class="btn btn-default timer-button" @onclick="@(() => AddTagByIdAsync(tag.Id))"><span class="badge badge-info">@tag.Name</span></button></li>
                                 }
                             </ul>
                         }
@@ -122,7 +122,10 @@
 
     private ILog log;
 
-    private TagItem[] Tags { get; set; } //TODO; should be only excluded tags
+
+    private TagItem[] Tags { get; set; }
+
+    private TagItem[] NotAssignedTags { get; set; }
 
     private string[] TagLabels
     {
@@ -134,6 +137,10 @@
             for(int i =  0; i < Tags.Length && i < 5; i ++) //TODO: make limit configurable
             {
                 result.Add(Tags[i].Name);
+            }
+            if(Tags.Length > 5)
+            {
+                result.Add("+");
             }
             return result.ToArray();
         }
@@ -164,10 +171,7 @@
         if (Item != null)
         {
             Tags = await Service.GetTagsAsync(Item);
-            log.D($"{Tags.Length}");
-            //Tags = new TagItem[] { new TagItem { Name = "Tag 1" }, new TagItem { Name = "Tag 2" } };
-
-            //TagLabels = new string[] { "Tag 1", "Tag 2" };
+            NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);
 
             StateHasChanged();
         }
@@ -215,6 +219,14 @@
         log.D("ApplyChanges");
 
         await Service.AddOrCreateTagAsync(Item, NewTagLabel);
+        await RefreshDataAsync();
+    }
+
+    private async void AddTagByIdAsync(string id)
+    {
+        log.D("ApplyChanges");
+
+        await Service.AddTagAsync(Item, id);
         await RefreshDataAsync();
     }
 }

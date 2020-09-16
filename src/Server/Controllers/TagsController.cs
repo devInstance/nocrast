@@ -58,6 +58,14 @@ namespace NoCrast.Server.Controllers
                     select tags);
         }
 
+        private IQueryable<TimerTag> SelectTagsByName(string name)
+        {
+            return (from tags in DB.TimerTags
+                    where tags.Profile == CurrentProfile && tags.Name == name
+                    orderby tags.Name ascending
+                    select tags);
+        }
+
         [Authorize]
         [HttpGet]
         [Route("{id}")]
@@ -81,6 +89,17 @@ namespace NoCrast.Server.Controllers
             return HandleWebRequest<TagItem>(() =>
             {
                 DateTime now = TimeProvider.CurrentTime;
+
+                //check if the tag with such name already exists
+                var existingRecord = SelectTagsByName(tag.Name).FirstOrDefault();
+                if(existingRecord != null)
+                {
+                    return new TagItem
+                    {
+                        Id = existingRecord.PublicId,
+                        Name = existingRecord.Name
+                    };
+                }
 
                 var tagRecord = new TimerTag
                 {
@@ -182,6 +201,8 @@ namespace NoCrast.Server.Controllers
         [Route("{tagId}/task")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public ActionResult<TagItem> AddTagTaskAsync([FromBody]string taskId, string tagId)
         {
             return HandleWebRequest<TagItem>(() =>
@@ -198,6 +219,14 @@ namespace NoCrast.Server.Controllers
                 if(taskDbId == null)
                 {
                     return NotFound();
+                }
+
+                var existing = (from ttt in DB.TagToTimerTasks
+                                where ttt.TagId == tag.Id && ttt.TaskId == taskDbId
+                                select ttt).FirstOrDefault();
+                if(existing != null)
+                {
+                    return Conflict();
                 }
 
                 var tagRecord = new TagToTimerTask

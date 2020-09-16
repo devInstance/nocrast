@@ -366,6 +366,41 @@ namespace NoCrast.Client.Services
             }
         }
 
+        public async Task<TagItem[]> GetNotAssignedTagsAsync(TagItem[] exclude)
+        {
+            using (var l = Log.DebugScope())
+            {
+                try
+                {
+                    var tags = await TagsApi.GetTagsAsync(); //TODO: should be cached
+
+                    ResetNetworkError();
+
+                    //TODO: re-write this code
+                    var result = new List<TagItem>(tags);
+                    foreach (var ex in exclude)
+                    {
+                        for(int i = 0; i < result.Count; i ++)
+                        {
+                            if (result[i].Id == ex.Id)
+                            {
+                                result.RemoveAt(i);
+                            }
+                        }
+                    }
+
+                    NotifyDataHasChanged();
+                    return result.ToArray();
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
         public async Task<TagItem> AddOrCreateTagAsync(TaskItem item, string name)
         {
             using (var l = Log.DebugScope())
@@ -391,6 +426,26 @@ namespace NoCrast.Client.Services
                 return null;
             }
         }
+
+        public async Task<bool> AddTagAsync(TaskItem item, string id)
+        {
+            using (var l = Log.DebugScope())
+            {
+                try
+                {
+                    await TagsApi.AddTagTaskAsync(item.Id, id);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return false;
+            }
+        }
+
 
         public async Task<TagItem> RemoveTagAsync(TaskItem item, TagItem tag)
         {
