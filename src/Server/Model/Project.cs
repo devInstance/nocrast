@@ -2,13 +2,13 @@
 
 namespace NoCrast.Server.Model
 {
-    public class TimerTag : DatabaseObject
+    public class Project : DatabaseObject
     {
         public virtual UserProfile Profile { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        public string Title { get; set; }
 
-        public int Color { get; set; }
+        public string Descritpion { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace NoCrast.Shared.Model
 {
@@ -10,6 +9,10 @@ namespace NoCrast.Shared.Model
  
         [Required]
         public bool IsRunning { get; set; }
+
+        public string Descritpion { get; set; }
+
+        public ProjectItem Project { get; set; }
 
         public TimeLogItem ActiveTimeLogItem { get; set; }
 

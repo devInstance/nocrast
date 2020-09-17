@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NoCrast.Server.Model
 {
@@ -17,5 +13,9 @@ namespace NoCrast.Server.Model
         public virtual ICollection<TimeLog> TimeLog { get; set; }
 
         public virtual TimerTaskState State { get; set; }
+
+        public virtual Project Project { get; set; }
+
+        public string Descritpion { get; set; }
     }
 }

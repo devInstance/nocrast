@@ -30,9 +30,12 @@ namespace NoCrast.Server.Controllers
         private IQueryable<TimerTask> SelectTasks()
         {
             return (from tks in DB.Tasks
-                   where tks.Profile == CurrentProfile
-                   orderby tks.CreateDate
-                   select tks).Include(q => q.State);
+                    join prj in DB.Projects on tks.Project equals prj
+                    into projectTasks
+                    from tksp in projectTasks.DefaultIfEmpty()
+                    where tks.Profile == CurrentProfile
+                    orderby tks.CreateDate
+                    select tks).Include(q => q.State).Include(q => q.Project);
         }
 
         private IQueryable<TaskItem> DecorateTasks(IQueryable<TimerTask> q, int timeoffset)
@@ -56,6 +59,8 @@ namespace NoCrast.Server.Controllers
                        } : null,
                        TimeLogCount = tks.TimeLog.Count,
                        Title = tks.Title,
+                       Project = tks.Project != null ? new ProjectItem { Id = tks.Project.PublicId, Title = tks.Project.Title } : null,
+                       Descritpion = tks.Descritpion,
                        TotalTimeSpent = (from tl in DB.TimeLog
                                          where tl.TaskId == tks.Id
                                          select tl.ElapsedMilliseconds).Sum(),

@@ -9,5 +9,7 @@ namespace NoCrast.Shared.Model
     {
         [Required]
         public string Name { get; set; }
+
+        public int Color { get; set; }
     }
 }

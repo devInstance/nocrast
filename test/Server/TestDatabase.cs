@@ -100,6 +100,7 @@ namespace NoCrast.ServerTests
                 Profile = profile,
                 PublicId = name,
                 Title = name,
+                Project = lastProject,
                 CreateDate = TimeProvider.CurrentTime,
                 UpdateDate = TimeProvider.CurrentTime,
             };
@@ -118,6 +119,24 @@ namespace NoCrast.ServerTests
         public TimerTask FetchTask(string id)
         {
             return (from t in db.Tasks where t.PublicId == id select t).FirstOrDefault();
+        }
+
+        public Project lastProject = null;
+        public TestDatabase CreateProject(string name)
+        {
+            lastProject = new Project
+            {
+                Id = Guid.NewGuid(),
+                Profile = profile,
+                PublicId = name,
+                Title = name,
+                CreateDate = TimeProvider.CurrentTime,
+                UpdateDate = TimeProvider.CurrentTime,
+            };
+
+            db.Projects.Add(lastProject);
+            db.SaveChanges();
+            return this;
         }
 
         TimeLog lastLog;
