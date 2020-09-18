@@ -95,6 +95,7 @@ namespace NoCrast.Client.Services
                     var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset);
 
                     ResetNetworkError();
+                    NotifyNetworkError(new Exception("test"));
 
                     return tasks;
                 }

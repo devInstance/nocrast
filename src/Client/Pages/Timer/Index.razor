@@ -12,11 +12,6 @@
 
 <button class="btn btn-primary" @onclick="AddTimer">Add Timer</button>
 
-@if (!String.IsNullOrEmpty(ErrorText))
-{
-    <label class="text-danger">@ErrorText</label>
-}
-
 @if (TasksList != null)
 {
     <ul class="timer-list">
@@ -37,8 +32,6 @@ else
 
     private string title = "";
 
-    string ErrorText { get; set; }
-
     private System.Timers.Timer timer;
 
     private ILog log;
@@ -53,7 +46,6 @@ else
                 SetUpTimer();
 
                 NotificationServ.DataHasChanged += OnDataHasChanged;
-                NotificationServ.ErrorHasOccured += OnError;
 
                 await RefreshData();
             }
@@ -87,20 +79,6 @@ else
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
         RefreshData();
-    }
-
-    private void OnError(Object sender, ServiceErrorEventArgs e)
-    {
-        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
-
-        if (e.IsUIError)
-        {
-            ErrorText = e.Message;
-        }
-        else
-        {
-            ErrorText = "";
-        }
     }
 
     private async Task<bool> RefreshData()

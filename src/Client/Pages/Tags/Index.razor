@@ -4,11 +4,6 @@
 
 <button class="btn btn-primary" @onclick="AddTag">Add Tag</button>
 
-@if (!String.IsNullOrEmpty(ErrorText))
-{
-    <label class="text-danger">@ErrorText</label>
-}
-
 @if (Tags != null)
 {
     <ul>
@@ -16,7 +11,7 @@
         {
             <li>
                 <NavLink class="nav-link" href="@($"tags/{item.Id}")">
-                    <span class="timer-text">
+                    <span class="badge badge-info">
                         @item.Name
                     </span>
                 </NavLink>
@@ -36,8 +31,6 @@ else
 
 @code {
 
-    string ErrorText { get; set; }
-
     private ILog log;
 
     private string newTagName = "";
@@ -52,7 +45,6 @@ else
             using (var scope = log.DebugScope())
             {
                 NotificationServ.DataHasChanged += OnDataHasChanged;
-                NotificationServ.ErrorHasOccured += OnError;
 
                 await RefreshData();
             }
@@ -67,20 +59,6 @@ else
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
         RefreshData();
-    }
-
-    private void OnError(Object sender, ServiceErrorEventArgs e)
-    {
-        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
-
-        if (e.IsUIError)
-        {
-            ErrorText = e.Message;
-        }
-        else
-        {
-            ErrorText = "";
-        }
     }
 
     private async Task<bool> RefreshData()
