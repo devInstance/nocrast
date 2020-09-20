@@ -1,0 +1,53 @@
+﻿@if (!String.IsNullOrEmpty(ErrorText))
+{
+    <div class="notification-container">
+        <div class="p-1">
+            <div class="alert alert-danger alert-dismissible fade show notification-container-alert" role="alert">
+                @ErrorText
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@inject NotificationService NotificationServ;
+@inject ILogProvider LogProvider;
+
+@code {
+
+    string ErrorText { get; set; }
+
+    private ILog log;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        using (var l = log.DebugScope())
+        {
+            NotificationServ.ErrorHasOccured += OnError;
+        }
+    }
+
+    private void OnError(Object sender, ServiceErrorEventArgs e)
+    {
+        using (var l = log.DebugScope())
+        {
+            l.E(e.Message);
+            if (e.IsNetworkError)
+            {
+                ErrorText = $"Error connecting to the server {e.Message}";
+            }
+            else if (e.IsUIError)
+            {
+                ErrorText = e.Message;
+            }
+            else
+            {
+                ErrorText = "";
+            }
+            StateHasChanged();
+        }
+    }
+}

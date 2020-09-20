@@ -10,35 +10,20 @@
                 <button type="button" class="btn btn-link ml-md-auto" @onclick="@LogoutClick">Logout</button>
             </div>
 
-            <div class="content px-4">
-                @if (!String.IsNullOrEmpty(ErrorText))
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        @ErrorText
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                }
-
-                @Body
-
-            </div>
+            @Body
         </div>
+        <NotificationBar />
     </Authorized>
 </AuthorizeView>
 
 @inherits LayoutComponentBase
 @inject NavigationManager navigationManager
 @inject IdentityAuthenticationStateProvider authStateProvider
-@inject NotificationService NotificationServ;
 
 @functions{
 
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationState { get; set; }
-
-    string ErrorText { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -47,29 +32,6 @@
             navigationManager.NavigateTo("/login");
         }
     }
-
-    protected override void OnInitialized()
-    {
-        NotificationServ.ErrorHasOccured += OnError;
-    }
-
-    private void OnError(Object sender, ServiceErrorEventArgs e)
-    {
-        if (e.IsNetworkError)
-        {
-            ErrorText = $"Error connecting to the server {e.Message}";
-        }
-        else if (e.IsUIError)
-        {
-            ErrorText = e.Message;
-        }
-        else
-        {
-            ErrorText = "";
-        }
-        StateHasChanged();
-    }
-
 
     async Task LogoutClick()
     {
