@@ -31,6 +31,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<IAuthorizationApi, AuthorizationApi>();
             builder.Services.AddScoped<ITasksApi, TasksApi>();
             builder.Services.AddScoped<IReportApi, ReportApi>();
+            builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
             builder.Services.AddScoped<ITagsApi, TagsApi>();
 
             //builder.Services.AddScoped<IDataProvider, DataProvider>();
@@ -42,6 +43,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<TasksService>();
             builder.Services.AddScoped<ReportService>();
             builder.Services.AddScoped<TagsService>();
+            builder.Services.AddScoped<ProjectsService>();
             builder.Services.AddScoped<NotificationService>();
 
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });

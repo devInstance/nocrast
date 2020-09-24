@@ -347,5 +347,25 @@ namespace NoCrast.Server.Controllers
                 return Ok(DecorateTasks(result, timeoffset).ToArray());
             });
         }
+
+        [Authorize]
+        [HttpGet]
+        [Route("project/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<TaskItem[]> GetTasksByProjectIdAsync(string id, int timeoffset)
+        {
+            return HandleWebRequest<TaskItem[]>(() =>
+            {
+                var tasks = SelectTasks();
+
+                var result = (from tsk in tasks
+                              join proj in DB.Projects on tsk.Project equals proj
+                              where proj.PublicId == id && proj.Profile == CurrentProfile && tsk.Profile == CurrentProfile
+                              select tsk);
+
+                return Ok(DecorateTasks(result, timeoffset).ToArray());
+            });
+        }
     }
 }

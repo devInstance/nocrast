@@ -35,6 +35,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Watch Remove="Pages\Projects\ProjectDetails.razor" />
       <Watch Remove="Pages\Tags\Index.razor" />
       <Watch Remove="Pages\Tags\TagDetails.razor" />
       <Watch Remove="Shared\Components\NotificationBar.razor" />

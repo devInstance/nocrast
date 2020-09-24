@@ -72,5 +72,10 @@ namespace NoCrast.Client.Services.Net
         {
             return await httpClient.GetFromJsonAsync<TaskItem[]>($"{Controller}tag/{id}?timeoffset={timeoffset}");
         }
+
+        public async Task<TaskItem[]> GetTasksByProjectIdAsync(string id, int timeoffset)
+        {
+            return await httpClient.GetFromJsonAsync<TaskItem[]>($"{Controller}project/{id}?timeoffset={timeoffset}");
+        }
     }
 }

@@ -1,0 +1,201 @@
+﻿@page "/projects/{id}"
+
+@if (Item != null)
+{
+    @if (!IsEditing)
+    {
+        <span class="timer-text">
+            <strong>@Item.Title</strong>
+            @Item.Descritpion
+            <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+                <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+            </button>
+        </span>
+    }
+    else
+    {
+        <EditForm Model="@NameEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+            <InputText @bind-Value="@NameEditText"></InputText>
+            <InputText @bind-Value="@DescriptionEditText"></InputText>
+            <button type="submit" class="btn timer-button text-info">
+                <span class="oi oi-circle-check" aria-hidden="true"></span>
+            </button>
+            <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+                <span class="oi oi-circle-x" aria-hidden="true"></span>
+            </button>
+        </EditForm>
+    }
+
+    <button class="btn btn-default" @onclick="@(() => NavigateBack())">
+        <span class="oi oi-arrow-circle-left" aria-hidden="true"></span> Back
+    </button>
+    <button class="btn btn-default" @onclick="@(() => Remove())">
+        <span class="oi oi-x" aria-hidden="true"></span> Delete
+    </button>
+
+    @if (Tasks != null)
+    {
+        <ul class="timer-list">
+            @foreach (var tl in Tasks)
+            {
+                <li class="timer-list-item"><TaskView Item="tl" ShowNavigationButton="true" /></li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div>Loading Tasks...</div>
+    }
+}
+else
+{
+    <div>Loading ...</div>
+}
+
+@using System.Timers;
+
+@inject ProjectsService Service;
+@inject NotificationService NotificationServ;
+
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
+
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private ProjectItem Item { get; set; }
+
+    private TaskItem[] Tasks { get; set; }
+
+    private System.Timers.Timer timer;
+
+    private ILog log;
+
+    private bool IsEditing { get; set; }
+    private string NameEditText { get; set; }
+    private string DescriptionEditText { get; set; }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+
+        using (var scope = log.DebugScope())
+        {
+
+            NotificationServ.DataHasChanged += OnDataHasChanged;
+
+            await RefreshData();
+
+            SetUpTimer();
+        }
+    }
+
+    private void SetUpTimer()
+    {
+        timer = new System.Timers.Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            NotificationServ.DataHasChanged -= OnDataHasChanged;
+
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private async void Remove()
+    {
+        var tempId = Id;
+        Id = null;
+        if (await Service.RemoveProjectAsync(Item))
+        {
+            NavigateBack();
+        }
+        else
+        {
+            Id = tempId;
+        }
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        using (var scope = log.DebugScope())
+        {
+            RefreshData();
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/projects");
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        using (var scope = log.DebugScope())
+        {
+            if (!String.IsNullOrEmpty(Id))
+            {
+                Item = await Service.GetProjectAsync(Id);
+                if (Item == null)
+                {
+                    return false;
+                }
+
+                Tasks = await Service.GetTasksAsync(Id);
+                if (Tasks == null)
+                {
+                    return false;
+                }
+            }
+        }
+        StateHasChanged();
+
+        return true;
+    }
+
+    private void StartEditing()
+    {
+        NameEditText = Item.Title;
+        DescriptionEditText = Item.Descritpion;
+        IsEditing = true;
+    }
+
+    private async void ApplyChangesAsync()
+    {
+        IsEditing = false;
+        log.D("ApplyChanges");
+
+        Item = await Service.UpdateProjectAsync(Item, NameEditText, DescriptionEditText);
+        StateHasChanged();
+    }
+
+    private void ResetChanges()
+    {
+        IsEditing = false;
+        NameEditText = Item.Title;
+        DescriptionEditText = Item.Descritpion;
+        log.D("ResetChanges");
+    }
+
+}

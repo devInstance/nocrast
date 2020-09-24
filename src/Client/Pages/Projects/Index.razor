@@ -1,20 +1,43 @@
 ﻿@page "/projects"
 
+<input class="new-timer-edit" @bind="newProjectName" type="text" />
+<button class="btn btn-primary" @onclick="AddProject">Add Project</button>
+
+@if (Projects != null)
+{
+    <ul>
+        @foreach (var item in Projects)
+        {
+            <li>
+                <NavLink class="nav-link" href="@($"projects/{item.Id}")">
+                    <span class="badge badge-info">
+                        @item.Title
+                    </span>
+                </NavLink>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Loading ...</p>
+}
+
 @using System.Timers;
 
+@inject ProjectsService Service;
 @inject ILogProvider LogProvider;
+@inject NotificationService NotificationServ;
 
 @implements IDisposable
 
-<h1>Projects</h1>
-
-<p>Under construction :)</p>
-
 @code {
 
-    string ErrorText { get; set; }
-
     private ILog log;
+
+    private string newProjectName = "";
+
+    private ProjectItem[] Projects;
 
     protected async override Task OnInitializedAsync()
     {
@@ -23,6 +46,9 @@
         {
             using (var scope = log.DebugScope())
             {
+                NotificationServ.DataHasChanged += OnDataHasChanged;
+
+                await RefreshData();
             }
         }
         catch (Exception ex)
@@ -35,4 +61,21 @@
     {
     }
 
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        RefreshData();
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        Projects = await Service.GetProjectsAsync();
+        StateHasChanged();
+
+        return true;
+    }
+
+    public async void AddProject()
+    {
+        await Service.AddNewProjectAsync(newProjectName, "");
+    }
 }
