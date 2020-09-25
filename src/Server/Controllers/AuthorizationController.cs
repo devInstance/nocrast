@@ -15,15 +15,13 @@ namespace NoCrast.Server.Controllers
 {
     [Route("api/user/account")]
     [ApiController]
-    public class AuthorizationController : BaseController
+    public class AuthorizationController : UserBaseController
     {
-        private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
 
         public AuthorizationController(ApplicationDbContext db, UserManager<ApplicationUser> um, SignInManager<ApplicationUser> sm)
-            : base(db)
+            : base(db, um)
         {
-            userManager = um;
             signInManager = sm;
         }
 
@@ -33,7 +31,9 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginParameters parameters)
         {
-            var user = await userManager.FindByNameAsync(parameters.UserName);
+            ResetCurrentProfile();
+
+            var user = await UserManager.FindByNameAsync(parameters.UserName);
             if (user == null)
             {
                 return Unauthorized("User does not exist");
@@ -48,20 +48,22 @@ namespace NoCrast.Server.Controllers
 
             await signInManager.SignInAsync(user, parameters.RememberMe);
 
-            DB.UserProfiles.Add(new UserProfile 
+            if (CurrentProfile == null)
             {
-                Id = Guid.NewGuid(),
-                PublicId = IdGenerator.New(),
-                Status = UserStatus.LIVE,
+                DB.UserProfiles.Add(new UserProfile
+                {
+                    Id = Guid.NewGuid(),
+                    PublicId = IdGenerator.New(),
+                    Status = UserStatus.LIVE,
 
-                ApplicationUserId = user.Id,
-                Name = parameters.UserName,
-                Email = parameters.UserName,
+                    ApplicationUserId = user.Id,
+                    Name = parameters.UserName,
+                    Email = parameters.UserName,
 
-                CreateDate = DateTime.Now,
-                UpdateDate = DateTime.Now
+                    CreateDate = DateTime.Now,
+                    UpdateDate = DateTime.Now
+                });
             }
-            );
             DB.SaveChanges();
 
             return Ok();
@@ -75,7 +77,7 @@ namespace NoCrast.Server.Controllers
         {
             var user = new ApplicationUser();
             user.UserName = parameters.UserName;
-            var result = await userManager.CreateAsync(user, parameters.Password);
+            var result = await UserManager.CreateAsync(user, parameters.Password);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors.FirstOrDefault()?.Description);
@@ -95,6 +97,7 @@ namespace NoCrast.Server.Controllers
         public async Task<IActionResult> Logout()
         {
             await signInManager.SignOutAsync();
+            ResetCurrentProfile();
             return Ok();
         }
 

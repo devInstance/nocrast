@@ -6,9 +6,6 @@
     {
         <label class="text-danger">@ErrorText</label>
     }
-    <button class="btn btn-default" @onclick="@(() => NavigateBack())">
-        <span class="oi oi-arrow-circle-left" aria-hidden="true"></span> Back
-    </button>
     <button class="btn btn-default" @onclick="@(() => Remove())">
         <span class="oi oi-x" aria-hidden="true"></span> Delete
     </button>
@@ -70,6 +67,7 @@ else
 @inject ILogProvider LogProvider;
 @inject NavigationManager NavigationManager;
 @inject NotificationService NotificationServ;
+@inject ToolbarService ToolbarServ
 
 @implements IDisposable
 
@@ -101,6 +99,7 @@ else
 
         using (var scope = log.DebugScope())
         {
+            ToolbarServ.Back += OnBack;
 
             NotificationServ.DataHasChanged += OnDataHasChanged;
             NotificationServ.ErrorHasOccured += OnError;
@@ -109,6 +108,11 @@ else
 
             SetUpTimer();
         }
+    }
+
+    private void OnBack(object e, EventArgs a)
+    {
+        NavigateBack();
     }
 
     private void SetUpTimer()
@@ -123,6 +127,9 @@ else
     {
         using (var scope = log.DebugScope())
         {
+            ToolbarServ.Back -= OnBack;
+            ToolbarServ.Update(null);
+
             NotificationServ.DataHasChanged -= OnDataHasChanged;
             NotificationServ.ErrorHasOccured -= OnError;
 
@@ -189,6 +196,8 @@ else
                 Item = await Service.GetTaskAsync(Id);
                 if (Item != null)
                 {
+                    ToolbarServ.Update(Item.Title);
+
                     TimeLog = await Service.GetTimeLogItemsAsync(Item);
 
                     Projects = await PrjService.GetProjectsAsync();

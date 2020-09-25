@@ -28,13 +28,17 @@ namespace NoCrast.Server.Controllers
                     if (!String.IsNullOrEmpty(userId))
                     {
                         currentProfile = (from pr in db.UserProfiles
-                                           where pr.ApplicationUserId != null && pr.ApplicationUserId == Guid.Parse(userId)
-                                           select pr).FirstOrDefault();
+                                          where pr.ApplicationUserId != null && pr.ApplicationUserId == Guid.Parse(userId)
+                                          select pr).FirstOrDefault();
                     }
                 }
                 return currentProfile;
             }
         }
 
+        public void ResetCurrentProfile()
+        {
+            currentProfile = null;
+        }
     }
 }

@@ -1,16 +1,11 @@
 ﻿@page "/"
 
-@using System.Timers;
 
-@inject TasksService Service;
-@inject ILogProvider LogProvider;
-@inject NotificationService NotificationServ;
-
-@implements IDisposable
-
+@if (showAddTimer)
+{
 <input class="new-timer-edit" @bind="title" type="text" />
-
 <button class="btn btn-primary" @onclick="AddTimer">Add Timer</button>
+}
 
 @if (TasksList != null)
 {
@@ -26,6 +21,16 @@ else
     <p>Loading ...</p>
 }
 
+@using System.Timers;
+
+@inject TasksService Service;
+@inject ILogProvider LogProvider;
+@inject NotificationService NotificationServ;
+@inject ToolbarService ToolbarServ
+
+@implements IDisposable
+
+
 @code {
 
     private TaskItem[] TasksList { get; set; }
@@ -36,6 +41,8 @@ else
 
     private ILog log;
 
+    private bool showAddTimer = false;
+
     protected async override Task OnInitializedAsync()
     {
         log = LogProvider.CreateLogger(this);
@@ -44,6 +51,9 @@ else
             using (var scope = log.DebugScope())
             {
                 SetUpTimer();
+
+                ToolbarServ.Add += DisplayAddTimer;
+                ToolbarServ.Update(null);
 
                 NotificationServ.DataHasChanged += OnDataHasChanged;
 
@@ -68,6 +78,9 @@ else
     {
         using (var scope = log.DebugScope())
         {
+            ToolbarServ.Add -= DisplayAddTimer;
+            ToolbarServ.Update(null);
+
             if (timer != null)
             {
                 timer.Elapsed -= OnTimedEvent;
@@ -98,5 +111,13 @@ else
     private async void AddTimer()
     {
         await Service.AddNewTaskAsync(title);
+        showAddTimer = false;
+        StateHasChanged();
+    }
+
+    private void DisplayAddTimer(object e, EventArgs a)
+    {
+        showAddTimer = true;
+        StateHasChanged();
     }
 }

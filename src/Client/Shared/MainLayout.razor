@@ -4,11 +4,8 @@
         <div class="sidebar">
             <NavMenu />
         </div>
-
         <div class="main">
-            <div class="top-row px-4">
-                <button type="button" class="btn btn-link ml-md-auto" @onclick="@LogoutClick">Logout</button>
-            </div>
+            <ToolBar />
 
             @Body
         </div>
@@ -31,11 +28,5 @@
         {
             navigationManager.NavigateTo("/login");
         }
-    }
-
-    async Task LogoutClick()
-    {
-        await authStateProvider.LogoutAsync();
-        navigationManager.NavigateTo("/login");
     }
 }

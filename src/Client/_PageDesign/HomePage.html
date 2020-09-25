@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link href="../wwwroot/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="../wwwroot/css/site.css" rel="stylesheet" />
+    <title></title>
+</head>
+<body>
+    <app>
+        <!--MainLayout.razor-->
+        <div class="sidebar">
+            <!--NavMenu.razor-->
+            <div class="top-row pl-4 navbar navbar-dark">
+                <a class="navbar-brand" href="">NoCrast</a>
+                <button class="navbar-toggler">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse">
+                <ul class="nav flex-column">
+                    <li class="nav-item px-3">
+                        <a href="" class="nav-link active">
+                            <span class="oi oi-clock" aria-hidden="true"></span> Timer
+                        </a>
+                    </li>
+                    <li class="nav-item px-3">
+                        <a href="projects" class="nav-link">
+                            <span class="oi oi-project" aria-hidden="true"></span> Projects
+                        </a>
+                    </li>
+                    <li class="nav-item px-3">
+                        <a href="tags" class="nav-link">
+                            <span class="oi oi-tag" aria-hidden="true"></span> Tags
+                        </a>
+                    </li>
+                    <li class="nav-item px-3">
+                        <a href="reports" class="nav-link">
+                            <span class="oi oi-list-rich" aria-hidden="true"></span> Reports
+                        </a>
+                    </li>
+                    <li class="nav-item px-3">
+                        <a href="reports" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                            <span class="oi oi-person" aria-hidden="true"></span> Account
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Profile</a>
+                            <a class="dropdown-item" href="#">Change password</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Logout</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="top-row px-4">
+                <button type="button" class="btn mr-auto">
+                    <span class="oi oi-chevron-left" aria-hidden="true"></span>
+                </button>
+                <h2 class="mr-1">Title</h2>
+                <button type="button" class="btn ml-auto">
+                    <span class="oi oi-plus" aria-hidden="true"></span>
+                </button>
+            </div>
+
+            <!--@Body-->
+            <div class="content px-4">
+
+            </div>
+
+        </div>
+    </app>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" `></script>
+</body>
+</html>

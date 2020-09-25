@@ -28,6 +28,7 @@ else
 @inject ProjectsService Service;
 @inject ILogProvider LogProvider;
 @inject NotificationService NotificationServ;
+@inject ToolbarService ToolbarServ;
 
 @implements IDisposable
 
@@ -46,6 +47,8 @@ else
         {
             using (var scope = log.DebugScope())
             {
+                ToolbarServ.Add += ShowAddProject;
+                ToolbarServ.Update(null);
                 NotificationServ.DataHasChanged += OnDataHasChanged;
 
                 await RefreshData();
@@ -59,11 +62,16 @@ else
 
     public void Dispose()
     {
+        ToolbarServ.Add -= ShowAddProject;
+        ToolbarServ.Update(null);
     }
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
-        RefreshData();
+        using (var scope = log.DebugScope())
+        {
+            RefreshData();
+        }
     }
 
     private async Task<bool> RefreshData()
@@ -72,6 +80,11 @@ else
         StateHasChanged();
 
         return true;
+    }
+
+    public async void ShowAddProject(object e, EventArgs a)
+    {
+        await Service.AddNewProjectAsync(newProjectName, "");
     }
 
     public async void AddProject()

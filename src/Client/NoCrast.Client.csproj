@@ -31,15 +31,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Remove="Shared\Components\NotificationBar.razor" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Watch Remove="Pages\Projects\ProjectDetails.razor" />
-      <Watch Remove="Pages\Tags\Index.razor" />
-      <Watch Remove="Pages\Tags\TagDetails.razor" />
-      <Watch Remove="Shared\Components\NotificationBar.razor" />
-      <Watch Remove="Shared\Components\TimeLogPanelItemView.razor" />
+      <Watch Remove="Pages\Account\ChangePassword.razor" />
+      <Watch Remove="Pages\Account\Index.razor" />
+      <Watch Remove="Shared\ToolBar.razor" />
     </ItemGroup>
 
 </Project>
