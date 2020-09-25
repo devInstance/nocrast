@@ -12,6 +12,7 @@ namespace NoCrast.Shared.Model
 
         public string Descritpion { get; set; }
 
+        [Required]
         public ProjectItem Project { get; set; }
 
         public TimeLogItem ActiveTimeLogItem { get; set; }

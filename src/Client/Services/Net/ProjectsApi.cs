@@ -44,19 +44,5 @@ namespace NoCrast.Client.Services.Net
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<bool>().Result;
         }
-
-        public async Task<ProjectItem> AddTaskToProjectAsync(string projectId, string taskId)
-        {
-            var result = await httpClient.PostAsJsonAsync($"{Controller}{projectId}/task", taskId);
-            result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<ProjectItem>().Result;
-        }
-
-        public async Task<bool> RemoveTaskToProjectAsync(string projectId, string taskId)
-        {
-            var result = await httpClient.DeleteAsync($"{Controller}{projectId}/task/{taskId}");
-            result.EnsureSuccessStatusCode();
-            return result.Content.ReadFromJsonAsync<bool>().Result;
-        }
     }
 }

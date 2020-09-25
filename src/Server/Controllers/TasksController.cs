@@ -59,7 +59,7 @@ namespace NoCrast.Server.Controllers
                        } : null,
                        TimeLogCount = tks.TimeLog.Count,
                        Title = tks.Title,
-                       Project = tks.Project != null ? new ProjectItem { Id = tks.Project.PublicId, Title = tks.Project.Title } : null,
+                       Project = tks.Project != null ? new ProjectItem { Id = tks.Project.PublicId, Title = tks.Project.Title, Descritpion = tks.Project.Descritpion } : null,
                        Descritpion = tks.Descritpion,
                        TotalTimeSpent = (from tl in DB.TimeLog
                                          where tl.TaskId == tks.Id
@@ -135,7 +135,7 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<TaskItem> UpdateTask(string id, [FromBody] TaskItem task)
+        public ActionResult<TaskItem> UpdateTask(string id, [FromBody] TaskItem task, int timeoffset)
         {
             return HandleWebRequest<TaskItem>(() =>
             {
@@ -151,10 +151,31 @@ namespace NoCrast.Server.Controllers
                 }
 
                 taskRecord.Title = task.Title;
+                if (task.Project != null)
+                {
+                    var projectRecord = (from prj in DB.Projects
+                                      where prj.PublicId == task.Project.Id && prj.Profile == CurrentProfile
+                                      select prj).FirstOrDefault();
+
+                    if (projectRecord == null)
+                    {
+                        return NotFound();
+                    }
+
+                    taskRecord.Project = projectRecord;
+                }
+                else
+                {
+                    taskRecord.Project = null;
+                }
                 taskRecord.UpdateDate = now;
                 DB.SaveChanges();
 
-                return Ok(task);
+                var response = (from ts in DecorateTasks(SelectTasks(), timeoffset)
+                                where ts.Id == taskRecord.PublicId
+                                select ts).FirstOrDefault();
+
+                return Ok(response);
             });
         }
 

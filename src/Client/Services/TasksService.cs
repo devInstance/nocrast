@@ -446,7 +446,6 @@ namespace NoCrast.Client.Services
             }
         }
 
-
         public async Task<TagItem> RemoveTagAsync(TaskItem item, TagItem tag)
         {
             using (var l = Log.DebugScope())
@@ -461,6 +460,29 @@ namespace NoCrast.Client.Services
                     NotifyNetworkError(ex);
                 }
                 return tag;
+            }
+        }
+
+        public async Task<TaskItem> UpdateProjectAsync(TaskItem item, string id)
+        {
+            using (var l = Log.DebugScope())
+            {
+                TaskItem newTask;
+                try
+                {
+                    item.Project = new ProjectItem { Id = id };
+                    newTask = await TaskApi.UpdateTaskAsync(item.Id, item, TimeProvider.UtcTimeOffset);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    newTask = item;
+                    newTask.ClientId = IdGenerator.New();
+
+                    NotifyNetworkError(ex);
+                }
+
+                return newTask;
             }
         }
     }

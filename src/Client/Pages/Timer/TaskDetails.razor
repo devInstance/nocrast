@@ -12,7 +12,30 @@
     <button class="btn btn-default" @onclick="@(() => Remove())">
         <span class="oi oi-x" aria-hidden="true"></span> Delete
     </button>
-
+    @if (Item.Project == null)
+    {
+        <button class="btn btn-default" data-toggle="dropdown">
+            <span class="oi oi-plus" aria-hidden="true"></span> Project
+        </button>
+    }
+    else
+    {
+        <span><strong>@Item.Project.Title</strong></span>
+        <button class="btn btn-default" data-toggle="dropdown">
+            Change Project
+        </button>
+    }
+    <div class="dropdown-menu">
+        @if (Projects != null && Projects.Length > 0)
+        {
+            <ul>
+                @foreach (var project in Projects)
+                {
+                    <li><button class="btn btn-default timer-button" @onclick="@(() => AddProjectByIdAsync(project.Id))"><span class="badge badge-info">@project.Title</span></button></li>
+                }
+            </ul>
+        }
+    </div>
     <ul class="timer-list">
         <TaskView Item="Item" ShowNavigationButton="false" />
         <li><span class="timer-text">@String.Format("This Week: {0:F1}", Item.GetTotalHoursSpentThisWeek()) hour(s)</span></li>
@@ -43,6 +66,7 @@ else
 @using System.Timers;
 
 @inject TasksService Service;
+@inject ProjectsService PrjService;
 @inject ILogProvider LogProvider;
 @inject NavigationManager NavigationManager;
 @inject NotificationService NotificationServ;
@@ -55,6 +79,7 @@ else
 
     private TaskItem Item { get; set; }
     private List<TimeLogItem> TimeLog { get; set; }
+    private ProjectItem[] Projects { get; set; }
 
     private System.Timers.Timer timer;
 
@@ -165,6 +190,8 @@ else
                 if (Item != null)
                 {
                     TimeLog = await Service.GetTimeLogItemsAsync(Item);
+
+                    Projects = await PrjService.GetProjectsAsync();
                 }
                 else
                 {
@@ -176,5 +203,11 @@ else
         StateHasChanged();
 
         return true;
+    }
+
+    private async void AddProjectByIdAsync(string id)
+    {
+        Item = await Service.UpdateProjectAsync(Item, id);
+        StateHasChanged();
     }
 }
