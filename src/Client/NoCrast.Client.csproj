@@ -31,8 +31,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Watch Remove="Pages\Account\AccountIndex.razor" />
       <Watch Remove="Pages\Account\ChangePassword.razor" />
-      <Watch Remove="Pages\Account\Index.razor" />
+      <Watch Remove="Pages\Projects\ProjectsIndex.razor" />
+      <Watch Remove="Pages\Reports\ReportsIndex.razor" />
+      <Watch Remove="Pages\Tags\tagsIndex.razor" />
+      <Watch Remove="Pages\Tasks\TasksIndex.razor" />
       <Watch Remove="Shared\ToolBar.razor" />
     </ItemGroup>
 
