@@ -1,0 +1,104 @@
+﻿<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">Add Timer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" placeholder="Timer's name" aria-label="Timer's name" @bind="TaskTitle" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="OnAddTask">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addTagModal" tabindex="-1" aria-labelledby="addTagModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTagModalLabel">Add Tag</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" placeholder="Tag's name" aria-label="Tag's name" @bind="TagTitle" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="OnAddTag">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProjectModalLabel">Add Project</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" placeholder="Project's name" aria-label="Project's name" @bind="ProjectTitle" />
+                <input type="text" class="form-control" placeholder="Project's description" aria-label="Project's description" @bind="ProjectDescription" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="OnAddProject">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@inject ILogProvider LogProvider;
+@inject TasksService TasksServ;
+@inject TagsService TagsServ;
+@inject ProjectsService ProjectsServ;
+
+@code {
+    private ILog log;
+
+    string TaskTitle { get; set; }
+    string TagTitle { get; set; }
+    string ProjectTitle { get; set; }
+    string ProjectDescription { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        using (var l = log.DebugScope())
+        {
+        }
+    }
+
+    private async void OnAddTask()
+    {
+        using (var l = log.DebugScope())
+        {
+            await TasksServ.AddNewTaskAsync(TaskTitle);
+        }
+    }
+
+    private async void OnAddTag()
+    {
+        using (var l = log.DebugScope())
+        {
+            await TagsServ.AddNewTagAsync(TagTitle);
+        }
+    }
+
+    private async void OnAddProject()
+    {
+        using (var l = log.DebugScope())
+        {
+            await ProjectsServ.AddNewProjectAsync(ProjectTitle, ProjectDescription);
+        }
+    }
+}

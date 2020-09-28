@@ -1,9 +1,5 @@
 ﻿@page "/tags"
 
-<input class="new-timer-edit" @bind="newTagName" type="text" />
-
-<button class="btn btn-primary" @onclick="AddTag">Add Tag</button>
-
 @if (Tags != null)
 {
     <ul>
@@ -28,12 +24,13 @@ else
 @inject NotificationService NotificationServ;
 @inject ILogProvider LogProvider;
 @inject ITimeProvider TimeProvider;
+@inject ToolbarService ToolbarServ;
+
+@implements IDisposable
 
 @code {
 
     private ILog log;
-
-    private string newTagName = "";
 
     private TagItem[] Tags;
 
@@ -44,6 +41,9 @@ else
         {
             using (var scope = log.DebugScope())
             {
+                ToolbarServ.EnableAddTag = true;
+                ToolbarServ.Update();
+
                 NotificationServ.DataHasChanged += OnDataHasChanged;
 
                 await RefreshData();
@@ -55,6 +55,11 @@ else
         }
     }
 
+    public void Dispose()
+    {
+        ToolbarServ.EnableAddTag = false;
+        ToolbarServ.Update();
+    }
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
@@ -69,8 +74,4 @@ else
         return true;
     }
 
-    private async void AddTag()
-    {
-        await Service.AddNewTagAsync(newTagName);
-    }
 }

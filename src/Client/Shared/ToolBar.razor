@@ -1,4 +1,4 @@
-﻿<div class="top-row px-4">
+﻿<div class="px-3 pt-3 pb-1">
     @if (IsBack)
     {
         <button type="button" class="btn mr-auto" @onclick="OnBack">
@@ -7,12 +7,24 @@
     }
     @if (!String.IsNullOrEmpty(Title))
     {
-        <h2 class="mr-1">@Title</h2>
+        <h2 class="mr-1">@ToolbarServ.Title</h2>
     }
-    @if (IsAdd)
+    @if (ToolbarServ.EnableAddProject)
     {
-        <button type="button" class="btn ml-auto" @onclick="OnAdd">
-            <span class="oi oi-plus" aria-hidden="true"></span>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProjectModal" title="New project">
+            New Project
+        </button>
+    }
+    @if (ToolbarServ.EnableAddTag)
+    {
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTagModal" title="New tag">
+            New Tag
+        </button>
+    }
+    @if (ToolbarServ.EnableAddTask)
+    {
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal" title="New timer">
+            New Timer
         </button>
     }
 </div>
@@ -25,7 +37,6 @@
 
     string Title { get; set; }
     bool IsBack { get; set; }
-    bool IsAdd { get; set; }
 
     private ILog log;
 
@@ -43,10 +54,6 @@
     {
         using (var l = log.DebugScope())
         {
-            Title = ToolbarServ.Title;
-            IsBack = ToolbarServ.IsBack;
-            IsAdd = ToolbarServ.IsAdd;
-
             StateHasChanged();
         }
     }
@@ -56,14 +63,6 @@
         using (var l = log.DebugScope())
         {
             ToolbarServ.InvokeBack();
-        }
-    }
-
-    private void OnAdd()
-    {
-        using (var l = log.DebugScope())
-        {
-            ToolbarServ.InvokeAdd();
         }
     }
 }

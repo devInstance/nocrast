@@ -10,11 +10,12 @@ namespace NoCrast.Client.Services
     {
         public event EventHandler ToolbarHasChanged;
         public event EventHandler Back;
-        public event EventHandler Add;
 
         public string Title { get; private set; }
-        public bool IsBack { get { return Back != null; } }
-        public bool IsAdd { get { return Add != null; } }
+        public bool EnableBack { get { return Back != null; } }
+        public bool EnableAddProject { get; set; }
+        public bool EnableAddTag { get; set; }
+        public bool EnableAddTask { get; set; }
 
         private ILog log;
 
@@ -22,6 +23,7 @@ namespace NoCrast.Client.Services
         {
             log = lp.CreateLogger(this);
         }
+
         public void Update(string title)
         {
             using(var l = log.DebugScope())
@@ -30,19 +32,20 @@ namespace NoCrast.Client.Services
                 ToolbarHasChanged?.Invoke(this, null);
             }
         }
+
+        public void Update()
+        {
+            using (var l = log.DebugScope())
+            {
+                ToolbarHasChanged?.Invoke(this, null);
+            }
+        }
+
         public void InvokeBack()
         {
             using (var l = log.DebugScope())
             {
                 Back?.Invoke(this, null);
-            }
-        }
-
-        public void InvokeAdd()
-        {
-            using (var l = log.DebugScope())
-            {
-                Add?.Invoke(this, null);
             }
         }
     }

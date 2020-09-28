@@ -1,8 +1,5 @@
 ﻿@page "/projects"
 
-<input class="new-timer-edit" @bind="newProjectName" type="text" />
-<button class="btn btn-primary" @onclick="AddProject">Add Project</button>
-
 @if (Projects != null)
 {
     <ul>
@@ -36,8 +33,6 @@ else
 
     private ILog log;
 
-    private string newProjectName = "";
-
     private ProjectItem[] Projects;
 
     protected async override Task OnInitializedAsync()
@@ -47,8 +42,8 @@ else
         {
             using (var scope = log.DebugScope())
             {
-                ToolbarServ.Add += ShowAddProject;
-                ToolbarServ.Update(null);
+                ToolbarServ.EnableAddProject = true;
+                ToolbarServ.Update();
                 NotificationServ.DataHasChanged += OnDataHasChanged;
 
                 await RefreshData();
@@ -62,7 +57,7 @@ else
 
     public void Dispose()
     {
-        ToolbarServ.Add -= ShowAddProject;
+        ToolbarServ.EnableAddProject = false;
         ToolbarServ.Update(null);
     }
 
@@ -80,15 +75,5 @@ else
         StateHasChanged();
 
         return true;
-    }
-
-    public async void ShowAddProject(object e, EventArgs a)
-    {
-        await Service.AddNewProjectAsync(newProjectName, "");
-    }
-
-    public async void AddProject()
-    {
-        await Service.AddNewProjectAsync(newProjectName, "");
     }
 }

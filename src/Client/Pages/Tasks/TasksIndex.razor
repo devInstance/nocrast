@@ -1,15 +1,8 @@
 ﻿@page "/"
 
-
-@if (showAddTimer)
-{
-<input class="new-timer-edit" @bind="title" type="text" />
-<button class="btn btn-primary" @onclick="AddTimer">Add Timer</button>
-}
-
 @if (TasksList != null)
 {
-    <ul class="timer-list">
+    <ul class="p-0 m-0">
         @foreach (var item in TasksList)
         {
             <TaskView Item="item" ShowNavigationButton="true" />
@@ -26,34 +19,32 @@ else
 @inject TasksService Service;
 @inject ILogProvider LogProvider;
 @inject NotificationService NotificationServ;
-@inject ToolbarService ToolbarServ
+@inject ToolbarService ToolbarServ;
+@inject IJSRuntime JSRuntime;
 
-@implements IDisposable
+@implements IDisposable;
 
 
 @code {
 
     private TaskItem[] TasksList { get; set; }
 
-    private string title = "";
-
     private System.Timers.Timer timer;
 
     private ILog log;
 
-    private bool showAddTimer = false;
-
     protected async override Task OnInitializedAsync()
     {
         log = LogProvider.CreateLogger(this);
+
         try
         {
             using (var scope = log.DebugScope())
             {
                 SetUpTimer();
 
-                ToolbarServ.Add += DisplayAddTimer;
-                ToolbarServ.Update(null);
+                ToolbarServ.EnableAddTask = true;
+                ToolbarServ.Update();
 
                 NotificationServ.DataHasChanged += OnDataHasChanged;
 
@@ -78,8 +69,8 @@ else
     {
         using (var scope = log.DebugScope())
         {
-            ToolbarServ.Add -= DisplayAddTimer;
-            ToolbarServ.Update(null);
+            ToolbarServ.EnableAddTask = false;
+            ToolbarServ.Update();
 
             if (timer != null)
             {
@@ -105,19 +96,6 @@ else
     private void OnTimedEvent(Object source, ElapsedEventArgs e)
     {
         log.D("OnTimedEvent");
-        StateHasChanged();
-    }
-
-    private async void AddTimer()
-    {
-        await Service.AddNewTaskAsync(title);
-        showAddTimer = false;
-        StateHasChanged();
-    }
-
-    private void DisplayAddTimer(object e, EventArgs a)
-    {
-        showAddTimer = true;
         StateHasChanged();
     }
 }
