@@ -2,13 +2,6 @@
 
 @if (Item != null)
 {
-    @if (!String.IsNullOrEmpty(ErrorText))
-    {
-        <label class="text-danger">@ErrorText</label>
-    }
-    <button class="btn btn-default" @onclick="@(() => Remove())">
-        <span class="oi oi-x" aria-hidden="true"></span> Delete
-    </button>
     @if (Item.Project == null)
     {
         <button class="btn btn-default" data-toggle="dropdown">
@@ -100,9 +93,9 @@ else
         using (var scope = log.DebugScope())
         {
             ToolbarServ.Back += OnBack;
+            ToolbarServ.Delete += OnDelete;
 
             NotificationServ.DataHasChanged += OnDataHasChanged;
-            NotificationServ.ErrorHasOccured += OnError;
 
             await RefreshData();
 
@@ -113,6 +106,11 @@ else
     private void OnBack(object e, EventArgs a)
     {
         NavigateBack();
+    }
+
+    private void OnDelete(object e, EventArgs a)
+    {
+        Remove();
     }
 
     private void SetUpTimer()
@@ -128,10 +126,10 @@ else
         using (var scope = log.DebugScope())
         {
             ToolbarServ.Back -= OnBack;
+            ToolbarServ.Delete -= OnDelete;
             ToolbarServ.Update(null);
 
             NotificationServ.DataHasChanged -= OnDataHasChanged;
-            NotificationServ.ErrorHasOccured -= OnError;
 
             if (timer != null)
             {
@@ -165,20 +163,6 @@ else
         using (var scope = log.DebugScope())
         {
             RefreshData();
-        }
-    }
-
-    private void OnError(Object sender, ServiceErrorEventArgs e)
-    {
-        log.E($"IsUIError {e.IsUIError} Message {e.Message}");
-
-        if (e.IsUIError)
-        {
-            ErrorText = e.Message;
-        }
-        else
-        {
-            ErrorText = "";
         }
     }
 

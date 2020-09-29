@@ -1,42 +1,52 @@
 ﻿<div class="px-3 pt-3 pb-1">
-    @if (IsBack)
-    {
-        <button type="button" class="btn mr-auto" @onclick="OnBack">
-            <span class="oi oi-chevron-left" aria-hidden="true"></span>
-        </button>
-    }
-    @if (!String.IsNullOrEmpty(Title))
-    {
-        <h2 class="mr-1">@ToolbarServ.Title</h2>
-    }
-    @if (ToolbarServ.EnableAddProject)
-    {
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProjectModal" title="New project">
-            New Project
-        </button>
-    }
-    @if (ToolbarServ.EnableAddTag)
-    {
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTagModal" title="New tag">
-            New Tag
-        </button>
-    }
-    @if (ToolbarServ.EnableAddTask)
-    {
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal" title="New timer">
-            New Timer
-        </button>
-    }
+        <div class="row p-0">
+            <div class="col-auto ml-0">
+                @if (ToolbarServ.EnableBack)
+                {
+                    <button type="button" class="btn" @onclick="OnBack" title="Back">
+                        <span class="oi oi-chevron-left" aria-hidden="true"></span>
+                    </button>
+                }
+                @if (ToolbarServ.EnableAddProject)
+                {
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProjectModal" title="New project">
+                        New Project
+                    </button>
+                }
+                @if (ToolbarServ.EnableAddTag)
+                {
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTagModal" title="New tag">
+                        New Tag
+                    </button>
+                }
+                @if (ToolbarServ.EnableAddTask)
+                {
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal" title="New timer">
+                        New Timer
+                    </button>
+                }
+            </div>
+            <div class="col-auto mr-auto">
+                @if (!String.IsNullOrEmpty(ToolbarServ.Title))
+                {
+                    <h2>@ToolbarServ.Title</h2>
+                }
+            </div>
+            <div class="col-auto">
+                @if (ToolbarServ.EnableDelete)
+                {
+                    <button type="button" class="btn" data-toggle="modal" data-target="#addDeleteModal" title="Delete">
+                        <span class="oi oi-trash" aria-hidden="true"></span>
+                    </button>
+                }
+            </div>
+        </div>
 </div>
-
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
 @inject ILogProvider LogProvider;
 
 @code {
-
-    string Title { get; set; }
-    bool IsBack { get; set; }
 
     private ILog log;
 

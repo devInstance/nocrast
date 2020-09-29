@@ -10,12 +10,14 @@ namespace NoCrast.Client.Services
     {
         public event EventHandler ToolbarHasChanged;
         public event EventHandler Back;
+        public event EventHandler Delete;
 
         public string Title { get; private set; }
         public bool EnableBack { get { return Back != null; } }
         public bool EnableAddProject { get; set; }
         public bool EnableAddTag { get; set; }
         public bool EnableAddTask { get; set; }
+        public bool EnableDelete { get { return Delete != null; } }
 
         private ILog log;
 
@@ -46,6 +48,14 @@ namespace NoCrast.Client.Services
             using (var l = log.DebugScope())
             {
                 Back?.Invoke(this, null);
+            }
+        }
+
+        public void InvokeDelete()
+        {
+            using (var l = log.DebugScope())
+            {
+                Delete?.Invoke(this, null);
             }
         }
     }
