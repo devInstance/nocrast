@@ -2,46 +2,134 @@
 
 @if (Item != null)
 {
-    @if (Item.Project == null)
-    {
-        <button class="btn btn-default" data-toggle="dropdown">
-            <span class="oi oi-plus" aria-hidden="true"></span> Project
-        </button>
-    }
-    else
-    {
-        <span><strong>@Item.Project.Title</strong></span>
-        <button class="btn btn-default" data-toggle="dropdown">
-            Change Project
-        </button>
-    }
-    <div class="dropdown-menu">
-        @if (Projects != null && Projects.Length > 0)
-        {
-            <ul>
-                @foreach (var project in Projects)
+    <div class="row">
+        <div class="col">
+            @if (Item.Project == null)
+            {
+                <button class="btn btn-primary btn-sm" data-toggle="dropdown">
+                    Add Project
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-primary btn-sm" data-toggle="dropdown" title="Change project">
+                    @Item.Project.Title
+                </button>
+            }
+            <div class="dropdown-menu">
+                @if (Projects != null && Projects.Length > 0)
                 {
-                    <li><button class="btn btn-default timer-button" @onclick="@(() => AddProjectByIdAsync(project.Id))"><span class="badge badge-info">@project.Title</span></button></li>
+                    <ul>
+                        @foreach (var project in Projects)
+                        {
+                            <li><button class="btn btn-default" @onclick="@(() => AddProjectByIdAsync(project.Id))"><span class="badge badge-info">@project.Title</span></button></li>
+                        }
+                    </ul>
                 }
-            </ul>
-        }
+            </div>
+        </div>
     </div>
-    <ul class="timer-list">
-        <TaskView Item="Item" ShowNavigationButton="false" />
-        <li><span class="timer-text">@String.Format("This Week: {0:F1}", Item.GetTotalHoursSpentThisWeek()) hour(s)</span></li>
-        <li><span class="timer-text">@String.Format("Total: {0:F1}", Item.GetTotalHoursSpent()) hour(s)</span></li>
-    </ul>
+    <div class="row pt-2">
+        <div class="col">
+            <div class="d-flex flex-row">
+                <div class="alert @(Item.IsRunning ? "alert-danger" : "alert-info") container-fluid timer-link" role="document">
+                    <div class="d-flex align-items-center">
+                        <span class="timer-text timer-text-timespan-lg">
+                            @String.Format("{0:hh}:{0:mm}:{0:ss}", Item.GetElapsedTimeSpan(TimeProvider))
+                        </span>
+                        @if (IsActive)
+                        {
+                            <button class="btn btn-default ml-2" @onclick="@(() => Stop())">
+                                <span class="oi oi-media-pause timer-text-timespan-lg" aria-hidden="true"></span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-default ml-2" @onclick="@(() => Start())">
+                                <span class="oi oi-media-play timer-text-timespan-lg" aria-hidden="true"></span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button class="btn btn-default timer-button" data-toggle="dropdown">
+                @if (TagLabels != null && TagLabels.Length > 0)
+                {
+                    @foreach (var label in TagLabels)
+                    {
+                        <span class="badge badge-info">@label</span>
+                    }
+                }
+                <span class="badge badge-primary">Add Tag</span>
+            </button>
+            <div class="dropdown-menu">
+                @if (NotAssignedTags != null && NotAssignedTags.Length > 0)
+                {
+                    <ul>
+                        @foreach (var tag in NotAssignedTags)
+                        {
+                            <li>
+                                <button class="btn btn-default timer-button" @onclick="@(() => AddTagByIdAsync(tag.Id))">
+                                    <span class="badge badge-info">@tag.Name</span>
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+                <EditForm Model="@NewTagLabel" OnValidSubmit="@(() => AddTagAsync())" class="px-4 py-3">
+                    <div class="form-group">
+                        <label class="form-check-label" for="newTagEdit">
+                            New tag
+                        </label>
+                        <InputText @bind-Value="@NewTagLabel" class="form-control" placeholder="tag name" id="newTagEdit"></InputText>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <ul class="list-group list-group-horizontal">
+                <li class="p-2">
+                    <img src="/img/today.svg" width="32" height="32" alt="Today"  title="Today"/>
+                    <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider))</strong> <small>hour(s)</small></span>
+                </li>
+                <li class="p-2">
+                    <img src="/img/week.svg" width="32" height="32" alt="This Week" title="This Week"/>
+                    <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek())</strong> <small>hour(s)</small></span>
+                </li>
+                <li class="p-2">
+                    <img src="/img/total.svg" width="32" height="32" alt="Total" title="Total"/>
+                    <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpent())</strong> <small>hour(s)</small></span>
+                </li>
+            </ul>
+        </div>
+    </div>
     @if (TimeLog != null)
     {
-        <ul class="timer-list">
-            @foreach (var tl in TimeLog)
-            {
-                <li class="timer-list-item">
-                    <TimeLogPanelItemView Item="Item" Log="tl" IsActive="IsActive">
-                    </TimeLogPanelItemView>
-                </li>
-            }
-        </ul>
+        <div class="row pt-2">
+            <div class="col">
+                <h4>Time log</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <ul class="px-0 py-2 m-0">
+                    @foreach (var tl in TimeLog)
+                    {
+                        <li class="timer-list-item">
+                            <TimeLogPanelItemView Item="Item" Log="tl" IsActive="IsActive">
+                            </TimeLogPanelItemView>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
     }
     else
     {
@@ -61,6 +149,7 @@ else
 @inject NavigationManager NavigationManager;
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ
+@inject ITimeProvider TimeProvider;
 
 @implements IDisposable
 
@@ -75,6 +164,30 @@ else
     private System.Timers.Timer timer;
 
     private ILog log;
+
+    //tags begin
+    private TagItem[] Tags { get; set; }
+
+    private TagItem[] NotAssignedTags { get; set; }
+
+    private string[] TagLabels
+    {
+        get
+        {
+            //TODO: run only once and cache, optimize
+            var result = new List<string>();
+            if (Tags == null) return null;
+            for (int i = 0; i < Tags.Length; i++)
+            {
+                result.Add(Tags[i].Name);
+            }
+            return result.ToArray();
+        }
+    }
+
+    private string NewTagLabel { get; set; }
+
+    //tags end
 
     public bool IsActive
     {
@@ -94,23 +207,29 @@ else
         {
             ToolbarServ.Back += OnBack;
             ToolbarServ.Delete += OnDelete;
+            ToolbarServ.TitleChanged += OnTitleChanged;
 
             NotificationServ.DataHasChanged += OnDataHasChanged;
 
-            await RefreshData();
+            await RefreshDataAsync();
 
             SetUpTimer();
         }
     }
 
-    private void OnBack(object e, EventArgs a)
+    private void OnBack(object value)
     {
         NavigateBack();
     }
 
-    private void OnDelete(object e, EventArgs a)
+    private void OnDelete(object value)
     {
         Remove();
+    }
+
+    private async void OnTitleChanged(object value)
+    {
+        Item = await Service.UpdateTaskTitleAsync(Item, value.ToString());
     }
 
     private void SetUpTimer()
@@ -162,7 +281,7 @@ else
     {
         using (var scope = log.DebugScope())
         {
-            RefreshData();
+            RefreshDataAsync();
         }
     }
 
@@ -171,10 +290,11 @@ else
         NavigationManager.NavigateTo("/");
     }
 
-    private async Task<bool> RefreshData()
+    private async Task<bool> RefreshDataAsync()
     {
         using (var scope = log.DebugScope())
         {
+            NewTagLabel = "";
             if (!String.IsNullOrEmpty(Id))
             {
                 Item = await Service.GetTaskAsync(Id);
@@ -185,6 +305,9 @@ else
                     TimeLog = await Service.GetTimeLogItemsAsync(Item);
 
                     Projects = await PrjService.GetProjectsAsync();
+
+                    Tags = await Service.GetTagsAsync(Item);
+                    NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);
                 }
                 else
                 {
@@ -203,4 +326,32 @@ else
         Item = await Service.UpdateProjectAsync(Item, id);
         StateHasChanged();
     }
+
+
+    private void Start()
+    {
+        Service.StartTaskAsync(Item);
+    }
+
+    private void Stop()
+    {
+        Service.StopTaskAsync(Item);
+    }
+
+    private async void AddTagAsync()
+    {
+        log.D("ApplyChanges");
+
+        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
+        //await RefreshDataAsync();
+    }
+
+    private async void AddTagByIdAsync(string id)
+    {
+        log.D("ApplyChanges");
+
+        await Service.AddTagAsync(Item, id);
+        //await RefreshDataAsync();
+    }
+
 }

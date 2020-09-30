@@ -21,6 +21,11 @@ namespace NoCrast.Client.Services.Net
             return await httpClient.GetFromJsonAsync<TaskItem[]>($"{Controller}?timeoffset={timeoffset}");
         }
 
+        public async Task<TaskItem> GetTaskAsync(string id, int timeoffset)
+        {
+            return await httpClient.GetFromJsonAsync<TaskItem>($"{Controller}{id}?timeoffset={timeoffset}");
+        }
+
         public async Task<TaskItem> AddTaskAsync(TaskItem task, int timeoffset)
         {
             var result = await httpClient.PostAsJsonAsync($"{Controller}?timeoffset={timeoffset}", task);

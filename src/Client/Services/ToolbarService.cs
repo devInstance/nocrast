@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services
 {
+    public delegate void ToolbarEventHandler(object value);
+
     public class ToolbarService
     {
-        public event EventHandler ToolbarHasChanged;
-        public event EventHandler Back;
-        public event EventHandler Delete;
+        public event ToolbarEventHandler ToolbarHasChanged;
+        public event ToolbarEventHandler Back;
+        public event ToolbarEventHandler Delete;
+        public event ToolbarEventHandler TitleChanged;
 
         public string Title { get; private set; }
         public bool EnableBack { get { return Back != null; } }
@@ -31,7 +34,7 @@ namespace NoCrast.Client.Services
             using(var l = log.DebugScope())
             {
                 Title = title;
-                ToolbarHasChanged?.Invoke(this, null);
+                ToolbarHasChanged?.Invoke(null);
             }
         }
 
@@ -39,7 +42,7 @@ namespace NoCrast.Client.Services
         {
             using (var l = log.DebugScope())
             {
-                ToolbarHasChanged?.Invoke(this, null);
+                ToolbarHasChanged?.Invoke(null);
             }
         }
 
@@ -47,7 +50,7 @@ namespace NoCrast.Client.Services
         {
             using (var l = log.DebugScope())
             {
-                Back?.Invoke(this, null);
+                Back?.Invoke(null);
             }
         }
 
@@ -55,7 +58,16 @@ namespace NoCrast.Client.Services
         {
             using (var l = log.DebugScope())
             {
-                Delete?.Invoke(this, null);
+                Delete?.Invoke(null);
+            }
+        }
+
+        public void InvokeTitleChanged(string value)
+        {
+            using (var l = log.DebugScope())
+            {
+                Title = value;
+                TitleChanged?.Invoke(value);
             }
         }
     }

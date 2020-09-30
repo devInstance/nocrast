@@ -15,6 +15,15 @@
             <div class="d-flex flex-column flex-grow-1">
                 <div class="d-flex flex-row">
                     <div class="align-self-center">
+                        @if (Item.Project != null)
+                        {
+                            <span class="timer-text-title text-muted">
+                                @Item.Project.Title
+                            </span>
+                            <span class="timer-text-title text-muted">
+                                |
+                            </span>
+                        }
                         @if (!IsEditing)
                         {
                             <span class="timer-text-title">
@@ -22,11 +31,6 @@
                                 <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
                                     <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
                                 </button>
-                            </span>
-                            <span>
-                                <small class="text-muted ml-1">
-                                    @String.Format("{0:F1} hour(s) today", Item.GetTotalHoursSpentTodayTillNow(TimeProvider))
-                                </small>
                             </span>
                         }
                         else
@@ -41,6 +45,20 @@
                                 </button>
                             </EditForm>
                         }
+                        <ul class="list-group list-group-horizontal text-muted">
+                            <li class="pr-5">
+                                <img src="/img/today.svg" width="32" height="32" alt="Today" title="Today" />
+                                <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs</strong></span>
+                            </li>
+                            <li class="pr-2">
+                                <img src="/img/week.svg" width="24" height="24" alt="This Week" title="This Week" />
+                                <span><small>@String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek())</small></span>
+                            </li>
+                            <li class="pr-2">
+                                <img src="/img/total.svg" width="24" height="24" alt="Total" title="Total" />
+                                <span><small>@String.Format("{0:F1}", Item.GetTotalHoursSpent())</small></span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
                 <div class="d-flex flex-row">
@@ -139,11 +157,11 @@
             //TODO: run only once and cache, optimize
             var result = new List<string>();
             if (Tags == null) return null;
-            for(int i =  0; i < Tags.Length && i < 5; i ++) //TODO: make limit configurable
+            for (int i = 0; i < Tags.Length && i < 5; i++) //TODO: make limit configurable
             {
                 result.Add(Tags[i].Name);
             }
-            if(Tags.Length > 5)
+            if (Tags.Length > 5)
             {
                 result.Add("...");
             }

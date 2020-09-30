@@ -99,7 +99,7 @@
         }
     }
 
-    private void OnChange(Object sender, EventArgs e)
+    private void OnChange(object value)
     {
         using (var l = log.DebugScope())
         {
@@ -136,7 +136,6 @@
         using (var l = log.DebugScope())
         {
             ToolbarServ.InvokeDelete();
-            //await ProjectsServ.AddNewProjectAsync(ProjectTitle, ProjectDescription);
         }
     }
 }

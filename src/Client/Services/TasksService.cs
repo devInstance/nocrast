@@ -113,18 +113,11 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-
                     //TODO: optimize, don't fetch full list, create back local store
-                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset);
+                    var task = await TaskApi.GetTaskAsync(taskId, TimeProvider.UtcTimeOffset);
 
                     ResetNetworkError();
 
-                    var task = (from t in tasks where t.Id == taskId select t).FirstOrDefault();
-                    if (task == null)
-                    {
-                        NotifyUIError($"Cannot find task with id {taskId}");
-                        return null;
-                    }
                     return task;
                 }
                 catch (Exception ex)
@@ -354,7 +347,6 @@ namespace NoCrast.Client.Services
                 {
                     var result = await TagsApi.GetTagsByTaskIdAsync(item.Id);
                     ResetNetworkError();
-                    NotifyDataHasChanged();
                     return result;
                 }
                 catch (Exception ex)
@@ -389,7 +381,6 @@ namespace NoCrast.Client.Services
                         }
                     }
 
-                    NotifyDataHasChanged();
                     return result.ToArray();
                 }
                 catch (Exception ex)

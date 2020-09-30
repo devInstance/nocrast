@@ -1,46 +1,68 @@
 ﻿<div class="px-3 pt-3 pb-1">
-        <div class="row p-0">
-            <div class="col-auto ml-0">
-                @if (ToolbarServ.EnableBack)
-                {
-                    <button type="button" class="btn" @onclick="OnBack" title="Back">
-                        <span class="oi oi-chevron-left" aria-hidden="true"></span>
-                    </button>
-                }
-                @if (ToolbarServ.EnableAddProject)
-                {
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProjectModal" title="New project">
-                        New Project
-                    </button>
-                }
-                @if (ToolbarServ.EnableAddTag)
-                {
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTagModal" title="New tag">
-                        New Tag
-                    </button>
-                }
-                @if (ToolbarServ.EnableAddTask)
-                {
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal" title="New timer">
-                        New Timer
-                    </button>
-                }
-            </div>
-            <div class="col-auto mr-auto">
-                @if (!String.IsNullOrEmpty(ToolbarServ.Title))
-                {
-                    <h2>@ToolbarServ.Title</h2>
-                }
-            </div>
-            <div class="col-auto">
-                @if (ToolbarServ.EnableDelete)
-                {
-                    <button type="button" class="btn" data-toggle="modal" data-target="#addDeleteModal" title="Delete">
-                        <span class="oi oi-trash" aria-hidden="true"></span>
-                    </button>
-                }
-            </div>
+    <div class="row p-0">
+        <div class="col-auto ml-0">
+            @if (ToolbarServ.EnableBack)
+            {
+                <button type="button" class="btn" @onclick="OnBack" title="Back">
+                    <span class="oi oi-chevron-left" aria-hidden="true"></span>
+                </button>
+            }
+            @if (ToolbarServ.EnableAddProject)
+            {
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addProjectModal" title="New project">
+                    New Project
+                </button>
+            }
+            @if (ToolbarServ.EnableAddTag)
+            {
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTagModal" title="New tag">
+                    New Tag
+                </button>
+            }
+            @if (ToolbarServ.EnableAddTask)
+            {
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal" title="New timer">
+                    New Timer
+                </button>
+            }
         </div>
+        <div class="col-auto mr-auto">
+            @if (!String.IsNullOrEmpty(ToolbarServ.Title))
+            {
+                @if (!IsEditing)
+                {
+                    <h2>
+                        @ToolbarServ.Title
+                        <button class="btn btn-default" @onclick="@(() => StartEditing())">
+                            <span class="oi oi-pencil" aria-hidden="true"></span>
+                        </button>
+                    </h2>
+                }
+                else
+                {
+                    <EditForm Model="@TitleEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+                        <div class="form-group row">
+                            <InputText type="text" class="form-control" @bind-Value="@TitleEditText"></InputText>
+                            <button type="submit" class="btn text-info">
+                                <span class="oi oi-circle-check" aria-hidden="true"></span>
+                            </button>
+                            <button class="btn text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+                                <span class="oi oi-circle-x" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+            }
+        </div>
+        <div class="col-auto">
+            @if (ToolbarServ.EnableDelete)
+            {
+                <button type="button" class="btn" data-toggle="modal" data-target="#addDeleteModal" title="Delete">
+                    <span class="oi oi-trash" aria-hidden="true"></span>
+                </button>
+            }
+        </div>
+    </div>
 </div>
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
@@ -49,6 +71,8 @@
 @code {
 
     private ILog log;
+    private bool IsEditing { get; set; }
+    private string TitleEditText { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
@@ -56,11 +80,11 @@
         using (var l = log.DebugScope())
         {
             ToolbarServ.ToolbarHasChanged += OnChange;
-            OnChange(null, null);
+            OnChange(null);
         }
     }
 
-    private void OnChange(Object sender, EventArgs e)
+    private void OnChange(object value)
     {
         using (var l = log.DebugScope())
         {
@@ -75,4 +99,27 @@
             ToolbarServ.InvokeBack();
         }
     }
+
+    private void StartEditing()
+    {
+        TitleEditText = ToolbarServ.Title;
+        IsEditing = true;
+    }
+
+    private async void ApplyChangesAsync()
+    {
+        IsEditing = false;
+        log.D("ApplyChanges");
+        ToolbarServ.InvokeTitleChanged(TitleEditText);
+
+        StateHasChanged();
+    }
+
+    private void ResetChanges()
+    {
+        IsEditing = false;
+        TitleEditText = ToolbarServ.Title;
+        log.D("ResetChanges");
+    }
+
 }

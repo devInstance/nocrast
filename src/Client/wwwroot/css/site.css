@@ -24,6 +24,7 @@ app {
     position: relative;
     font-size: 20px;
     vertical-align: 0 !important;
+    top: -1px;
 }
 
 .top-row {
@@ -225,9 +226,12 @@ ul {
     vertical-align: sub;
 }
 
-.timer-text-timespan {
+.timer-text-timespan, .timer-text-timespan-lg {
     font-weight: 600;
     font-size: 1.5rem;
+}
+.timer-text-timespan-lg {
+    font-size: 3rem;
 }
 
 .timer-button, .small-timer-button {
