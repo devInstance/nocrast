@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\NoCrast.Shared.csproj" />
+    <ProjectReference Include="..\..\src\Shared\NoCrast.Shared.csproj" />
   </ItemGroup>
 
 </Project>
