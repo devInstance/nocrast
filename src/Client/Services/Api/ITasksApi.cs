@@ -22,7 +22,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<bool> RemoveTaskAsync(string id);
 
-        Task<TimeLogItem[]> GetTimelogAsync(string id);
+        Task<ModelList<TimeLogItem>> GetTimelogAsync(string id, int timeoffset, int? top, int? page, TimeLogResultType? type);
 
         Task<TaskItem> InsertTimerAsync(string id, bool startTask, TimeLogItem log, int timeoffset);
 

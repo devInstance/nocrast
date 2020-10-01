@@ -96,15 +96,15 @@
         <div class="col">
             <ul class="list-group list-group-horizontal">
                 <li class="p-2">
-                    <img src="/img/today.svg" width="32" height="32" alt="Today"  title="Today"/>
+                    <img src="/img/today.svg" width="32" height="32" alt="Today" title="Today" />
                     <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider))</strong> <small>hour(s)</small></span>
                 </li>
                 <li class="p-2">
-                    <img src="/img/week.svg" width="32" height="32" alt="This Week" title="This Week"/>
+                    <img src="/img/week.svg" width="32" height="32" alt="This Week" title="This Week" />
                     <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek())</strong> <small>hour(s)</small></span>
                 </li>
                 <li class="p-2">
-                    <img src="/img/total.svg" width="32" height="32" alt="Total" title="Total"/>
+                    <img src="/img/total.svg" width="32" height="32" alt="Total" title="Total" />
                     <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpent())</strong> <small>hour(s)</small></span>
                 </li>
             </ul>
@@ -119,8 +119,9 @@
         </div>
         <div class="row">
             <div class="col">
+                <h5>This week (@TimeLog.Count):</h5>
                 <ul class="px-0 py-2 m-0">
-                    @foreach (var tl in TimeLog)
+                    @foreach (var tl in TimeLog.Items)
                     {
                         <li class="timer-list-item">
                             <TimeLogPanelItemView Item="Item" Log="tl" IsActive="IsActive">
@@ -128,6 +129,11 @@
                         </li>
                     }
                 </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <a href="#">All records (@TimeLog.TotalCount)</a>
             </div>
         </div>
     }
@@ -158,7 +164,7 @@ else
     public string Id { get; set; }
 
     private TaskItem Item { get; set; }
-    private List<TimeLogItem> TimeLog { get; set; }
+    private ModelList<TimeLogItem> TimeLog { get; set; }
     private ProjectItem[] Projects { get; set; }
 
     private System.Timers.Timer timer;
@@ -302,7 +308,7 @@ else
                 {
                     ToolbarServ.Update(Item.Title);
 
-                    TimeLog = await Service.GetTimeLogItemsAsync(Item);
+                    TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Week);
 
                     Projects = await PrjService.GetProjectsAsync();
 

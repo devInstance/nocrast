@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using NoCrast.Server.Controllers;
+using Xunit;
 using NoCrast.ServerTests;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Shared.Model;
@@ -12,7 +13,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetTasksSimpleSuccessfulTest()
         {
-            var timeProvider =  TestUtils.CreateTimerProvider();
+            var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1").CreateTask("Task 2");
@@ -28,13 +29,13 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(2, resultList.Length);
                 Assert.False(resultList[0].IsRunning);
                 Assert.False(resultList[1].IsRunning);
-                
+
                 Assert.Equal(0, resultList[0].TimeLogCount);
                 Assert.Equal(0, resultList[1].TimeLogCount);
-                
+
                 Assert.Equal(0, resultList[0].TotalTimeSpent);
                 Assert.Equal(0, resultList[1].TotalTimeSpent);
-                
+
                 Assert.Equal(0, resultList[0].TotalTimeSpentThisWeek);
                 Assert.Equal(0, resultList[1].TotalTimeSpentThisWeek);
 
@@ -364,6 +365,173 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal("Test 1", task.Title);
 
                 //TODO: verify status
+            }
+        }
+
+        [Fact()]
+        public void GetTimelogAsyncReturnAllTest()
+        {
+            var time = new DateTime(2020, 8, 12, 0, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddDays(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, null, null, null);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(6, resultList.Items.Length);
+                Assert.Equal(6, resultList.TotalCount);
+                Assert.Equal(6, resultList.Count);
+                Assert.Equal(0, resultList.Page);
+                Assert.Equal(time.AddDays(-2f), resultList.Items[0].StartTime);
+            }
+        }
+
+        [Fact()]
+        public void GetTimelogAsyncReturnTodayTest()
+        {
+            var time = new DateTime(2020, 8, 12, 15, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-24f * 2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, null, null, TimeLogResultType.Day);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(3, resultList.Items.Length);
+                Assert.Equal(9, resultList.TotalCount);
+                Assert.Equal(3, resultList.Count);
+                Assert.Equal(0, resultList.Page);
+                Assert.Equal(time.AddHours(-2f), resultList.Items[0].StartTime);
+            }
+        }
+
+        [Fact()]
+        public void GetTimelogAsyncReturnWeekTest()
+        {
+            var time = new DateTime(2020, 8, 12, 15, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-24f * 2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, null, null, TimeLogResultType.Week);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(5, resultList.Items.Length);
+                Assert.Equal(9, resultList.TotalCount);
+                Assert.Equal(5, resultList.Count);
+                Assert.Equal(0, resultList.Page);
+                Assert.Equal(time.AddHours(-2f), resultList.Items[0].StartTime);
+            }
+        }
+
+        [Fact()]
+        public void GetTimelogAsyncReturnTop5Test()
+        {
+            var time = new DateTime(2020, 8, 12, 0, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-24f * 2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, 5, null, TimeLogResultType.All);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(5, resultList.Items.Length);
+                Assert.Equal(9, resultList.TotalCount);
+                Assert.Equal(9, resultList.Count);
+                Assert.Equal(0, resultList.Page);
+                Assert.Equal(time.AddHours(-2f), resultList.Items[0].StartTime);
+            }
+        }
+
+        [Fact()]
+        public void GetTimelogAsyncReturnTop5Page2Test()
+        {
+            var time = new DateTime(2020, 8, 12, 0, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-24f * 2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, 5, 1, TimeLogResultType.All);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(4, resultList.Items.Length);
+                Assert.Equal(9, resultList.TotalCount);
+                Assert.Equal(9, resultList.Count);
+                Assert.Equal(1, resultList.Page);
+                Assert.Equal(time.AddDays(-4f), resultList.Items[0].StartTime);
             }
         }
     }

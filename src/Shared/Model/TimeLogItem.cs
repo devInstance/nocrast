@@ -2,6 +2,12 @@
 
 namespace NoCrast.Shared.Model
 {
+    public enum TimeLogResultType
+    {
+        Day,
+        Week,
+        All
+    }
     public class TimeLogItem : ModelItem
     {
         public DateTime StartTime { get; set; }

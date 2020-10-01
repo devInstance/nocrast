@@ -47,9 +47,22 @@ namespace NoCrast.Client.Services.Net
             return result.Content.ReadFromJsonAsync<bool>().Result;
         }
 
-        public async Task<TimeLogItem[]> GetTimelogAsync(string id)
+        public async Task<ModelList<TimeLogItem>> GetTimelogAsync(string id, int timeoffset, int? top, int? page, TimeLogResultType? type)
         {
-            return await httpClient.GetFromJsonAsync<TimeLogItem[]>(Controller + id + "/timelog");
+            string url = $"{Controller}{id}/timelog?&timeoffset={timeoffset}";
+            if(top.HasValue)
+            {
+                url += $"&top={top}";
+            }
+            if (page.HasValue)
+            {
+                url += $"&page={page}";
+            }
+            if (type.HasValue)
+            {
+                url += $"&type={type}";
+            }
+            return await httpClient.GetFromJsonAsync<ModelList<TimeLogItem>>(url);
         }
 
         public async Task<TaskItem> InsertTimerAsync(string id, bool startTask, TimeLogItem log, int timeoffset)

@@ -225,21 +225,65 @@ namespace NoCrast.Server.Controllers
         [Route("{id}/timelog")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<TimeLogItem[]> GetTimelogAsync(string id)
+        public ActionResult<ModelList<TimeLogItem>> GetTimelogAsync(string id, int timeoffset, int? top, int? page, TimeLogResultType? type)
         {
-            return HandleWebRequest<TimeLogItem[]>(() =>
+            return HandleWebRequest<ModelList<TimeLogItem>>(() =>
             {
-                var result = (from tasks in DB.Tasks
-                              join timeLog in DB.TimeLog on tasks equals timeLog.Task
-                              where tasks.PublicId == id && tasks.Profile == CurrentProfile
-                              orderby timeLog.StartTime descending
-                              select new TimeLogItem
-                              {
-                                  Id = timeLog.PublicId,
-                                  ElapsedMilliseconds = timeLog.ElapsedMilliseconds,
-                                  StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
-                              }).ToList();
-                return Ok(result.ToArray());
+                DateTime now = TimeProvider.CurrentTime;
+                DateTime? dateFilter = null;
+                if(type.HasValue)
+                {
+                    switch (type.Value) 
+                    {
+                        case TimeLogResultType.Day:
+                            dateFilter = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
+                            break;
+                        case TimeLogResultType.Week:
+                            dateFilter = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
+                            break;
+
+                    }
+                }
+
+                var coreQuery = (from tasks in DB.Tasks
+                                 join timeLog in DB.TimeLog on tasks equals timeLog.Task
+                                 where tasks.PublicId == id && tasks.Profile == CurrentProfile
+                                 select timeLog);
+
+                var filteredQuery = (from timeLog in coreQuery
+                                     where (dateFilter == null || timeLog.StartTime >= dateFilter.Value)
+                                     select timeLog);
+
+                var items = (from timeLog in filteredQuery
+                           orderby timeLog.StartTime descending
+                           select new TimeLogItem
+                           {
+                               Id = timeLog.PublicId,
+                               ElapsedMilliseconds = timeLog.ElapsedMilliseconds,
+                               StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
+                           });
+
+                if (page.HasValue && top.HasValue)
+                {
+                    items = items.Skip(page.Value * top.Value);
+                }
+                if (top.HasValue)
+                {
+                    items = items.Take(top.Value);
+                }
+                var result = new ModelList<TimeLogItem>()
+                {
+                    Items = items.ToList().ToArray(),
+                    TotalCount = coreQuery.Count(),
+                    Count = filteredQuery.Count(),
+                };
+
+                if (page.HasValue)
+                {
+                    result.Page = page.Value;
+                }
+
+                return Ok(result);
             });
         }
 
