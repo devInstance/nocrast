@@ -1,29 +1,21 @@
-﻿
+﻿@if (IsActive)
+{
+    <PageTitle Value="@FormatingUtils.GetTimerTitle(Item, TimeProvider)" />
+}
+
 <li>
     <div class="alert @(IsActive ? "alert-danger" : "alert-info") container-fluid timer-link" role="document">
         <div class="d-flex flex-row">
-            @if (ShowNavigationButton)
-            {
-                <div class="d-flex mr-3">
-                    <div class="align-self-center">
-                        <NavLink href="@($"task/{Item.Id}")" Match="NavLinkMatch.All">
-                            <span class="oi oi-chevron-right" aria-hidden="true"></span>
-                        </NavLink>
-                    </div>
+            <div class="d-flex mr-3">
+                <div class="align-self-center">
+                    <NavLink href="@($"task/{Item.Id}")" Match="NavLinkMatch.All">
+                        <span class="oi oi-chevron-right" aria-hidden="true"></span>
+                    </NavLink>
                 </div>
-            }
+            </div>
             <div class="d-flex flex-column flex-grow-1">
                 <div class="d-flex flex-row">
                     <div class="align-self-center">
-                        @if (Item.Project != null)
-                        {
-                            <span class="timer-text-title text-muted">
-                                @Item.Project.Title
-                            </span>
-                            <span class="timer-text-title text-muted">
-                                |
-                            </span>
-                        }
                         @if (!IsEditing)
                         {
                             <span class="timer-text-title">
@@ -31,6 +23,9 @@
                                 <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
                                     <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
                                 </button>
+                            </span>
+                            <span class="timer-text-title text-muted">
+                                <small>@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
                             </span>
                         }
                         else
@@ -40,41 +35,29 @@
                                 <button type="submit" class="btn timer-button text-info">
                                     <span class="oi oi-circle-check" aria-hidden="true"></span>
                                 </button>
-                                <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+                                <button class="btn timer-button text-danger" @onclick="@(() => ResetChanges())" @onclick:preventDefault>
                                     <span class="oi oi-circle-x" aria-hidden="true"></span>
                                 </button>
                             </EditForm>
                         }
-                        <ul class="list-group list-group-horizontal text-muted">
-                            <li class="pr-5">
-                                <img src="/img/today.svg" width="32" height="32" alt="Today" title="Today" />
-                                <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs</strong></span>
-                            </li>
-                            <li class="pr-2">
-                                <img src="/img/week.svg" width="24" height="24" alt="This Week" title="This Week" />
-                                <span><small>@String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek())</small></span>
-                            </li>
-                            <li class="pr-2">
-                                <img src="/img/total.svg" width="24" height="24" alt="Total" title="Total" />
-                                <span><small>@String.Format("{0:F1}", Item.GetTotalHoursSpent())</small></span>
-                            </li>
-                        </ul>
                     </div>
                 </div>
                 <div class="d-flex flex-row">
-                    <button class="btn btn-default timer-button" data-toggle="dropdown">
-                        @if (TagLabels != null && TagLabels.Length > 0)
+                    @if (Item.Project != null)
+                    {
+                        <span class="badge badge-primary mr-3">@Item.Project.Title</span>
+                    }
+                    @if (TagLabels != null && TagLabels.Length > 0)
+                    {
+                        @foreach (var label in TagLabels)
                         {
-                            @foreach (var label in TagLabels)
-                            {
-                                <span class="badge badge-info">@label</span>
-                            }
+                            <span class="badge badge-info mr-1">@label</span>
                         }
-                        else
-                        {
-                            <span class="badge badge-info">+ Tag</span>
-                        }
-                    </button>
+                    }
+                    else
+                    {
+                        <span class="badge badge-info" data-toggle="dropdown" style="cursor:pointer">+ Tag</span>
+                    }
                     <div class="dropdown-menu">
                         @if (NotAssignedTags != null && NotAssignedTags.Length > 0)
                         {
@@ -102,11 +85,9 @@
                     <div class="align-self-center">
                         @if (IsActive)
                         {
-                            <span class="timer-text timer-text-timespan">@FormatTime(Item.GetElapsedTimeSpan(TimeProvider))</span>
-                        }
-                        else
-                        {
-                            <span class="timer-text">@String.Format("{0:F1} hour(s) today", Item.GetTotalHoursSpentToday())</span>
+                        <span class="timer-text timer-text-timespan">
+                            @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
+                        </span>
                         }
                     </div>
                     <div class="align-self-center">
@@ -137,15 +118,12 @@
     [Parameter]
     public TaskItem Item { get; set; }
 
-    [Parameter]
-    public bool ShowNavigationButton { get; set; }
-
     private bool IsEditing { get; set; }
     private string TitleEditText { get; set; }
 
     private ILog log;
 
-
+    //TODO: refactor code duplication here and in TaskDetails into a separate component
     private TagItem[] Tags { get; set; }
 
     private TagItem[] NotAssignedTags { get; set; }
@@ -198,11 +176,6 @@
 
             StateHasChanged();
         }
-    }
-
-    private string FormatTime(TimeSpan time)
-    {
-        return String.Format("{0:hh}:{0:mm}:{0:ss}", time);
     }
 
     private void Start()

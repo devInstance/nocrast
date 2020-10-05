@@ -31,6 +31,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Watch Remove="Shared\PageTitle.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Folder Include="wwwroot\img\" />
     </ItemGroup>
 

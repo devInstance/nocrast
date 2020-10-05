@@ -1,5 +1,7 @@
 ﻿@page "/reports"
 
+<PageTitle Value="Report"></PageTitle>
+
 <div class="btn-toolbar p-2" role="toolbar">
     <div class="btn-group btn-group-toggle mr-4" role="group">
         <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Daily))">Daily</button>

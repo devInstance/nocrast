@@ -2,6 +2,10 @@
 
 @if (Item != null)
 {
+    @if (Item.IsRunning)
+    {
+        <PageTitle Value="@FormatingUtils.GetTimerTitle(Item, TimeProvider)" />
+    }
     <div class="row">
         <div class="col">
             @if (Item.Project == null)
@@ -22,7 +26,11 @@
                     <ul>
                         @foreach (var project in Projects)
                         {
-                            <li><button class="btn btn-default" @onclick="@(() => AddProjectByIdAsync(project.Id))"><span class="badge badge-info">@project.Title</span></button></li>
+                            <li>
+                                <button class="btn btn-default" @onclick="@(() => AddProjectByIdAsync(project.Id))">
+                                    <span class="badge badge-info">@project.Title</span>
+                                </button>
+                            </li>
                         }
                     </ul>
                 }
@@ -35,7 +43,7 @@
                 <div class="alert @(Item.IsRunning ? "alert-danger" : "alert-info") container-fluid timer-link" role="document">
                     <div class="d-flex align-items-center">
                         <span class="timer-text timer-text-timespan-lg">
-                            @String.Format("{0:hh}:{0:mm}:{0:ss}", Item.GetElapsedTimeSpan(TimeProvider))
+                            @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
                         </span>
                         @if (IsActive)
                         {
@@ -202,8 +210,6 @@ else
             return Item.IsRunning;
         }
     }
-
-    string ErrorText { get; set; }
 
     protected async override Task OnInitializedAsync()
     {

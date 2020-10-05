@@ -1,11 +1,13 @@
 ﻿@page "/"
 
+<PageTitle Value="Timers" />
+
 @if (TasksList != null)
 {
     <ul class="p-0 m-0">
         @foreach (var item in TasksList)
         {
-            <TaskView Item="item" ShowNavigationButton="true" />
+            <TaskView Item="item" />
         }
     </ul>
 }

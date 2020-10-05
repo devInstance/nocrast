@@ -1,0 +1,34 @@
+﻿@inject IJSRuntime JSRuntime
+
+@inject ILogProvider LogProvider;
+
+@code{
+    [Parameter]
+    public string Value { get; set; }
+
+    private ILog log;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        using (var l = log.DebugScope())
+        {
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        using (var l = log.DebugScope())
+        {
+            l.D($"Title: {Value}");
+            if(String.IsNullOrEmpty(Value))
+            {
+                await JSRuntime.InvokeVoidAsync("blazor_setTitle", $"Nocrast");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("blazor_setTitle", $"Nocrast: {Value}");
+            }
+        }
+    }
+}
