@@ -35,7 +35,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var response = await TagsApi.GetTagsAsync();
+                    var response = await TagsApi.GetTagsAsync(true);
                     ResetNetworkError();
                     return response;
                 }

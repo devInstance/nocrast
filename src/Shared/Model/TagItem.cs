@@ -11,5 +11,9 @@ namespace NoCrast.Shared.Model
         public string Name { get; set; }
 
         public int Color { get; set; }
+
+        public int TasksCount { get; set; }
+
+        public long TotalTimeSpent { get; set; }
     }
 }

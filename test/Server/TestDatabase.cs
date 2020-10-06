@@ -183,7 +183,7 @@ namespace NoCrast.ServerTests
             return this;
         }
 
-        public TestDatabase AssignTag()
+        public TestDatabase AssignLastTag()
         {
             var taskToTag = new TagToTimerTask
             {

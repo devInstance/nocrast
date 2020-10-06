@@ -365,7 +365,7 @@ namespace NoCrast.Client.Services
             {
                 try
                 {
-                    var tags = await TagsApi.GetTagsAsync(); //TODO: should be cached
+                    var tags = await TagsApi.GetTagsAsync(false); //TODO: should be cached
 
                     ResetNetworkError();
 

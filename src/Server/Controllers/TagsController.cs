@@ -31,23 +31,82 @@ namespace NoCrast.Server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<TagItem[]> GetTags()
+        public ActionResult<TagItem[]> GetTags(bool addTotals)
         {
             return HandleWebRequest((WebHandler<TagItem[]>)(() =>
             {
-                List<TagItem> result = DecorateTagItems(SelectTags(null));
+                List<TagItem> result = DecorateTagItems(SelectTags(null), addTotals);
                 return Ok(result.ToArray());
             }));
         }
 
-        private List<TagItem> DecorateTagItems(IQueryable<TimerTag> q)
+        private List<TagItem> DecorateTagItems(IQueryable<TimerTag> q, bool addTotals)
         {
-            return (from tags in q
-                    select new TagItem
-                    {
-                        Id = tags.PublicId,
-                        Name = tags.Name
-                    }).ToList();
+            if (!addTotals)
+            {
+                return (from tags in q
+                        select new TagItem
+                        {
+                            Id = tags.PublicId,
+                            Name = tags.Name,
+                            TasksCount = 0,
+                            TotalTimeSpent = 0
+                        }).ToList();
+            }
+
+            var counts = from tags in q
+                         join ttt in DB.TagToTimerTasks on tags equals ttt.Tag
+                         group ttt by ttt.TagId into res
+                         select new
+                         {
+                             TagId = res.Key,
+                             Count = res.Count(),
+                         };
+
+            var tasksSums = from tags in q
+                            join ttt in DB.TagToTimerTasks on tags equals ttt.Tag
+                            join task in DB.Tasks on ttt.Task equals task
+                            select new
+                            {
+                                TagId = tags.Id,
+                                TotalTimeSpent = (from tl in DB.TimeLog
+                                                  where tl.TaskId == task.Id
+                                                  select tl.ElapsedMilliseconds).Sum(),
+                            };
+
+            var sums = from t in tasksSums
+                       group t by t.TagId into r
+                       select new
+                       {
+                           TagId = r.Key,
+                           TotalTimeSpent = r.Sum(c => c.TotalTimeSpent)
+                       };
+
+            var finalCount = (from tags in q
+                              join ttt in counts on tags.Id equals ttt.TagId
+                              into res
+                              from r in res.DefaultIfEmpty()
+                              select new
+                              {
+                                  Id = tags.Id,
+                                  PublicId = tags.PublicId,
+                                  Name = tags.Name,
+                                  TasksCount = r != null ? r.Count : 0
+                              });
+
+            var finalRes = (from tags in finalCount
+                            join ttt in sums on tags.Id equals ttt.TagId
+                            into res
+                            from r in res.DefaultIfEmpty()
+                            select new TagItem
+                            {
+                                Id = tags.PublicId,
+                                Name = tags.Name,
+                                TasksCount = tags.TasksCount,
+                                TotalTimeSpent = r != null ? r.TotalTimeSpent : 0
+                            });
+
+            return finalRes.ToList();
         }
 
         private IQueryable<TimerTag> SelectTags(string id)
@@ -75,7 +134,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest((WebHandler<TagItem>)(() =>
             {
-                List<TagItem> result = DecorateTagItems(SelectTags(id));
+                List<TagItem> result = DecorateTagItems(SelectTags(id), true);
                 return Ok(result.FirstOrDefault());
             }));
         }
@@ -92,7 +151,7 @@ namespace NoCrast.Server.Controllers
 
                 //check if the tag with such name already exists
                 var existingRecord = SelectTagsByName(tag.Name).FirstOrDefault();
-                if(existingRecord != null)
+                if (existingRecord != null)
                 {
                     return new TagItem
                     {
@@ -116,7 +175,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = DecorateTagItems(SelectTags(tagRecord.PublicId)).FirstOrDefault();
+                var response = DecorateTagItems(SelectTags(tagRecord.PublicId), false).FirstOrDefault();
 
                 return Ok(response);
             });
@@ -133,7 +192,7 @@ namespace NoCrast.Server.Controllers
             return HandleWebRequest<TagItem>(() =>
             {
                 var tagRecord = SelectTags(id).FirstOrDefault();
-                if(tagRecord == null)
+                if (tagRecord == null)
                 {
                     return NotFound();
                 }
@@ -145,7 +204,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = DecorateTagItems(SelectTags(tagRecord.PublicId)).FirstOrDefault();
+                var response = DecorateTagItems(SelectTags(tagRecord.PublicId), true).FirstOrDefault();
 
                 return Ok(response);
             });
@@ -186,12 +245,12 @@ namespace NoCrast.Server.Controllers
                 var tags = SelectTags(null);
 
                 var dtags = (from tag in tags
-                                join ttt in DB.TagToTimerTasks on tag equals ttt.Tag
-                                join tsk in DB.Tasks on ttt.Task equals tsk
-                                where tsk.PublicId == id && tsk.Profile == CurrentProfile
-                                select tag);
+                             join ttt in DB.TagToTimerTasks on tag equals ttt.Tag
+                             join tsk in DB.Tasks on ttt.Task equals tsk
+                             where tsk.PublicId == id && tsk.Profile == CurrentProfile
+                             select tag);
 
-                List<TagItem> result = DecorateTagItems(dtags);
+                List<TagItem> result = DecorateTagItems(dtags, false);
                 return Ok(result.ToArray());
             });
         }
@@ -203,20 +262,20 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public ActionResult<TagItem> AddTagTaskAsync([FromBody]string taskId, string tagId)
+        public ActionResult<TagItem> AddTagTaskAsync([FromBody] string taskId, string tagId)
         {
             return HandleWebRequest<TagItem>(() =>
             {
                 var tag = SelectTags(tagId).FirstOrDefault();
-                if(tag == null)
+                if (tag == null)
                 {
                     return NotFound();
                 }
 
                 var taskDbId = (from task in DB.Tasks
-                            where task.PublicId == taskId && task.Profile == CurrentProfile
-                            select task.Id).FirstOrDefault();
-                if(taskDbId == null)
+                                where task.PublicId == taskId && task.Profile == CurrentProfile
+                                select task.Id).FirstOrDefault();
+                if (taskDbId == null)
                 {
                     return NotFound();
                 }
@@ -224,7 +283,7 @@ namespace NoCrast.Server.Controllers
                 var existing = (from ttt in DB.TagToTimerTasks
                                 where ttt.TagId == tag.Id && ttt.TaskId == taskDbId
                                 select ttt).FirstOrDefault();
-                if(existing != null)
+                if (existing != null)
                 {
                     return Conflict();
                 }
@@ -240,7 +299,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = DecorateTagItems(SelectTags(tagId)).FirstOrDefault();
+                var response = DecorateTagItems(SelectTags(tagId), true).FirstOrDefault();
 
                 return Ok(response);
             });

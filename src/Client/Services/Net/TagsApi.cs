@@ -14,9 +14,9 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<TagItem[]> GetTagsAsync()
+        public async Task<TagItem[]> GetTagsAsync(bool addTotals)
         {
-            return await httpClient.GetFromJsonAsync<TagItem[]>($"{Controller}");
+            return await httpClient.GetFromJsonAsync<TagItem[]>($"{Controller}?addTotals={addTotals}");
         }
 
         public async Task<TagItem> GetTagAsync(string id)

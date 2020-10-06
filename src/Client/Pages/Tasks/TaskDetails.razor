@@ -258,6 +258,7 @@ else
         {
             ToolbarServ.Back -= OnBack;
             ToolbarServ.Delete -= OnDelete;
+            ToolbarServ.TitleChanged -= OnTitleChanged;
             ToolbarServ.Update(null);
 
             NotificationServ.DataHasChanged -= OnDataHasChanged;

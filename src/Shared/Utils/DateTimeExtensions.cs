@@ -11,5 +11,10 @@ namespace NoCrast.Shared.Utils
             int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
             return dt.AddDays(-1 * diff).Date;
         }
+
+        public static float ToHours(this long dt)
+        {
+            return (float) dt / (60 * 60 * 1000);
+        }
     }
 }

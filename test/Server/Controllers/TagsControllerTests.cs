@@ -13,7 +13,7 @@ namespace NoCrast.Server.Controllers.Tests
     public class TagsControllerTests
     {
         [Fact()]
-        public void GetTagsTest()
+        public void GetEmptyTagsTest()
         {
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
@@ -24,13 +24,129 @@ namespace NoCrast.Server.Controllers.Tests
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
-                var result = controller.GetTags();
+                var result = controller.GetTags(false);
 
                 Assert.True(result.Result is OkObjectResult);
                 var resultList = ((TagItem[])((OkObjectResult)result.Result).Value);
                 Assert.Equal(2, resultList.Length);
                 Assert.Equal("Test A", resultList[0].Name);
+                Assert.Equal(0, resultList[0].TotalTimeSpent);
+                Assert.Equal(0, resultList[0].TasksCount);
                 Assert.Equal("Test B", resultList[1].Name);
+                Assert.Equal(0, resultList[1].TasksCount);
+                Assert.Equal(0, resultList[1].TotalTimeSpent);
+            }
+        }
+
+        [Fact()]
+        public void GetTagsWithOutTotalsTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                        .CreateTimeLog(TestUtils.TEST_TIME.AddHours(-4), 2 * 60 * 1000, false)
+                        .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                        .CreateTag("Test A").AssignLastTag()
+                        .CreateTag("Test B").AssignLastTag()
+                        .CreateTask("Task 2").AssignLastTag()
+                        .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TagsController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTags(false);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TagItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.Length);
+                Assert.Equal("Test A", resultList[0].Name);
+                Assert.Equal(0, resultList[0].TasksCount);
+                Assert.Equal(0, resultList[0].TotalTimeSpent);
+                Assert.Equal("Test B", resultList[1].Name);
+                Assert.Equal(0, resultList[1].TasksCount);
+                Assert.Equal(0, resultList[1].TotalTimeSpent);
+            }
+        }
+
+        [Fact()]
+        public void GetTagsWithTotalsTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                        .CreateTimeLog(TestUtils.TEST_TIME.AddHours(-4), 2 * 60 * 1000, false)
+                        .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                        .CreateTag("Test A").AssignLastTag()
+                        .CreateTag("Test B").AssignLastTag()
+                        .CreateTask("Task 2").AssignLastTag()
+                        .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false);
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TagsController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTags(true);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TagItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.Length);
+                Assert.Equal("Test A", resultList[0].Name);
+                Assert.Equal(1, resultList[0].TasksCount);
+                Assert.Equal(4 * 60 * 1000, resultList[0].TotalTimeSpent);
+                Assert.Equal("Test B", resultList[1].Name);
+                Assert.Equal(2, resultList[1].TasksCount);
+                Assert.Equal(6 * 60 * 1000, resultList[1].TotalTimeSpent);
+            }
+        }
+
+        [Fact()]
+        public void GetTagsMultiUsersTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTag("Test A").CreateTag("Test B");
+                db_test.UserProfile();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TagsController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTags(false);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TagItem[])((OkObjectResult)result.Result).Value);
+                Assert.Empty(resultList);
+            }
+        }
+
+        [Fact()]
+        public void GetTagsTaskCountTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1").CreateTag("Test A").AssignLastTag().CreateTag("Test B").AssignLastTag()
+                    .CreateTask("Task 2").AssignLastTag().CreateTask("Test 3").AssignLastTag();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new TagsController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTags(true);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TagItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.Length);
+                Assert.Equal("Test A", resultList[0].Name);
+                Assert.Equal(1, resultList[0].TasksCount);
+                Assert.Equal(0, resultList[0].TotalTimeSpent);
+                Assert.Equal("Test B", resultList[1].Name);
+                Assert.Equal(3, resultList[1].TasksCount);
+                Assert.Equal(0, resultList[1].TotalTimeSpent);
             }
         }
 

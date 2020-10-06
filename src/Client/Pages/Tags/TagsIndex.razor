@@ -4,18 +4,35 @@
 
 @if (Tags != null)
 {
-    <ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Tasks</th>
+                <th scope="col">Total time logged</th>
+            </tr>
+        </thead>
         @foreach (var item in Tags)
         {
-            <li>
-                <NavLink class="nav-link" href="@($"tags/{item.Id}")">
-                    <span class="badge badge-info">
-                        @item.Name
-                    </span>
-                </NavLink>
-            </li>
+            <tr>
+                <td>
+                    <NavLink class="nav-link" href="@($"tags/{item.Id}")">
+                        <strong>@item.Name</strong>
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tags/{item.Id}")">
+                        @item.TasksCount
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tags/{item.Id}")">
+                        @String.Format("{0:F1}", item.TotalTimeSpent.ToHours())
+                    </NavLink>
+                </td>
+            </tr>
         }
-    </ul>
+    </table>
 }
 else
 {
@@ -74,6 +91,12 @@ else
         StateHasChanged();
 
         return true;
+    }
+
+    private void StartEditing()
+    {
+        //TitleEditText = Item.Title;
+        //IsEditing = true;
     }
 
 }
