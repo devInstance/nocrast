@@ -1,21 +1,44 @@
 ﻿@page "/projects"
 
-<PageTitle Value="Report"></PageTitle>
+<PageTitle Value="Projects"></PageTitle>
 
 @if (Projects != null)
 {
-    <ul>
-        @foreach (var item in Projects)
-        {
-            <li>
-                <NavLink class="nav-link" href="@($"projects/{item.Id}")">
-                    <span class="badge badge-info">
-                        @item.Title
-                    </span>
-                </NavLink>
-            </li>
-        }
-    </ul>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Tasks</th>
+            <th scope="col">Total time logged</th>
+        </tr>
+    </thead>
+    @foreach (var item in Projects)
+    {
+<tr>
+    <td>
+        <NavLink class="nav-link" href="@($"projects/{item.Id}")">
+            <strong>@item.Title</strong>
+        </NavLink>
+    </td>
+    <td>
+        <NavLink class="nav-link" href="@($"projects/{item.Id}")">
+            @item.Descritpion
+        </NavLink>
+    </td>
+    <td>
+        <NavLink class="nav-link" href="@($"projects/{item.Id}")">
+            @item.TasksCount
+        </NavLink>
+    </td>
+    <td>
+        <NavLink class="nav-link" href="@($"projects/{item.Id}")">
+            @String.Format("{0:F1}", item.TotalTimeSpent.ToHours())
+        </NavLink>
+    </td>
+</tr>
+    }
+</table>
 }
 else
 {
@@ -73,7 +96,7 @@ else
 
     private async Task<bool> RefreshData()
     {
-        Projects = await Service.GetProjectsAsync();
+        Projects = await Service.GetProjectsAsync(true);
         StateHasChanged();
 
         return true;

@@ -162,7 +162,7 @@ else
 @inject ILogProvider LogProvider;
 @inject NavigationManager NavigationManager;
 @inject NotificationService NotificationServ;
-@inject ToolbarService ToolbarServ
+@inject ToolbarService ToolbarServ;
 @inject ITimeProvider TimeProvider;
 
 @implements IDisposable
@@ -317,7 +317,7 @@ else
 
                     TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Week);
 
-                    Projects = await PrjService.GetProjectsAsync();
+                    Projects = await PrjService.GetProjectsAsync(false);
 
                     Tags = await Service.GetTagsAsync(Item);
                     NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);

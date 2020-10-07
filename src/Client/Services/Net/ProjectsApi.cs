@@ -14,9 +14,9 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<ProjectItem[]> GetProjectsAsync()
+        public async Task<ProjectItem[]> GetProjectsAsync(bool addTotals)
         {
-            return await httpClient.GetFromJsonAsync<ProjectItem[]>($"{Controller}");
+            return await httpClient.GetFromJsonAsync<ProjectItem[]>($"{Controller}?addTotals={addTotals}");
         }
 
         public async Task<ProjectItem> GetProjectAsync(string id)

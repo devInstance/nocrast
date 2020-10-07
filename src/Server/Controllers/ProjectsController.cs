@@ -30,24 +30,65 @@ namespace NoCrast.Server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<ProjectItem[]> GetProjects()
+        public ActionResult<ProjectItem[]> GetProjects(bool addTotals)
         {
             return HandleWebRequest((WebHandler<ProjectItem[]>)(() =>
             {
-                List<ProjectItem> result = DecorateProjectItems(SelectProjects(null));
+                List<ProjectItem> result = DecorateProjectItems(SelectProjects(null), addTotals);
                 return Ok(result.ToArray());
             }));
         }
 
-        private List<ProjectItem> DecorateProjectItems(IQueryable<Project> q)
+        private List<ProjectItem> DecorateProjectItems(IQueryable<Project> q, bool addTotals)
         {
-            return (from project in q
-                    select new ProjectItem
-                    {
-                        Id = project.PublicId,
-                        Title = project.Title,
-                        Descritpion = project.Descritpion
-                    }).ToList();
+            if(!addTotals)
+            {
+                return (from project in q
+                        select new ProjectItem
+                        {
+                            Id = project.PublicId,
+                            Title = project.Title,
+                            Descritpion = project.Descritpion,
+                            TasksCount = 0,
+                            TotalTimeSpent = 0
+                        }).ToList();
+            }
+
+            var sums = from project in q
+                         join task in DB.Tasks on project equals task.Project
+                         join tl in DB.TimeLog on task equals tl.Task
+                         group tl by new { tl.TaskId, project.Id } into res
+                         select new
+                         {
+                             TaskId = res.Key.TaskId,
+                             ProjectId = res.Key.Id,
+                             ElapsedMilliseconds = res.Sum(d => d.ElapsedMilliseconds),
+                         };
+
+            var tasksSums = from s in sums
+                            group s by s.ProjectId into res
+                            select new
+                            {
+                                ProjectId = res.Key,
+                                TasksCount = res.Count(),
+                                TotalTimeSpent = res.Sum(r => r.ElapsedMilliseconds),
+                            };
+
+            var result = from p in q
+                         join t in tasksSums on p.Id equals t.ProjectId
+                         into l
+                         from s in l.DefaultIfEmpty()
+                         select new ProjectItem
+                         {
+                             Id = p.PublicId,
+                             Title = p.Title,
+                             Descritpion = p.Descritpion,
+                             TasksCount = s != null ? s.TasksCount : 0,
+                             TotalTimeSpent = s != null ? s.TotalTimeSpent: 0
+                         };
+
+            return result.ToList();
+
         }
 
         private IQueryable<Project> SelectProjects(string id)
@@ -75,7 +116,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest((WebHandler<ProjectItem>)(() =>
             {
-                List<ProjectItem> result = DecorateProjectItems(SelectProjects(id));
+                List<ProjectItem> result = DecorateProjectItems(SelectProjects(id), true);
                 return Ok(result.FirstOrDefault());
             }));
         }
@@ -118,7 +159,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = DecorateProjectItems(SelectProjects(projectRecord.PublicId)).FirstOrDefault();
+                var response = DecorateProjectItems(SelectProjects(projectRecord.PublicId), false).FirstOrDefault();
 
                 return Ok(response);
             });
@@ -148,7 +189,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = DecorateProjectItems(SelectProjects(projectRecord.PublicId)).FirstOrDefault();
+                var response = DecorateProjectItems(SelectProjects(projectRecord.PublicId), true).FirstOrDefault();
 
                 return Ok(response);
             });

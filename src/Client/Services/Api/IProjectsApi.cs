@@ -5,7 +5,7 @@ namespace NoCrast.Client.Services.Api
 {
     public interface IProjectsApi
     {
-        Task<ProjectItem[]> GetProjectsAsync();
+        Task<ProjectItem[]> GetProjectsAsync(bool addTotals);
 
         Task<ProjectItem> GetProjectAsync(string id);
 

@@ -28,14 +28,14 @@ namespace NoCrast.Client.Services
             Log.D("constructor");
         }
 
-        public async Task<ProjectItem[]> GetProjectsAsync()
+        public async Task<ProjectItem[]> GetProjectsAsync(bool addTotals)
         {
             using (var l = Log.DebugScope())
             {
                 ResetUIError();
                 try
                 {
-                    var response = await ProjectsApi.GetProjectsAsync();
+                    var response = await ProjectsApi.GetProjectsAsync(addTotals);
                     ResetNetworkError();
                     return response;
                 }
@@ -112,7 +112,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<ProjectItem> UpdateProjectAsync(ProjectItem project, string newTitle, string newDescription)
+        public async Task<ProjectItem> UpdateProjectNameAsync(ProjectItem project, string newTitle)
         {
             using (var l = Log.DebugScope())
             {
@@ -120,6 +120,26 @@ namespace NoCrast.Client.Services
                 try
                 {
                     project.Title = newTitle;
+                    newProject = await ProjectsApi.UpdateProjectAsync(project.Id, project);
+                    ResetNetworkError();
+                }
+                catch (Exception ex)
+                {
+                    newProject = project;
+                    NotifyNetworkError(ex);
+                }
+
+                return newProject;
+            }
+        }
+
+        public async Task<ProjectItem> UpdateProjectDescriptionAsync(ProjectItem project, string newDescription)
+        {
+            using (var l = Log.DebugScope())
+            {
+                ProjectItem newProject;
+                try
+                {
                     project.Descritpion = newDescription;
                     newProject = await ProjectsApi.UpdateProjectAsync(project.Id, project);
                     ResetNetworkError();

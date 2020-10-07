@@ -4,19 +4,17 @@
 {
     @if (!IsEditing)
     {
-        <span class="timer-text">
-            <strong>@Item.Title</strong>
+        <p class="text-muted">
             @Item.Descritpion
             <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
                 <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
             </button>
-        </span>
+        </p>
     }
     else
     {
-        <EditForm Model="@NameEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
-            <InputText @bind-Value="@NameEditText"></InputText>
-            <InputText @bind-Value="@DescriptionEditText"></InputText>
+        <EditForm Model="@DescriptionEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+            <InputTextArea @bind-Value="@DescriptionEditText" class="form-control"></InputTextArea>
             <button type="submit" class="btn timer-button text-info">
                 <span class="oi oi-circle-check" aria-hidden="true"></span>
             </button>
@@ -26,19 +24,12 @@
         </EditForm>
     }
 
-    <button class="btn btn-default" @onclick="@(() => NavigateBack())">
-        <span class="oi oi-arrow-circle-left" aria-hidden="true"></span> Back
-    </button>
-    <button class="btn btn-default" @onclick="@(() => Remove())">
-        <span class="oi oi-x" aria-hidden="true"></span> Delete
-    </button>
-
     @if (Tasks != null)
     {
-        <ul class="timer-list">
+        <ul class="p-0 m-0">
             @foreach (var tl in Tasks)
             {
-                <li class="timer-list-item"><TaskView Item="tl" ShowNavigationButton="true" /></li>
+                <li class="timer-list-item"><TaskView Item="tl" /></li>
             }
         </ul>
     }
@@ -60,7 +51,8 @@ else
 @inject ILogProvider LogProvider;
 @inject ITimeProvider TimeProvider;
 
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavigationManager;
+@inject ToolbarService ToolbarServ;
 
 @implements IDisposable
 
@@ -77,9 +69,7 @@ else
     private ILog log;
 
     private bool IsEditing { get; set; }
-    private string NameEditText { get; set; }
     private string DescriptionEditText { get; set; }
-
 
     protected async override Task OnInitializedAsync()
     {
@@ -87,6 +77,9 @@ else
 
         using (var scope = log.DebugScope())
         {
+            ToolbarServ.Back += OnBack;
+            ToolbarServ.Delete += OnDelete;
+            ToolbarServ.TitleChanged += OnTitleChanged;
 
             NotificationServ.DataHasChanged += OnDataHasChanged;
 
@@ -94,6 +87,21 @@ else
 
             SetUpTimer();
         }
+    }
+
+    private void OnBack(object value)
+    {
+        NavigateBack();
+    }
+
+    private void OnDelete(object value)
+    {
+        Remove();
+    }
+
+    private async void OnTitleChanged(object value)
+    {
+        Item = await Service.UpdateProjectNameAsync(Item, value.ToString());
     }
 
     private void SetUpTimer()
@@ -108,6 +116,11 @@ else
     {
         using (var scope = log.DebugScope())
         {
+            ToolbarServ.Back -= OnBack;
+            ToolbarServ.Delete -= OnDelete;
+            ToolbarServ.TitleChanged -= OnTitleChanged;
+            ToolbarServ.Update(null);
+
             NotificationServ.DataHasChanged -= OnDataHasChanged;
 
             if (timer != null)
@@ -161,6 +174,7 @@ else
                 {
                     return false;
                 }
+                ToolbarServ.Update(Item.Title);
 
                 Tasks = await Service.GetTasksAsync(Id);
                 if (Tasks == null)
@@ -176,7 +190,6 @@ else
 
     private void StartEditing()
     {
-        NameEditText = Item.Title;
         DescriptionEditText = Item.Descritpion;
         IsEditing = true;
     }
@@ -186,14 +199,13 @@ else
         IsEditing = false;
         log.D("ApplyChanges");
 
-        Item = await Service.UpdateProjectAsync(Item, NameEditText, DescriptionEditText);
+        Item = await Service.UpdateProjectDescriptionAsync(Item, DescriptionEditText);
         StateHasChanged();
     }
 
     private void ResetChanges()
     {
         IsEditing = false;
-        NameEditText = Item.Title;
         DescriptionEditText = Item.Descritpion;
         log.D("ResetChanges");
     }

@@ -24,13 +24,83 @@ namespace NoCrast.Server.Controllers.Tests
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 
-                var result = controller.GetProjects();
+                var result = controller.GetProjects(false);
 
                 Assert.True(result.Result is OkObjectResult);
                 var resultList = ((ProjectItem[])((OkObjectResult)result.Result).Value);
                 Assert.Equal(2, resultList.Length);
                 Assert.Equal("Test A", resultList[0].Title);
+                Assert.Null(resultList[0].Descritpion);
+                Assert.Equal(0, resultList[0].TasksCount);
+                Assert.Equal(0, resultList[0].TotalTimeSpent);
                 Assert.Equal("Test B", resultList[1].Title);
+            }
+        }
+
+        [Fact()]
+        public void GetProjectsWithZeroTotalsTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateProject("Test A").CreateProject("Test B");
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new ProjectsController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetProjects(true);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ProjectItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.Length);
+                Assert.Equal("Test A", resultList[0].Title);
+                Assert.Null(resultList[0].Descritpion);
+                Assert.Equal(0, resultList[0].TasksCount);
+                Assert.Equal(0, resultList[0].TotalTimeSpent);
+                Assert.Equal("Test B", resultList[1].Title);
+                Assert.Null(resultList[1].Descritpion);
+                Assert.Equal(0, resultList[1].TasksCount);
+                Assert.Equal(0, resultList[1].TotalTimeSpent);
+            }
+        }
+
+        [Fact()]
+        public void GetProjectsWithTotalsTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile()
+                    .CreateProject("Test A")
+                        .CreateTask("Task 1")
+                            .CreateTimeLog(TestUtils.TEST_TIME.AddHours(-4), 2 * 60 * 1000, false)
+                            .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                        .CreateTask("Test 2")
+                            .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                    .CreateProject("Test B")
+                        .CreateTask("Test 3")
+                            .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                    .CreateProject("Test C");
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+
+                var controller = new ProjectsController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetProjects(true);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ProjectItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(3, resultList.Length);
+                Assert.Equal("Test A", resultList[0].Title);
+                Assert.Equal(2, resultList[0].TasksCount);
+                Assert.Equal(6 * 60 * 1000, resultList[0].TotalTimeSpent);
+                Assert.Equal("Test B", resultList[1].Title);
+                Assert.Equal(1, resultList[1].TasksCount);
+                Assert.Equal(2 * 60 * 1000, resultList[1].TotalTimeSpent);
+                Assert.Equal("Test C", resultList[2].Title);
+                Assert.Equal(0, resultList[2].TasksCount);
+                Assert.Equal(0, resultList[2].TotalTimeSpent);
             }
         }
 
