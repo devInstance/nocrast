@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Server.Database;
+using NoCrast.Server.Indentity;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
@@ -17,9 +18,9 @@ namespace NoCrast.Server.Controllers
     [ApiController]
     public class AuthorizationController : UserBaseController
     {
-        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IApplicationSignManager signInManager;
 
-        public AuthorizationController(ApplicationDbContext db, UserManager<ApplicationUser> um, SignInManager<ApplicationUser> sm)
+        public AuthorizationController(ApplicationDbContext db, UserManager<ApplicationUser> um, IApplicationSignManager sm)
             : base(db, um)
         {
             signInManager = sm;
@@ -39,14 +40,11 @@ namespace NoCrast.Server.Controllers
                 return Unauthorized("User does not exist");
             }
 
-            var singInResult = await signInManager.CheckPasswordSignInAsync(user, parameters.Password, false);
-
+            var singInResult = await signInManager.SignInAsync(user, parameters.Password, parameters.RememberMe);
             if (!singInResult.Succeeded)
             {
                 return Unauthorized("Invalid password");
             }
-
-            await signInManager.SignInAsync(user, parameters.RememberMe);
 
             if (CurrentProfile == null)
             {
@@ -113,5 +111,59 @@ namespace NoCrast.Server.Controllers
                 ExposedClaims = User.Claims.ToDictionary(c => c.Type, c => c.Value)
             };
         }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Delete()
+        {
+            await signInManager.SignOutAsync();
+
+            var user = await UserManager.FindByNameAsync(CurrentProfile.Email);
+            if (user == null)
+            {
+                return Unauthorized("User does not exist");
+            }
+
+            db.TagToTimerTasks.RemoveRange(
+                (
+                from items in db.TagToTimerTasks 
+                 join ts in db.Tasks on items.Task equals ts
+                 where ts.Profile == CurrentProfile 
+                 select items
+                 ).ToList()
+            );
+
+            db.TimerTags.RemoveRange((from items in db.TimerTags 
+                                      where items.Profile == CurrentProfile select items).ToList());
+
+            db.TaskState.RemoveRange((from items in db.TaskState
+                                      join ts in db.Tasks on items.Task equals ts
+                                      where ts.Profile == CurrentProfile
+                                      select items).ToList());
+
+            db.TimeLog.RemoveRange((from items in db.TimeLog
+                                    join ts in db.Tasks on items.Task equals ts
+                                    where ts.Profile == CurrentProfile
+                                    select items).ToList());
+
+            db.Tasks.RemoveRange((from items in db.Tasks
+                                  where items.Profile == CurrentProfile
+                                  select items).ToList());
+
+            db.Projects.RemoveRange((from items in db.Projects
+                                     where items.Profile == CurrentProfile
+                                     select items).ToList());
+
+            DB.UserProfiles.Remove(CurrentProfile);
+
+            DB.SaveChanges();
+
+            var result = await UserManager.DeleteAsync(user);
+            ResetCurrentProfile();
+
+            return Ok(true);
+        }
+
     }
 }

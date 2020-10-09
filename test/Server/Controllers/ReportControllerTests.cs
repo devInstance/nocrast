@@ -40,7 +40,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ReportController(db_test.db, userManager, timeProvider);
 
@@ -105,7 +105,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ReportController(db_test.db, userManager, timeProvider);
 
@@ -173,7 +173,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
 
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ReportController(db_test.db, userManager, timeProvider);
 

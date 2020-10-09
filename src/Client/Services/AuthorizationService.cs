@@ -7,7 +7,6 @@ namespace NoCrast.Client.Services
     public class AuthorizationService
     {
         protected IAuthorizationApi Api { get; }
-
         public UserInfoItem CurrentUser { get; private set; }
 
         public AuthorizationService(IAuthorizationApi api)
@@ -30,6 +29,16 @@ namespace NoCrast.Client.Services
             var result = Api.LogoutAsync();
             CurrentUser = null;
             return result;
+        }
+
+        public async Task<bool> DeleteAsync()
+        {
+            if(await Api.DeleteUserAsync())
+            {
+                CurrentUser = null;
+                return true;
+            }
+            return false;
         }
 
         public async Task<UserInfoItem> GetUserInfoAsync()

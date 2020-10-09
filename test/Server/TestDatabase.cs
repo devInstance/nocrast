@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Utils;
+using System.Collections.Generic;
 
 namespace NoCrast.ServerTests
 {
@@ -62,6 +63,8 @@ namespace NoCrast.ServerTests
             db.SaveChanges();
             db.Tasks.RemoveRange((from items in db.Tasks select items).ToList());
             db.SaveChanges();
+            db.Projects.RemoveRange((from items in db.Projects select items).ToList());
+            db.SaveChanges();
             db.UserProfiles.RemoveRange((from items in db.UserProfiles select items).ToList());
             db.SaveChanges();
         }
@@ -88,6 +91,16 @@ namespace NoCrast.ServerTests
             db.UserProfiles.Add(profile);
             db.SaveChanges();
             return this;
+        }
+
+        public UserProfile FetchUser(string id)
+        {
+            return (from t in db.UserProfiles where t.Email == id select t).FirstOrDefault();
+        }
+
+        public List<UserProfile> FetchAllUsers(string id)
+        {
+            return (from t in db.UserProfiles where id == null || t.Email == id select t).ToList();
         }
 
         public TimerTask lastTask;
@@ -139,6 +152,11 @@ namespace NoCrast.ServerTests
             return this;
         }
 
+        public Project FetchProject(string id)
+        {
+            return (from t in db.Projects where t.PublicId == id select t).FirstOrDefault();
+        }
+
         TimeLog lastLog;
         public TestDatabase CreateTimeLog(DateTime startTime, long elapsedMilliseconds, bool startTask)
         {
@@ -181,6 +199,11 @@ namespace NoCrast.ServerTests
             db.SaveChanges();
 
             return this;
+        }
+
+        public TimerTag FetchTag(string id)
+        {
+            return (from t in db.TimerTags where t.PublicId == id select t).FirstOrDefault();
         }
 
         public TestDatabase AssignLastTag()

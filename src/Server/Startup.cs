@@ -31,6 +31,7 @@ namespace NoCrast.Server
             services.ConfigureIdentity();
 
             services.AddSingleton<ITimeProvider, TimeProvider>();
+            services.AddScoped<IApplicationSignManager, ApplicationSignManager>();
 
             services.AddControllersWithViews().AddNewtonsoftJson();
         }

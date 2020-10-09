@@ -18,7 +18,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateTask("Task 1").CreateTask("Task 2");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -61,7 +61,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -146,7 +146,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -231,7 +231,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -314,7 +314,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(new DateTime(2020, 8, 17, 21, 31, 0), 1 * HOURS, false)
 ;
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -345,7 +345,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile();
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, TestUtils.CreateTimerProvider());
 
@@ -383,7 +383,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -417,7 +417,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -451,7 +451,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -485,7 +485,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
@@ -519,7 +519,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 

@@ -36,5 +36,12 @@ namespace NoCrast.Client.Services.Net
         {
             return await httpClient.GetFromJsonAsync<UserInfoItem>(Controller + "user-info");
         }
+
+        public async Task<bool> DeleteUserAsync()
+        {
+            var result = await httpClient.DeleteAsync($"{Controller}");
+            result.EnsureSuccessStatusCode();
+            return result.Content.ReadFromJsonAsync<bool>().Result;
+        }
     }
 }

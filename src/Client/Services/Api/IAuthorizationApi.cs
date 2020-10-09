@@ -1,12 +1,8 @@
 ﻿using NoCrast.Shared.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services.Api
 {
-
     public interface IAuthorizationApi
     {
         Task RegisterAsync(RegisterParameters registerParameters);
@@ -16,5 +12,7 @@ namespace NoCrast.Client.Services.Api
         Task LogoutAsync();
 
         Task<UserInfoItem> GetUserInfoAsync();
+
+        Task<bool> DeleteUserAsync();
     }
 }

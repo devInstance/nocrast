@@ -20,7 +20,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateTag("Test A").CreateTag("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -52,7 +52,7 @@ namespace NoCrast.Server.Controllers.Tests
                         .CreateTask("Task 2").AssignLastTag()
                         .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -84,7 +84,7 @@ namespace NoCrast.Server.Controllers.Tests
                         .CreateTask("Task 2").AssignLastTag()
                         .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false);
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -111,7 +111,7 @@ namespace NoCrast.Server.Controllers.Tests
                 db_test.UserProfile().CreateTag("Test A").CreateTag("Test B");
                 db_test.UserProfile();
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -132,7 +132,7 @@ namespace NoCrast.Server.Controllers.Tests
                 db_test.UserProfile().CreateTask("Task 1").CreateTag("Test A").AssignLastTag().CreateTag("Test B").AssignLastTag()
                     .CreateTask("Task 2").AssignLastTag().CreateTask("Test 3").AssignLastTag();
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -158,7 +158,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateTag("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -183,7 +183,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateTag("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 
@@ -210,7 +210,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateTag("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new TagsController(db_test.db, userManager, timeProvider);
 

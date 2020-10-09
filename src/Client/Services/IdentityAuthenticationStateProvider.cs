@@ -37,6 +37,14 @@ namespace NoCrast.Client.Services
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
 
+        public async Task DeleteAsync()
+        {
+            if (await service.DeleteAsync())
+            {
+                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            }
+        }
+
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var identity = new ClaimsIdentity();

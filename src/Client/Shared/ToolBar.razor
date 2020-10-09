@@ -33,9 +33,12 @@
                 {
                     <h2>
                         @ToolbarServ.Title
+                        @if(ToolbarServ.EnableTitileChange)
+                        {
                         <button class="btn btn-default" @onclick="@(() => StartEditing())">
                             <span class="oi oi-pencil" aria-hidden="true"></span>
                         </button>
+                        }
                     </h2>
                 }
                 else
@@ -121,5 +124,4 @@
         TitleEditText = ToolbarServ.Title;
         log.D("ResetChanges");
     }
-
 }

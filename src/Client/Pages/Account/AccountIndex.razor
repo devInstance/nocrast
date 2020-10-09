@@ -1,19 +1,85 @@
 ﻿@page "/account"
 
-<PageTitle Value="Account"></PageTitle>
+<PageTitle Value="Profile"></PageTitle>
 
-<p>Loading ...</p>
+@if (Item != null)
+{
+    <table class="table">
+        <tr>
+            <td>Name:</td>
+            <td>@Item.Name</td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td>@Item.Email</td>
+        </tr>
+    </table>
+}
+else
+{
+    <p>Loading ...</p>
+}
 
+@inject ToolbarService ToolbarServ;
+@inject ILogProvider LogProvider;
+@inject AccountService Service;
+@inject AuthorizationService AuthorizationServ;
+@inject NotificationService NotificationServ;
+@inject NavigationManager NavigationManager;
+
+@implements IDisposable
 
 @code {
 
+    private UserProfileItem Item { get; set; }
+
+    private ILog log;
 
     protected async override Task OnInitializedAsync()
     {
+        log = LogProvider.CreateLogger(this);
+        using (var l = log.DebugScope())
+        {
+            ToolbarServ.Back += OnBack;
+            ToolbarServ.Delete += OnDelete;
+            ToolbarServ.TitleChanged += OnTitleChanged;
+
+            Item = await Service.GetAccountAsync();
+
+            ToolbarServ.Update(Item.Name);
+        }
     }
 
     public void Dispose()
     {
+        using (var scope = log.DebugScope())
+        {
+            ToolbarServ.Back -= OnBack;
+            ToolbarServ.Delete -= OnDelete;
+            ToolbarServ.TitleChanged -= OnTitleChanged;
+            ToolbarServ.Update(null);
+        }
     }
 
+    private void OnBack(object value)
+    {
+        NavigateBack();
+    }
+
+    private async void OnTitleChanged(object value)
+    {
+        Item = await Service.UpdateAccountNameAsync(Item, value.ToString());
+        StateHasChanged();
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async void OnDelete(object value)
+    {
+        await AuthorizationServ.DeleteAsync();
+        NavigationManager.NavigateTo("/login");
+    }
 }

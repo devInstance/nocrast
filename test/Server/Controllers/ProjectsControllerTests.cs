@@ -20,7 +20,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateProject("Test A").CreateProject("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 
@@ -45,7 +45,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateProject("Test A").CreateProject("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 
@@ -83,7 +83,7 @@ namespace NoCrast.Server.Controllers.Tests
                             .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
                     .CreateProject("Test C");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 
@@ -112,7 +112,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateProject("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 
@@ -140,7 +140,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateProject("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 
@@ -170,7 +170,7 @@ namespace NoCrast.Server.Controllers.Tests
             {
                 db_test.UserProfile().CreateProject("Test B");
 
-                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId.ToString());
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
                 var controller = new ProjectsController(db_test.db, userManager, timeProvider);
 

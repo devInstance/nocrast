@@ -21,6 +21,7 @@ namespace NoCrast.Client.Services
         public bool EnableAddTag { get; set; }
         public bool EnableAddTask { get; set; }
         public bool EnableDelete { get { return Delete != null; } }
+        public bool EnableTitileChange { get { return TitleChanged != null; } }
 
         private ILog log;
 

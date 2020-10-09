@@ -33,8 +33,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<IReportApi, ReportApi>();
             builder.Services.AddScoped<IProjectsApi, ProjectsApi>();
             builder.Services.AddScoped<ITagsApi, TagsApi>();
-
-            //builder.Services.AddScoped<IDataProvider, DataProvider>();
+            builder.Services.AddScoped<IUserProfileApi, UserProfileApi>();
 
             builder.Services.AddScoped<IdentityAuthenticationStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<IdentityAuthenticationStateProvider>());
@@ -46,6 +45,7 @@ namespace NoCrast.Client
             builder.Services.AddScoped<ProjectsService>();
             builder.Services.AddScoped<NotificationService>();
             builder.Services.AddScoped<ToolbarService>();
+            builder.Services.AddScoped<AccountService>();
 
             builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             //builder.Services.AddTransient(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5000") });
