@@ -108,7 +108,7 @@ namespace NoCrast.Server.Controllers.Tests
                     });
 
                 Assert.True(result.Result is UnauthorizedObjectResult);
-//                Assert.Null(controller.CurrentProfile);
+                //                Assert.Null(controller.CurrentProfile);
             }
         }
 
@@ -183,6 +183,62 @@ namespace NoCrast.Server.Controllers.Tests
                     });
 
                 Assert.True(result.Result is OkResult);
+                var users = db_test.FetchAllUsers(null);
+                Assert.Single(users);
+            }
+        }
+
+        [Fact()]
+        public void ChangePasswordFailedTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile("nobody");
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                var signinManagerMq = TestUtils.CreateSignManager(true);
+
+                var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
+
+                var result = controller.ChangePassword(
+                    new Shared.Model.ChangePasswordParameters
+                    {
+                        OldPassword = "ssss",
+                        NewPassword = "dddd",
+                    });
+
+                Assert.True(result.Result is BadRequestObjectResult);
+
+                var users = db_test.FetchAllUsers(null);
+                Assert.Single(users);
+            }
+        }
+
+        [Fact()]
+        public void ChangePasswordTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile("nobody");
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId, true);
+
+                var signinManagerMq = TestUtils.CreateSignManager(true);
+
+                var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
+
+                var result = controller.ChangePassword(
+                    new Shared.Model.ChangePasswordParameters
+                    {
+                        OldPassword = "ssss",
+                        NewPassword = "dddd",
+                    });
+
+                Assert.True(result.Result is OkResult);
+
                 var users = db_test.FetchAllUsers(null);
                 Assert.Single(users);
             }

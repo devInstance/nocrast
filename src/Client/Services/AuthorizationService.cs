@@ -24,6 +24,11 @@ namespace NoCrast.Client.Services
             return Api.LoginAsync(loginParameters);
         }
 
+        public Task ChangePasswordAsync(ChangePasswordParameters chngParameters)
+        {
+            return Api.ChangePasswordAsync(chngParameters);
+        }
+
         public Task LogoutAsync()
         {
             var result = Api.LogoutAsync();

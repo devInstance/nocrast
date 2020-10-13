@@ -165,5 +165,28 @@ namespace NoCrast.Server.Controllers
             return Ok(true);
         }
 
+        [Route("change-password")]
+        [Authorize]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ChangePassword(ChangePasswordParameters parameters)
+        {
+            var userId = UserManager.GetUserId(this.User);
+            var user = await UserManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return Unauthorized("User does not exist");
+            }
+
+            var result = await UserManager.ChangePasswordAsync(user, parameters.OldPassword, parameters.NewPassword);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors.FirstOrDefault()?.Description);
+            }
+            return Ok();
+        }
+
     }
 }

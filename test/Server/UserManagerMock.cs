@@ -18,7 +18,9 @@ namespace NoCrast.ServerTests
     {
         private Guid UserId;
 
-        public UserManagerMock(Guid userId)
+        public bool Succeeded { get; }
+
+        public UserManagerMock(Guid userId, bool succeeded)
             : base(new Mock<IUserStore<ApplicationUser>>().Object,
           new Mock<IOptions<IdentityOptions>>().Object,
           new Mock<IPasswordHasher<ApplicationUser>>().Object,
@@ -31,6 +33,12 @@ namespace NoCrast.ServerTests
                   new Mock<IHttpContextAccessor>().Object*/)
         {
             UserId = userId;
+            Succeeded = succeeded;
+        }
+
+        public UserManagerMock(Guid userId)
+            : this(userId, false)
+        {
         }
 
         public override Task<IdentityResult> CreateAsync(ApplicationUser user, string password)
@@ -43,11 +51,35 @@ namespace NoCrast.ServerTests
             return UserId.ToString();
         }
 
+        class IdentityResultMock : IdentityResult
+        {
+            public IdentityResultMock(bool successed)
+            {
+                Succeeded = successed;
+                if(!successed)
+                {
+                    //Errors = new List<IdentityError>() { new IdentityError { Code = 20, Description = "Test error" } };
+                }
+            }
+        }
+        public async override Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string currentPassword, string newPassword)
+        {
+            return new IdentityResultMock(Succeeded);
+        }
         public async override Task<ApplicationUser> FindByNameAsync(string userName)
         {
             return new ApplicationUser { 
                 Id = UserId,
                 UserName = userName
+            };
+        }
+
+        public async override Task<ApplicationUser> FindByIdAsync(string userId)
+        {
+            return new ApplicationUser
+            {
+                Id = UserId,
+                UserName = userId
             };
         }
     }

@@ -43,5 +43,11 @@ namespace NoCrast.Client.Services.Net
             result.EnsureSuccessStatusCode();
             return result.Content.ReadFromJsonAsync<bool>().Result;
         }
+
+        public async Task ChangePasswordAsync(ChangePasswordParameters chngParameters)
+        {
+            var result = await httpClient.PutAsJsonAsync(Controller + "change-password", chngParameters);
+            result.EnsureSuccessStatusCode();
+        }
     }
 }

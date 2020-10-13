@@ -14,5 +14,7 @@ namespace NoCrast.Client.Services.Api
         Task<UserInfoItem> GetUserInfoAsync();
 
         Task<bool> DeleteUserAsync();
+        
+        Task ChangePasswordAsync(ChangePasswordParameters chngParameters);
     }
 }
