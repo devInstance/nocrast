@@ -85,14 +85,35 @@ namespace NoCrast.Client.Services
         }
         */
 
-        public async Task<TaskItem[]> GetTasksAsync()
+        public async Task<TaskItem[]> GetTasksForDashboardAsync()
         {
             using (var l = Log.DebugScope())
             {
                 ResetUIError();
                 try
                 {
-                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset);
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, 5, null);
+
+                    ResetNetworkError();
+
+                    return tasks;
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
+        public async Task<TaskItem[]> GetTasksAsync(int? top, int? page)
+        {
+            using (var l = Log.DebugScope())
+            {
+                ResetUIError();
+                try
+                {
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, top, page);
 
                     ResetNetworkError();
 

@@ -1,5 +1,4 @@
-﻿
-<AuthorizeView>
+﻿<AuthorizeView>
     <Authorized>
         <div class="sidebar">
             <NavMenu />
@@ -16,19 +15,19 @@
 </AuthorizeView>
 
 @inherits LayoutComponentBase
-@inject NavigationManager navigationManager
-@inject IdentityAuthenticationStateProvider authStateProvider
+    @inject NavigationManager navigationManager
+        @inject IdentityAuthenticationStateProvider authStateProvider
 
-@functions{
+        @functions{
 
-    [CascadingParameter]
-    Task<AuthenticationState> AuthenticationState { get; set; }
+            [CascadingParameter]
+            Task<AuthenticationState> AuthenticationState { get; set; }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        if (!(await AuthenticationState).User.Identity.IsAuthenticated)
-        {
-            navigationManager.NavigateTo("/login");
+            protected override async Task OnParametersSetAsync()
+            {
+                if (!(await AuthenticationState).User.Identity.IsAuthenticated)
+                {
+                    navigationManager.NavigateTo("/login");
+                }
+            }
         }
-    }
-}

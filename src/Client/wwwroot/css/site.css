@@ -27,6 +27,10 @@ app {
     top: -1px;
 }
 
+.oi-large {
+    font-size: 32px !important;
+}
+
 .top-row {
     height: 3.5rem;
     display: flex;
@@ -252,6 +256,16 @@ ul {
     .timer-item-background:hover {
         background: rgba(255,0,0,0.1);
     }
+
+.timer-card, .timer-card-active {
+    max-width: 18rem;
+    min-width: 16rem;
+    margin-bottom: 2em !important;
+}
+
+.timer-card-active {
+    background-color: #ffb4b4;
+}
 
 .small-timer-button {
     font-size: 14px !important;

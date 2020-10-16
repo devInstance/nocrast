@@ -5,12 +5,12 @@
 
     @if (Tasks != null)
     {
-        <ul class="p-0 m-0">
+        <div class="card-deck">
             @foreach (var tl in Tasks)
             {
-                <li class="timer-list-item"><TaskView Item="tl" /></li>
+                <TaskView Item="tl" />
             }
-        </ul>
+        </div>
     }
     else
     {

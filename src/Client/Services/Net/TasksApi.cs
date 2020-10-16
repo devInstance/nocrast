@@ -16,9 +16,18 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<TaskItem[]> GetTasksAsync(int timeoffset)
+        public async Task<TaskItem[]> GetTasksAsync(int timeoffset, int? top, int? page)
         {
-            return await httpClient.GetFromJsonAsync<TaskItem[]>($"{Controller}?timeoffset={timeoffset}");
+            string url = $"{Controller}?&timeoffset={timeoffset}";
+            if (top.HasValue)
+            {
+                url += $"&top={top}";
+            }
+            if (page.HasValue)
+            {
+                url += $"&page={page}";
+            }
+            return await httpClient.GetFromJsonAsync<TaskItem[]>(url);
         }
 
         public async Task<TaskItem> GetTaskAsync(string id, int timeoffset)

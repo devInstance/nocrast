@@ -4,6 +4,8 @@ using NoCrast.ServerTests;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Shared.Model;
 using System;
+using Moq;
+using NoCrast.Shared.Utils;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -22,7 +24,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
-                var result = controller.GetTasks(0);
+                var result = controller.GetTasks(0, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
                 var resultList = ((TaskItem[])((OkObjectResult)result.Result).Value);
@@ -43,6 +45,56 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(0, resultList[1].TotalTimeSpentToday);
             }
         }
+
+        [Fact()]
+        public void GetTasksSimpleSuccessfulTop3Test()
+        {
+            var testTime = new DateTime(2020, 6, 7, 7, 0, 0);
+
+            var timeProvider = new Mock<ITimeProvider>();
+            timeProvider.Setup(t => t.CurrentTime).Returns(testTime);
+
+            using (TestDatabase db_test = new TestDatabase(timeProvider.Object))
+            {
+                var context = db_test.UserProfile().CreateTask("Task 1");
+                testTime = testTime.AddMinutes(1);
+                timeProvider.Setup(t => t.CurrentTime).Returns(testTime);
+                context.CreateTask("Task 2");
+                testTime = testTime.AddMinutes(1);
+                timeProvider.Setup(t => t.CurrentTime).Returns(testTime);
+                context.CreateTask("Task 3");
+                testTime = testTime.AddMinutes(1);
+                timeProvider.Setup(t => t.CurrentTime).Returns(testTime);
+                context.CreateTask("Task 4");
+                testTime = testTime.AddMinutes(1);
+                timeProvider.Setup(t => t.CurrentTime).Returns(testTime);
+                context.CreateTask("Task 5");
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider.Object);
+
+                var result = controller.GetTasks(0, 3, 0);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TaskItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(3, resultList.Length);
+                Assert.Equal("Task 5", resultList[0].Title);
+                Assert.Equal(testTime, resultList[0].UpdateDate);
+
+                Assert.Equal("Task 4", resultList[1].Title);
+                Assert.Equal("Task 3", resultList[2].Title);
+
+                result = controller.GetTasks(0, 3, 1);
+
+                Assert.True(result.Result is OkObjectResult);
+                resultList = ((TaskItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.Length);
+                Assert.Equal("Task 2", resultList[0].Title);
+                Assert.Equal("Task 1", resultList[1].Title);
+            }
+        }
+
 
         long HOURS = 60 * 60 * 1000;
 
@@ -66,7 +118,7 @@ namespace NoCrast.Server.Controllers.Tests
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
                 // UTC
-                var result = controller.GetTasks(0);
+                var result = controller.GetTasks(0, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -82,7 +134,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(8 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+7
-                result = controller.GetTasks(7 * 60);
+                result = controller.GetTasks(7 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -98,7 +150,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(10 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+11
-                result = controller.GetTasks(11 * 60);
+                result = controller.GetTasks(11 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -114,7 +166,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC-7
-                result = controller.GetTasks(-7 * 60);
+                result = controller.GetTasks(-7 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -151,7 +203,7 @@ namespace NoCrast.Server.Controllers.Tests
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
                 // UTC
-                var result = controller.GetTasks(0);
+                var result = controller.GetTasks(0, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -167,7 +219,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(0 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+7
-                result = controller.GetTasks(7 * 60);
+                result = controller.GetTasks(7 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -183,7 +235,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(0 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+11
-                result = controller.GetTasks(11 * 60);
+                result = controller.GetTasks(11 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -199,7 +251,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(2 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC-7
-                result = controller.GetTasks(-7 * 60);
+                result = controller.GetTasks(-7 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -236,7 +288,7 @@ namespace NoCrast.Server.Controllers.Tests
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
                 // UTC
-                var result = controller.GetTasks(0);
+                var result = controller.GetTasks(0, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -252,7 +304,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+7
-                result = controller.GetTasks(7 * 60);
+                result = controller.GetTasks(7 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -268,7 +320,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC+11
-                result = controller.GetTasks(11 * 60);
+                result = controller.GetTasks(11 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -284,7 +336,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(12 * HOURS, resultList[0].TotalTimeSpentToday);
 
                 // UTC-7
-                result = controller.GetTasks(-7 * 60);
+                result = controller.GetTasks(-7 * 60, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 
@@ -319,7 +371,7 @@ namespace NoCrast.Server.Controllers.Tests
                 var controller = new TasksController(db_test.db, userManager, timeProvider);
 
                 // UTC
-                var result = controller.GetTasks(-420);
+                var result = controller.GetTasks(-420, null, null);
 
                 Assert.True(result.Result is OkObjectResult);
 

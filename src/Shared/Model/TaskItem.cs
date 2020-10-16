@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace NoCrast.Shared.Model
 {
@@ -24,5 +25,7 @@ namespace NoCrast.Shared.Model
         public long TotalTimeSpentThisWeek { get; set; }
 
         public long TotalTimeSpentToday { get; set; }
+
+        public DateTime UpdateDate { get; set; }
     }
 }

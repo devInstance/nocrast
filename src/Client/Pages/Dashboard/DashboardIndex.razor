@@ -1,0 +1,100 @@
+﻿@page "/"
+
+<PageTitle Value="Dashboard" />
+
+<h2>Recent Tasks</h2>
+
+@if (TasksList != null)
+{
+    <div class="card-deck">
+        @foreach (var item in TasksList)
+        {
+            <TaskView Item="item" />
+        }
+    </div>
+    <NavLink href="/tasks" Match="NavLinkMatch.All">View All ...</NavLink>
+}
+else
+{
+    <p>Loading ...</p>
+}
+
+@using System.Timers;
+
+@inject TasksService Service;
+@inject ILogProvider LogProvider;
+@inject NotificationService NotificationServ;
+@inject ToolbarService ToolbarServ;
+@inject IJSRuntime JSRuntime;
+
+@implements IDisposable;
+
+
+@code {
+
+    private TaskItem[] TasksList { get; set; }
+
+    private System.Timers.Timer timer;
+
+    private ILog log;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+
+        try
+        {
+            using (var scope = log.DebugScope())
+            {
+                SetUpTimer();
+
+                NotificationServ.DataHasChanged += OnDataHasChanged;
+
+                await RefreshData();
+            }
+        }
+        catch (Exception ex)
+        {
+            log.E(ex);
+        }
+    }
+
+    private void SetUpTimer()
+    {
+        timer = new System.Timers.Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        RefreshData();
+    }
+
+    private async Task<bool> RefreshData()
+    {
+        TasksList = await Service.GetTasksAsync(5, null);
+        StateHasChanged();
+
+        return true;
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        log.D("OnTimedEvent");
+        StateHasChanged();
+    }
+}

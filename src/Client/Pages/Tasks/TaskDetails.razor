@@ -1,4 +1,4 @@
-﻿@page "/task/{id}"
+﻿@page "/tasks/{id}"
 
 @if (Item != null)
 {
@@ -40,7 +40,7 @@
     <div class="row pt-2">
         <div class="col">
             <div class="d-flex flex-row">
-                <div class="alert @(Item.IsRunning ? "alert-danger" : "alert-info") container-fluid timer-link" role="document">
+                <div class="container-fluid timer-link" role="document">
                     <div class="d-flex align-items-center">
                         <span class="timer-text timer-text-timespan-lg">
                             @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)

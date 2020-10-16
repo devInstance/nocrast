@@ -1,15 +1,57 @@
-﻿@page "/"
+﻿@page "/tasks"
 
-<PageTitle Value="Timers" />
+<PageTitle Value="Tasks" />
 
 @if (TasksList != null)
 {
-    <ul class="p-0 m-0">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Time logs</th>
+                <th scope="col">Today time logged</th>
+                <th scope="col">Week time logged</th>
+                <th scope="col">Total time logged</th>
+                <th scope="col">Updated</th>
+            </tr>
+        </thead>
         @foreach (var item in TasksList)
         {
-            <TaskView Item="item" />
+    <tr>
+        <td>
+            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                <strong>@item.Title @(item.IsRunning ? "(Running)" : "")</strong>
+            </NavLink>
+        </td>
+        <td>
+            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                @String.Format("{0:F1}", item.TimeLogCount)
+            </NavLink>
+        </td>
+        <td>
+            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                @String.Format("{0:F1}", item.TotalTimeSpentToday.ToHours())
+            </NavLink>
+        </td>
+        <td>
+            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                @String.Format("{0:F1}", item.TotalTimeSpentThisWeek.ToHours())
+            </NavLink>
+        </td>
+        <td>
+            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                @String.Format("{0:F1}", item.TotalTimeSpent.ToHours())
+            </NavLink>
+        </td>
+        <td>
+            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                @String.Format("{0:g}", item.UpdateDate.ToLocalTime())
+            </NavLink>
+        </td>
+    </tr>
         }
-    </ul>
+    </table>
+
 }
 else
 {
@@ -25,7 +67,6 @@ else
 @inject IJSRuntime JSRuntime;
 
 @implements IDisposable;
-
 
 @code {
 
@@ -89,7 +130,7 @@ else
 
     private async Task<bool> RefreshData()
     {
-        TasksList = await Service.GetTasksAsync();
+        TasksList = await Service.GetTasksAsync(null, null);
         StateHasChanged();
 
         return true;
