@@ -26,7 +26,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTask("Task 1")
                     .CreateTask("Task 2")
                     .CreateTag("Tag 1").AssignLastTag()
-                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true);
+                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true)
+                    .EndSetup();
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
                 var signinManagerMq = TestUtils.CreateSignManager(true);
@@ -61,7 +62,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile();
+                db_test.UserProfile().EndSetup();
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
                 var signinManagerMq = TestUtils.CreateSignManager(true);
@@ -91,7 +92,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTask("Task 1")
                     .CreateTask("Task 2")
                     .CreateTag("Tag 1").AssignLastTag()
-                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true);
+                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true)
+                    .EndSetup();
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -122,7 +124,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTask("Task 1")
                     .CreateTask("Task 2")
                     .CreateTag("Tag 1").AssignLastTag()
-                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true);
+                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true)
+                    .EndSetup();
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -156,7 +159,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTask("Task 1")
                     .CreateTask("Task 2")
                     .CreateTag("Tag 1").AssignLastTag()
-                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true);
+                    .CreateTimeLog(timeProvider.CurrentTime, 10000, true)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -194,7 +198,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile("nobody");
+                db_test.UserProfile("nobody").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -222,7 +226,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile("nobody");
+                db_test.UserProfile("nobody").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId, true);
 

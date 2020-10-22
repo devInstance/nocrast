@@ -397,15 +397,21 @@ namespace NoCrast.Server.Controllers
             return HandleWebRequest<TaskItem>(() =>
             {
                 var timeLogRecord = (from task in DB.Tasks
+                                     join taskState in DB.TaskState on task equals taskState.Task
                                      join timeLog in DB.TimeLog on task equals timeLog.Task
                                      where task.PublicId == id && task.Profile == CurrentProfile && timeLog.PublicId == timerId
-                                     select timeLog).FirstOrDefault();
-                if (timeLogRecord == null)
+                                     select new { taskState, timeLog })
+                                     //.Include(q => q.taskState.ActiveTimeLogItem)
+                                     .FirstOrDefault();
+                if (timeLogRecord == null || timeLogRecord.timeLog == null || timeLogRecord.taskState == null)
                 {
                     return NotFound();
                 }
-
-                DB.TimeLog.Remove(timeLogRecord);
+                if(timeLogRecord.timeLog.Id == timeLogRecord.taskState.ActiveTimeLogItem?.Id)
+                {
+                    timeLogRecord.taskState.ActiveTimeLogItem = null;
+                }
+                DB.TimeLog.Remove(timeLogRecord.timeLog);
                 DB.SaveChanges();
 
                 var selectTasks = DecorateTasks(SelectTasks(null, null, null), timeoffset);

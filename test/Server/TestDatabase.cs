@@ -15,22 +15,12 @@ namespace NoCrast.ServerTests
         ITimeProvider TimeProvider { get; set; }
         public ApplicationDbContext db;
 
+        private bool isEndSetupCalled = false;
+
         public TestDatabase(ITimeProvider provider)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
+            SetupDBContext();
 
-            var configuration = builder.Build();
-            var sqlConnectionString = configuration.GetConnectionString("UntiTestConnection");
-
-            DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
-            options.UseNpgsql(
-                sqlConnectionString,
-                b => b.MigrationsAssembly("NoCrast.Server")
-            );
-
-            db = new ApplicationDbContext(options.Options);
             try
             {
                 db.Database.Migrate();
@@ -46,9 +36,39 @@ namespace NoCrast.ServerTests
             TimeProvider = provider;
         }
 
+        /// <summary>
+        /// Resets DB context. Has to be called in the end of every setup.
+        /// It will help uncover issues related to object in memory behaviors of EF Core
+        /// such as cascade deletes which behaves differently in the test and real world scenario
+        /// </summary>
+        public void EndSetup()
+        {
+            isEndSetupCalled = true;
+            SetupDBContext();
+        }
+
+        public void SetupDBContext()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+
+            var configuration = builder.Build();
+            var sqlConnectionString = configuration.GetConnectionString("UntiTestConnection");
+
+            DbContextOptionsBuilder<ApplicationDbContext> options = new DbContextOptionsBuilder<ApplicationDbContext>();
+            options.UseNpgsql(
+                sqlConnectionString,
+                b => b.MigrationsAssembly("NoCrast.Server")
+            );
+
+            db = new ApplicationDbContext(options.Options);
+        }
+
         public void Dispose()
         {
             CleanUp();
+            if (!isEndSetupCalled) throw new Exception("You must call 'EndSetup' for every test");
         }
 
         public void CleanUp()
@@ -157,7 +177,7 @@ namespace NoCrast.ServerTests
             return (from t in db.Projects where t.PublicId == id select t).FirstOrDefault();
         }
 
-        TimeLog lastLog;
+        public TimeLog lastLog;
         public TestDatabase CreateTimeLog(DateTime startTime, long elapsedMilliseconds, bool startTask)
         {
             lastLog = new TimeLog
@@ -178,6 +198,11 @@ namespace NoCrast.ServerTests
             }
             db.SaveChanges();
             return this;
+        }
+
+        public TimeLog FetchTimeLog(string id)
+        {
+            return (from t in db.TimeLog where t.PublicId == id select t).FirstOrDefault();
         }
 
         public TimerTag lastTag;

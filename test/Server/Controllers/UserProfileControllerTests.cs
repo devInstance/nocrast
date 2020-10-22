@@ -19,7 +19,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile("Test");
+                db_test.UserProfile("Test").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -40,7 +40,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile("Test");
+                db_test.UserProfile("Test").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 

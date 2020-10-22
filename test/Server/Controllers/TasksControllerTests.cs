@@ -18,7 +18,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile().CreateTask("Task 1").CreateTask("Task 2");
+                db_test.UserProfile().CreateTask("Task 1").CreateTask("Task 2").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -69,6 +69,7 @@ namespace NoCrast.Server.Controllers.Tests
                 testTime = testTime.AddMinutes(1);
                 timeProvider.Setup(t => t.CurrentTime).Returns(testTime);
                 context.CreateTask("Task 5");
+                context.EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -111,7 +112,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time, 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(5f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -196,7 +198,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time, 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(5f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -281,7 +284,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time, 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(5f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddHours(10f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddHours(15f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -364,7 +368,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(new DateTime(2020, 8, 18, 16, 35, 0), 1 * HOURS, false)
                     .CreateTimeLog(new DateTime(2020, 8, 17, 22, 59, 0), 1 * HOURS, false)
                     .CreateTimeLog(new DateTime(2020, 8, 17, 21, 31, 0), 1 * HOURS, false)
-;
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -395,7 +399,7 @@ namespace NoCrast.Server.Controllers.Tests
             var timeProvider = TestUtils.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
-                db_test.UserProfile();
+                db_test.UserProfile().EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -433,7 +437,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -467,7 +472,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -501,7 +507,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -535,7 +542,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -569,7 +577,8 @@ namespace NoCrast.Server.Controllers.Tests
                     .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
                     .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
-                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false);
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
@@ -584,6 +593,103 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(9, resultList.Count);
                 Assert.Equal(1, resultList.Page);
                 Assert.Equal(time.AddDays(-4f), resultList.Items[0].StartTime);
+            }
+        }
+
+
+        [Fact()]
+        public void DeleteTimerLogAsyncNullActiveLogItemTest()
+        {
+            var time = new DateTime(2020, 8, 12, 0, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false).
+                    EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                db_test.SetupDBContext();
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var lastLogId = db_test.lastLog.PublicId;
+                var result = controller.DeleteTimerLogAsync(db_test.lastTask.PublicId, lastLogId, 0);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TaskItem)((OkObjectResult)result.Result).Value);
+                Assert.Equal(0, resultList.TimeLogCount);
+                Assert.Equal(0, resultList.TotalTimeSpent);
+                Assert.Equal(0, resultList.TotalTimeSpentThisWeek);
+                Assert.Equal(0, resultList.TotalTimeSpentToday);
+
+                Assert.Null(db_test.FetchTimeLog(lastLogId));
+            }
+        }
+
+
+        [Fact()]
+        public void DeleteTimerLogAsyncActiveLogItemTest()
+        {
+            var time = new DateTime(2020, 8, 12, 0, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, true).
+                    EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                db_test.SetupDBContext();
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var lastLogId = db_test.lastLog.PublicId;
+                var result = controller.DeleteTimerLogAsync(db_test.lastTask.PublicId, lastLogId, 0);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TaskItem)((OkObjectResult)result.Result).Value);
+                Assert.Equal(0, resultList.TimeLogCount);
+                Assert.Equal(0, resultList.TotalTimeSpent);
+                Assert.Equal(0, resultList.TotalTimeSpentThisWeek);
+                Assert.Equal(0, resultList.TotalTimeSpentToday);
+
+                Assert.Null(db_test.FetchTimeLog(lastLogId));
+            }
+        }
+
+        [Fact()]
+        public void DeleteTimerLogAsyncNonActiveLogItemTest()
+        {
+            var time = new DateTime(2020, 8, 12, 12, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 1 * HOURS, true);
+                var lastLogId = db_test.lastLog.PublicId;
+                db_test.CreateTimeLog(time.AddHours(-4f), 2 * HOURS, true)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, true)
+                    .EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                db_test.SetupDBContext();
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.DeleteTimerLogAsync(db_test.lastTask.PublicId, lastLogId, 0);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TaskItem)((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.TimeLogCount);
+                Assert.Equal(4 * HOURS, resultList.TotalTimeSpent);
+                Assert.Equal(4 * HOURS, resultList.TotalTimeSpentThisWeek);
+                Assert.Equal(4 * HOURS, resultList.TotalTimeSpentToday);
+
+                Assert.Null(db_test.FetchTimeLog(lastLogId));
             }
         }
     }
