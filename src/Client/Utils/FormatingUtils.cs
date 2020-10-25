@@ -10,7 +10,7 @@ namespace NoCrast.Client.Utils
 {
     public static class FormatingUtils
     {
-        private const int TruncationLimit = 8;
+        private const int TruncationLimit = 10;
 
         public static string FormatTimerElapsedTime(TaskItem item, ITimeProvider provider)
         {
@@ -22,9 +22,9 @@ namespace NoCrast.Client.Utils
             var pageName = item.Title;
             if (pageName.Length > TruncationLimit)
             {
-                pageName = pageName.Substring(0, TruncationLimit - 1) + "...";
+                pageName = pageName.Substring(0, TruncationLimit - 3) + "...";
             }
-            return $"{pageName} {FormatTimerElapsedTime(item, provider)}";
+            return $"{FormatTimerElapsedTime(item, provider)} {pageName}";
         }
 
     }

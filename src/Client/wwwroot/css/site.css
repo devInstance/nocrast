@@ -267,8 +267,11 @@ ul {
 }
 
 .timer-card-active {
-    min-width: 90%;
-    background-color: #ffb4b4;
+    min-width: 87%;
+    border: 1px solid #b0b0b0ff;
+    border-radius: 3px;
+    /*    background-color: #ffb4b4;
+*/
 }
 
 .small-timer-button {

@@ -3,7 +3,7 @@
     <PageTitle Value="@FormatingUtils.GetTimerTitle(Item, TimeProvider)" />
 
     <div class="timer-card-active">
-        <div class="card-header bg-danger text-white">
+        <div class="card-header @(Item.Project != null ? "bg-primary text-white" : "bg-secondary text-secondary")">
             <p class="card-text">
                 @if (Item.Project != null)
                 {
@@ -13,8 +13,9 @@
                         @Item.Project.Title
                     </NavLink>
                 }
+                <span>:</span>
                 <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
-                    <span class="card-title text-white">@Item.Title</span>
+                    <strong><span class="card-title text-white">@Item.Title</span></strong>
                 </NavLink>
             </p>
         </div>
