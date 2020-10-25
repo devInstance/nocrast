@@ -1,10 +1,27 @@
 ﻿@page "/"
 
-<PageTitle Value="Dashboard" />
-@if (TasksList != null)
+@if (ActiveTasksList != null)
 {
-    <TimerView />
+    if (ActiveTasksList.Length == 0 || ActiveTasksList.Length > 1)
+    {
+        <PageTitle Value="Dashboard" />
+    }
+    else
+    {
+        <PageTitle Value="@FormatingUtils.GetTimerTitle(ActiveTasksList[0], TimeProvider)" />
+    }
+    @foreach (var item in ActiveTasksList)
+    {
+        <TaskView Item="item" />
+    }
+}
+else
+{
+    <PageTitle Value="Dashboard" />
+}
 
+@if (PassiveTasksList != null)
+{
     <h2>Recent Tasks</h2>
 
     <div class="card-deck">
@@ -21,7 +38,7 @@
             </div>
         </div>
 
-        @foreach (var item in TasksList)
+        @foreach (var item in PassiveTasksList)
         {
             if (!item.IsRunning)
             {
@@ -36,17 +53,25 @@ else
     <p>Loading ...</p>
 }
 
+@using System.Timers;
+
 @inject TasksService Service;
 @inject ILogProvider LogProvider;
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
 @inject IJSRuntime JSRuntime;
+@inject ITimeProvider TimeProvider;
+
+@implements IDisposable;
 
 @code {
 
-    private TaskItem[] TasksList { get; set; }
+    private TaskItem[] ActiveTasksList { get; set; }
+    private TaskItem[] PassiveTasksList { get; set; }
 
     private ILog log;
+
+    private Timer timer;
 
     protected async override Task OnInitializedAsync()
     {
@@ -56,6 +81,8 @@ else
         {
             using (var scope = log.DebugScope())
             {
+                SetUpTimer();
+
                 NotificationServ.DataHasChanged += OnDataHasChanged;
 
                 await RefreshData();
@@ -67,6 +94,32 @@ else
         }
     }
 
+    private void SetUpTimer()
+    {
+        timer = new Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        log.D("OnTimedEvent");
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
+
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
         RefreshData();
@@ -74,7 +127,10 @@ else
 
     private async Task<bool> RefreshData()
     {
-        TasksList = await Service.GetTasksForDashboardAsync();
+        ActiveTasksList = await Service.GetRunningTasksAsync();
+        StateHasChanged();
+
+        PassiveTasksList = await Service.GetTasksForDashboardAsync();
         StateHasChanged();
 
         return true;

@@ -1,26 +1,38 @@
-﻿<div class="card timer-card">
+﻿<div class="card @(IsActive? "timer-card-active" : "timer-card")">
     <div class="card-header @(Item.Project != null ? "bg-primary text-white" : "bg-secondary text-secondary")">
         <p class="card-text">
+            <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
+                <strong><span class="card-title text-white">@Item.Title</span></strong>
+            </NavLink>
             @if (Item.Project != null)
             {
+                <span>·</span>
                 <NavLink class="@(Item.Project != null ? (IsActive ? "text-white" : "text-white") : (IsActive ? "text-danger" : "text-secondary"))"
                          href="@($"projects/{Item.Project.Id}")"
                          Match="NavLinkMatch.All">
                     @Item.Project.Title
                 </NavLink>
             }
-            <span>:</span>
-            <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
-                <strong><span class="card-title text-white">@Item.Title</span></strong>
-            </NavLink>
         </p>
     </div>
     <div class="card-body">
         <p class="card-text">
-            <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
-                <span class="oi oi-large oi-play-circle" aria-hidden="true"></span>
-            </button>
-            <small class="text-muted">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
+            @if (IsActive)
+            {
+                <span class="timer-text timer-text-timespan">
+                    @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
+                </span>
+                <button class="btn btn-default timer-active-button" @onclick="@(() => Stop())">
+                    <span class="oi oi-large oi-media-pause" aria-hidden="true"></span>
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
+                    <span class="oi oi-large oi-play-circle" aria-hidden="true"></span>
+                </button>
+                <small class="text-muted">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
+            }
         </p>
         @if (TagLabels != null && TagLabels.Length > 0)
         {
@@ -42,15 +54,10 @@
     [Parameter]
     public TaskItem Item { get; set; }
 
-    private bool IsEditing { get; set; }
-    private string TitleEditText { get; set; }
-
     private ILog log;
 
     //TODO: refactor code duplication here and in TaskDetails into a separate component
     private TagItem[] Tags { get; set; }
-
-    private TagItem[] NotAssignedTags { get; set; }
 
     private string[] TagLabels
     {
@@ -81,10 +88,8 @@
         }
     }
 
-    //TODO: Add form validation for title
     protected async override Task OnInitializedAsync()
     {
-        IsEditing = false;
         log = LogProvider.CreateLogger(this);
 
         await RefreshDataAsync();
@@ -96,7 +101,6 @@
         if (Item != null)
         {
             Tags = await Service.GetTagsAsync(Item);
-            NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);
 
             StateHasChanged();
         }
@@ -110,43 +114,5 @@
     private void Stop()
     {
         Service.StopTaskAsync(Item);
-    }
-
-    private void StartEditing()
-    {
-        TitleEditText = Item.Title;
-        IsEditing = true;
-    }
-
-    private async void ApplyChangesAsync()
-    {
-        IsEditing = false;
-        log.D("ApplyChanges");
-
-        Item = await Service.UpdateTaskTitleAsync(Item, TitleEditText);
-        StateHasChanged();
-    }
-
-    private void ResetChanges()
-    {
-        IsEditing = false;
-        TitleEditText = Item.Title;
-        log.D("ResetChanges");
-    }
-
-    private async void AddTagAsync()
-    {
-        log.D("ApplyChanges");
-
-        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
-        await RefreshDataAsync();
-    }
-
-    private async void AddTagByIdAsync(string id)
-    {
-        log.D("ApplyChanges");
-
-        await Service.AddTagAsync(Item, id);
-        await RefreshDataAsync();
     }
 }

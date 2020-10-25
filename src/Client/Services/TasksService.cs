@@ -113,7 +113,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, 5, null, TaskFilter.StoppedOnly);
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, 4, null, TaskFilter.StoppedOnly);
 
                     ResetNetworkError();
 
