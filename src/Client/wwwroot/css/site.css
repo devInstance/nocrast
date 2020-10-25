@@ -258,12 +258,16 @@ ul {
     }
 
 .timer-card, .timer-card-active {
-    max-width: 18rem;
-    min-width: 16rem;
     margin-bottom: 2em !important;
 }
 
+.timer-card {
+    max-width: 18rem;
+    min-width: 16rem;
+}
+
 .timer-card-active {
+    min-width: 90%;
     background-color: #ffb4b4;
 }
 

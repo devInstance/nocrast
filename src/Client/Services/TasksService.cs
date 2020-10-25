@@ -85,6 +85,27 @@ namespace NoCrast.Client.Services
         }
         */
 
+        public async Task<TaskItem[]> GetRunningTasksAsync()
+        {
+            using (var l = Log.DebugScope())
+            {
+                ResetUIError();
+                try
+                {
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, null, null, TaskFilter.RunningOnly);
+
+                    ResetNetworkError();
+
+                    return tasks;
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
         public async Task<TaskItem[]> GetTasksForDashboardAsync()
         {
             using (var l = Log.DebugScope())
@@ -92,7 +113,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, 5, null);
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, 5, null, TaskFilter.StoppedOnly);
 
                     ResetNetworkError();
 
@@ -113,7 +134,7 @@ namespace NoCrast.Client.Services
                 ResetUIError();
                 try
                 {
-                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, top, page);
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, top, page, null);
 
                     ResetNetworkError();
 
@@ -171,7 +192,8 @@ namespace NoCrast.Client.Services
                 //var task = await LocalStorage.CreateTaskAsync(title);
                 var task = new TaskItem
                 {
-                    Title = title
+                    Title = title,
+                    IsRunning = false
                 };
                 // Step 4: Post the object on server
                 TaskItem response = null;

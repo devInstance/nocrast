@@ -32,6 +32,7 @@
 
     <ItemGroup>
       <Watch Remove="Pages\Dashboard\DashboardIndex.razor" />
+      <Watch Remove="Shared\Components\TimerView.razor" />
       <Watch Remove="Shared\PageTitle.razor" />
     </ItemGroup>
 

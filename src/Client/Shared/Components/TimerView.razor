@@ -1,0 +1,146 @@
+﻿@if (IsActive)
+{
+    <PageTitle Value="@FormatingUtils.GetTimerTitle(Item, TimeProvider)" />
+
+    <div class="timer-card-active">
+        <div class="card-header bg-danger text-white">
+            <p class="card-text">
+                @if (Item.Project != null)
+                {
+                    <NavLink class="@(Item.Project != null ? (IsActive ? "text-white" : "text-white") : (IsActive ? "text-danger" : "text-secondary"))"
+                             href="@($"projects/{Item.Project.Id}")"
+                             Match="NavLinkMatch.All">
+                        @Item.Project.Title
+                    </NavLink>
+                }
+                <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
+                    <span class="card-title text-white">@Item.Title</span>
+                </NavLink>
+            </p>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                @if (IsActive)
+                {
+                    <span class="timer-text timer-text-timespan">
+                        @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
+                    </span>
+                    <button class="btn btn-default timer-active-button" @onclick="@(() => Stop())">
+                        <span class="oi oi-large oi-media-pause" aria-hidden="true"></span>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
+                        <span class="oi oi-large oi-media-play" aria-hidden="true"></span>
+                    </button>
+                }
+                <small class="text-muted">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
+            </p>
+            @*@if (TagLabels != null && TagLabels.Length > 0)
+        {
+            <div class="card-text">
+                @foreach (var label in TagLabels)
+                {
+                    <span class="badge badge-info mr-1">@label</span>
+                }
+            </div>
+        }*@
+        </div>
+    </div>
+}
+
+@using System.Timers;
+
+@inject TasksService Service;
+@inject NotificationService NotificationServ;
+@inject ITimeProvider TimeProvider;
+@inject ILogProvider LogProvider;
+
+@implements IDisposable;
+
+@code {
+    private TaskItem Item { get; set; }
+
+    private ILog log;
+
+    private System.Timers.Timer timer;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+
+        SetUpTimer();
+
+        NotificationServ.DataHasChanged += OnDataHasChanged;
+
+        await RefreshDataAsync();
+    }
+
+    private void SetUpTimer()
+    {
+        timer = new Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        log.D("OnTimedEvent");
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        RefreshDataAsync();
+    }
+
+
+    public bool IsActive
+    {
+        get
+        {
+            return Item != null && Item.IsRunning;
+        }
+    }
+
+
+    public async Task RefreshDataAsync()
+    {
+        var tasks = await Service.GetRunningTasksAsync();
+        if (tasks != null && tasks.Length > 0)
+        {
+            Item = tasks[0];
+        }
+
+        if (Item != null)
+        {
+            //Tags = await Service.GetTagsAsync(Item);
+        }
+        StateHasChanged();
+    }
+
+    private void Start()
+    {
+        Service.StartTaskAsync(Item);
+    }
+
+    private void Stop()
+    {
+        Service.StopTaskAsync(Item);
+    }
+
+}

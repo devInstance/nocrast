@@ -8,7 +8,7 @@ namespace NoCrast.Client.Services.Api
 {
     public interface ITasksApi
     {
-        Task<TaskItem[]> GetTasksAsync(int timeoffset, int? top, int? page);
+        Task<TaskItem[]> GetTasksAsync(int timeoffset, int? top, int? page, TaskFilter? filter);
 
         Task<TaskItem> GetTaskAsync(string id, int timeoffset);
 

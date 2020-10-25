@@ -1,7 +1,5 @@
 ﻿using NoCrast.Client.Services.Api;
 using NoCrast.Shared.Model;
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -16,7 +14,7 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<TaskItem[]> GetTasksAsync(int timeoffset, int? top, int? page)
+        public async Task<TaskItem[]> GetTasksAsync(int timeoffset, int? top, int? page, TaskFilter? filter)
         {
             string url = $"{Controller}?&timeoffset={timeoffset}";
             if (top.HasValue)
@@ -26,6 +24,10 @@ namespace NoCrast.Client.Services.Net
             if (page.HasValue)
             {
                 url += $"&page={page}";
+            }
+            if (filter.HasValue)
+            {
+                url += $"&filter={filter}";
             }
             return await httpClient.GetFromJsonAsync<TaskItem[]>(url);
         }

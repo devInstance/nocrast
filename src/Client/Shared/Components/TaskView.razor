@@ -1,48 +1,26 @@
-﻿@if (IsActive)
-{
-    <PageTitle Value="@FormatingUtils.GetTimerTitle(Item, TimeProvider)" />
-}
-
-<div class="card @(IsActive ? "timer-card-active" : "timer-card")">
-    <div class="card-header @(Item.Project != null ? (IsActive ? "bg-danger text-white" : "bg-primary text-white") : (IsActive ? "bg-danger text-danger" : "bg-secondary text-secondary"))">
+﻿<div class="card timer-card">
+    <div class="card-header @(Item.Project != null ? "bg-primary text-white" : "bg-secondary text-secondary")">
         <p class="card-text">
             @if (Item.Project != null)
             {
-            <NavLink class="@(Item.Project != null ? (IsActive ? "text-white" : "text-white") : (IsActive ? "text-danger" : "text-secondary"))"
-                     href="@($"projects/{Item.Project.Id}")"
-                     Match="NavLinkMatch.All">
-                <strong>@Item.Project.Title</strong>
+                <NavLink class="@(Item.Project != null ? (IsActive ? "text-white" : "text-white") : (IsActive ? "text-danger" : "text-secondary"))"
+                         href="@($"projects/{Item.Project.Id}")"
+                         Match="NavLinkMatch.All">
+                    @Item.Project.Title
+                </NavLink>
+            }
+            <span>:</span>
+            <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
+                <strong><span class="card-title text-white">@Item.Title</span></strong>
             </NavLink>
-            }
-            else
-            {
-                @("No Project")
-            }
-        </p>
-        <p class="card-text">
-            <small class="text-white">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
         </p>
     </div>
     <div class="card-body">
-        <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
-            <h5 class="card-title text-black-50">@Item.Title</h5>
-        </NavLink>
         <p class="card-text">
-            @if (IsActive)
-            {
-                <span class="timer-text timer-text-timespan">
-                    @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
-                </span>
-                <button class="btn btn-default timer-active-button" @onclick="@(() => Stop())">
-                    <span class="oi oi-large oi-media-pause" aria-hidden="true"></span>
-                </button>
-            }
-            else
-            {
-                <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
-                    <span class="oi oi-large oi-media-play" aria-hidden="true"></span>
-                </button>
-            }
+            <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
+                <span class="oi oi-large oi-play-circle" aria-hidden="true"></span>
+            </button>
+            <small class="text-muted">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
         </p>
         @if (TagLabels != null && TagLabels.Length > 0)
         {

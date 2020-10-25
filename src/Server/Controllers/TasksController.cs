@@ -27,13 +27,19 @@ namespace NoCrast.Server.Controllers
             TimeProvider = timeProvider;
         }
 
-        private IQueryable<TimerTask> SelectTasks(string id, int? top, int? page)
+        private IQueryable<TimerTask> SelectTasks(string id, int? top, int? page, TaskFilter? filter)
         {
             var core = (from tks in DB.Tasks
+                        join sts in DB.TaskState on tks equals sts.Task
                         join prj in DB.Projects on tks.Project equals prj
                         into projectTasks
                         from tksp in projectTasks.DefaultIfEmpty()
-                        where tks.Profile == CurrentProfile && (id == null || tks.PublicId == id)
+                        where tks.Profile == CurrentProfile 
+                                && (id == null || tks.PublicId == id)
+                                && (filter == null 
+                                        || (filter.Value == TaskFilter.RunningOnly && sts.IsRunning)
+                                        || (filter.Value == TaskFilter.StoppedOnly && !sts.IsRunning)
+                                        )
                         orderby tks.UpdateDate descending
                         select tks);
 
@@ -91,11 +97,11 @@ namespace NoCrast.Server.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<TaskItem[]> GetTasks(int timeoffset, int? top, int? page)
+        public ActionResult<TaskItem[]> GetTasks(int timeoffset, int? top, int? page, TaskFilter? filter)
         {
             return HandleWebRequest<TaskItem[]>(() =>
             { 
-                var tasks = DecorateTasks(SelectTasks(null, top, page), timeoffset).ToList();
+                var tasks = DecorateTasks(SelectTasks(null, top, page, filter), timeoffset).ToList();
 
                 return Ok(tasks.ToArray());
             });
@@ -110,7 +116,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem>(() =>
             {
-                var task = DecorateTasks(SelectTasks(id, null, null), timeoffset).FirstOrDefault();
+                var task = DecorateTasks(SelectTasks(id, null, null, null), timeoffset).FirstOrDefault();
 
                 return Ok(task);
             });
@@ -197,7 +203,7 @@ namespace NoCrast.Server.Controllers
                 taskRecord.UpdateDate = now;
                 DB.SaveChanges();
 
-                var response = (from ts in DecorateTasks(SelectTasks(null, null, null), timeoffset)
+                var response = (from ts in DecorateTasks(SelectTasks(null, null, null, null), timeoffset)
                                 where ts.Id == taskRecord.PublicId
                                 select ts).FirstOrDefault();
 
@@ -338,7 +344,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var response = (from ts in DecorateTasks(SelectTasks(null, null, null), timeoffset)
+                var response = (from ts in DecorateTasks(SelectTasks(null, null, null, null), timeoffset)
                                 where ts.Id == taskRecord.PublicId
                                 select ts).FirstOrDefault();
 
@@ -376,7 +382,7 @@ namespace NoCrast.Server.Controllers
 
                 DB.SaveChanges();
 
-                var selectTasks = DecorateTasks(SelectTasks(null, null, null), timeoffset);
+                var selectTasks = DecorateTasks(SelectTasks(null, null, null, null), timeoffset);
 
                 var updatedTask = (from t in selectTasks
                                    where t.Id == id
@@ -414,7 +420,7 @@ namespace NoCrast.Server.Controllers
                 DB.TimeLog.Remove(timeLogRecord.timeLog);
                 DB.SaveChanges();
 
-                var selectTasks = DecorateTasks(SelectTasks(null, null, null), timeoffset);
+                var selectTasks = DecorateTasks(SelectTasks(null, null, null, null), timeoffset);
 
                 var updatedTask = (from t in selectTasks
                                    where t.Id == id
@@ -433,7 +439,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem[]>(() =>
             {
-                var tasks = SelectTasks(null, null, null);
+                var tasks = SelectTasks(null, null, null, null);
 
                 var result = (from tsk in tasks
                               join ttt in DB.TagToTimerTasks on tsk equals ttt.Task
@@ -454,7 +460,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<TaskItem[]>(() =>
             {
-                var tasks = SelectTasks(null, null, null);
+                var tasks = SelectTasks(null, null, null, null);
 
                 var result = (from tsk in tasks
                               join proj in DB.Projects on tsk.Project equals proj

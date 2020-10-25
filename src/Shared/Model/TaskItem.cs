@@ -3,6 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NoCrast.Shared.Model
 {
+    public enum TaskFilter
+    {
+        All = 0,
+        RunningOnly = 1,
+        StoppedOnly = 2
+    }
+
     public class TaskItem : ModelItem
     {
         [Required]
