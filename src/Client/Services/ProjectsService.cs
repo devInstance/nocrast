@@ -85,7 +85,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<ProjectItem> AddNewProjectAsync(string newTitle, string newDescription)
+        public async Task<ProjectItem> AddNewProjectAsync(string newTitle, string newDescription, ProjectColor color)
         {
             using (var l = Log.DebugScope())
             {
@@ -94,7 +94,8 @@ namespace NoCrast.Client.Services
                 var project = new ProjectItem
                 {
                     Title = newTitle,
-                    Descritpion = newDescription
+                    Descritpion = newDescription,
+                    Color = color
                 };
 
                 try
@@ -133,14 +134,13 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<ProjectItem> UpdateProjectDescriptionAsync(ProjectItem project, string newDescription)
+        public async Task<ProjectItem> UpdateProjectAsync(ProjectItem project)
         {
             using (var l = Log.DebugScope())
             {
                 ProjectItem newProject;
                 try
                 {
-                    project.Descritpion = newDescription;
                     newProject = await ProjectsApi.UpdateProjectAsync(project.Id, project);
                     ResetNetworkError();
                 }
@@ -151,6 +151,24 @@ namespace NoCrast.Client.Services
                 }
 
                 return newProject;
+            }
+        }
+
+        public async Task<ProjectItem> UpdateProjectDescriptionAsync(ProjectItem project, string newDescription)
+        {
+            using (var l = Log.DebugScope())
+            {
+                project.Descritpion = newDescription;
+                return await UpdateProjectAsync(project);
+            }
+        }
+
+        public async Task<ProjectItem> UpdateProjectColorAsync(ProjectItem project, ProjectColor color)
+        {
+            using (var l = Log.DebugScope())
+            {
+                project.Color = color;
+                return await UpdateProjectAsync(project);
             }
         }
 

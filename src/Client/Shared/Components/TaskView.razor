@@ -1,5 +1,5 @@
 ﻿<div class="card @(IsActive? "timer-card-active" : "timer-card")">
-    <div class="card-header @(Item.Project != null ? "bg-primary text-white" : "bg-secondary text-secondary")">
+    <div class="card-header @(Item.Project != null ? Item.Project.Color.ToString().ToLower() : "bg-secondary")">
         <p class="card-text">
             <NavLink href="@($"tasks/{Item.Id}")" Match="NavLinkMatch.All">
                 <strong><span class="card-title text-white">@Item.Title</span></strong>

@@ -49,6 +49,7 @@ namespace NoCrast.Server.Controllers
                             Id = project.PublicId,
                             Title = project.Title,
                             Descritpion = project.Descritpion,
+                            Color = project.Color,
                             TasksCount = 0,
                             TotalTimeSpent = 0
                         }).ToList();
@@ -83,6 +84,7 @@ namespace NoCrast.Server.Controllers
                              Id = p.PublicId,
                              Title = p.Title,
                              Descritpion = p.Descritpion,
+                             Color = p.Color,
                              TasksCount = s != null ? s.TasksCount : 0,
                              TotalTimeSpent = s != null ? s.TotalTimeSpent: 0
                          };
@@ -139,7 +141,8 @@ namespace NoCrast.Server.Controllers
                     {
                         Id = existingRecord.PublicId,
                         Title = existingRecord.Title,
-                        Descritpion = existingRecord.Descritpion
+                        Descritpion = existingRecord.Descritpion,
+                        Color = existingRecord.Color
                     };
                 }
 
@@ -151,6 +154,7 @@ namespace NoCrast.Server.Controllers
                     Title = item.Title,
                     Profile = CurrentProfile,
                     Descritpion = item.Descritpion,
+                    Color = item.Color,
 
                     CreateDate = now,
                     UpdateDate = now,
@@ -185,6 +189,7 @@ namespace NoCrast.Server.Controllers
 
                 projectRecord.Title = project.Title;
                 projectRecord.Descritpion = project.Descritpion;
+                projectRecord.Color = project.Color;
                 projectRecord.UpdateDate = now;
 
                 DB.SaveChanges();

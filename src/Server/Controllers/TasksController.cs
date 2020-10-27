@@ -76,7 +76,7 @@ namespace NoCrast.Server.Controllers
                        UpdateDate = tks.UpdateDate,
                        TimeLogCount = tks.TimeLog.Count,
                        Title = tks.Title,
-                       Project = tks.Project != null ? new ProjectItem { Id = tks.Project.PublicId, Title = tks.Project.Title, Descritpion = tks.Project.Descritpion } : null,
+                       Project = tks.Project != null ? new ProjectItem { Id = tks.Project.PublicId, Title = tks.Project.Title, Descritpion = tks.Project.Descritpion, Color = tks.Project.Color } : null,
                        Descritpion = tks.Descritpion,
                        TotalTimeSpent = (from tl in DB.TimeLog
                                          where tl.TaskId == tks.Id

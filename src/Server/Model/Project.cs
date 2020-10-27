@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NoCrast.Shared.Model;
+using System.ComponentModel.DataAnnotations;
 
 namespace NoCrast.Server.Model
 {
@@ -10,5 +11,7 @@ namespace NoCrast.Server.Model
         public string Title { get; set; }
 
         public string Descritpion { get; set; }
+
+        public ProjectColor Color { get; set; }
     }
 }

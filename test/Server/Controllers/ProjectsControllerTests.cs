@@ -120,7 +120,8 @@ namespace NoCrast.Server.Controllers.Tests
                 var newProject = new ProjectItem
                 {
                     Title = "Test A",
-                    Descritpion = "test test"
+                    Descritpion = "test test",
+                    Color = ProjectColor.Purple
                 };
 
                 var result = controller.AddProject(newProject);
@@ -128,6 +129,7 @@ namespace NoCrast.Server.Controllers.Tests
                 var resultValue = ((ProjectItem)((OkObjectResult)result.Result).Value);
                 Assert.Equal("Test A", resultValue.Title);
                 Assert.Equal("test test", resultValue.Descritpion);
+                Assert.Equal(ProjectColor.Purple, resultValue.Color);
                 //TODO: Check create and update dates
                 Assert.NotEmpty(resultValue.Id);
             }
@@ -149,15 +151,18 @@ namespace NoCrast.Server.Controllers.Tests
                 {
                     Id = db_test.lastProject.PublicId,
                     Title = "Test A",
-                    Descritpion = "test test"
+                    Descritpion = "test test",
+                    Color = ProjectColor.Purple
                 };
 
                 var result = controller.UpdateProject(newProject.Id, newProject);
+
                 Assert.True(result.Result is OkObjectResult);
                 var resultValue = ((ProjectItem)((OkObjectResult)result.Result).Value);
                 Assert.Equal(newProject.Id, resultValue.Id);
                 Assert.Equal("Test A", resultValue.Title);
                 Assert.Equal("test test", resultValue.Descritpion);
+                Assert.Equal(ProjectColor.Purple, resultValue.Color);
                 //TODO: Check update date
                 Assert.NotEmpty(resultValue.Id);
             }

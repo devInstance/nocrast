@@ -6,6 +6,7 @@ using NoCrast.Shared.Model;
 using System;
 using Moq;
 using NoCrast.Shared.Utils;
+using System.Drawing;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -45,6 +46,31 @@ namespace NoCrast.Server.Controllers.Tests
 
                 Assert.Equal(0, resultList[0].TotalTimeSpentToday);
                 Assert.Equal(0, resultList[1].TotalTimeSpentToday);
+            }
+        }
+
+        [Fact()]
+        public void GetTasksWithProjectSuccessfulTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateProject("TTT", ProjectColor.Red).CreateTask("Task 1").CreateTask("Task 2").EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTasks(0, null, null, null);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((TaskItem[])((OkObjectResult)result.Result).Value);
+                Assert.Equal(2, resultList.Length);
+                Assert.NotNull(resultList[0].Project);
+                Assert.Equal(ProjectColor.Red, resultList[0].Project.Color);
+
+                Assert.NotNull(resultList[1].Project);
+                Assert.Equal(ProjectColor.Red, resultList[1].Project.Color);
             }
         }
 

@@ -2,27 +2,34 @@
 
 @if (Item != null)
 {
-    @if (!IsEditing)
-    {
-        <p class="text-muted">
-            @Item.Descritpion
-            <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
-                <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
-            </button>
-        </p>
-    }
-    else
-    {
-        <EditForm Model="@DescriptionEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
-            <InputTextArea @bind-Value="@DescriptionEditText" class="form-control"></InputTextArea>
-            <button type="submit" class="btn timer-button text-info">
-                <span class="oi oi-circle-check" aria-hidden="true"></span>
-            </button>
-            <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
-                <span class="oi oi-circle-x" aria-hidden="true"></span>
-            </button>
-        </EditForm>
-    }
+    <div class="row">
+        <div class="col-1">
+            <ColorDropdown Color="@Item.Color" ColorChanged="(color)=>OnSetColor(color)" />
+        </div>
+        <div class="col">
+            @if (!IsEditing)
+            {
+                <p class="text-muted">
+                    @Item.Descritpion
+                    <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+                        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                    </button>
+                </p>
+            }
+            else
+            {
+                <EditForm Model="@DescriptionEditText" OnValidSubmit="@(() => ApplyChangesAsync())">
+                    <InputTextArea @bind-Value="@DescriptionEditText" class="form-control"></InputTextArea>
+                    <button type="submit" class="btn timer-button text-info">
+                        <span class="oi oi-circle-check" aria-hidden="true"></span>
+                    </button>
+                    <button class="btn timer-button text-danger" @onclick="@(()=>ResetChanges())" @onclick:preventDefault>
+                        <span class="oi oi-circle-x" aria-hidden="true"></span>
+                    </button>
+                </EditForm>
+            }
+        </div>
+    </div>
 
     @if (Tasks != null)
     {
@@ -210,4 +217,9 @@ else
         log.D("ResetChanges");
     }
 
+    public async void OnSetColor(ProjectColor color)
+    {
+        Item = await Service.UpdateProjectColorAsync(Item, color);
+        StateHasChanged();
+    }
 }

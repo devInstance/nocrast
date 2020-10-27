@@ -1,0 +1,39 @@
+﻿<div class="btn-group">
+    <button type="button" class="btn @(Color.ToString().ToLower()) blue dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Color
+    </button>
+    <div class="dropdown-menu">
+        <table>
+            <tr>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Aqua)" @onclick:preventDefault><span class="dot aqua"></span></a></td>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Blue)" @onclick:preventDefault><span class="dot blue"></span></a></td>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Darkblue)" @onclick:preventDefault><span class="dot darkblue"></span></a></td>
+            </tr>
+            <tr>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Green)" @onclick:preventDefault><span class="dot green"></span></a></td>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Yellow)" @onclick:preventDefault><span class="dot yellow"></span></a></td>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Orange)" @onclick:preventDefault><span class="dot orange"></span></a></td>
+            </tr>
+            <tr>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Red)" @onclick:preventDefault><span class="dot red"></span></a></td>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Rose)" @onclick:preventDefault><span class="dot rose"></span></a></td>
+                <td><a class="dropdown-item" href="#" @onclick="()=>OnSetColor(ProjectColor.Purple)" @onclick:preventDefault><span class="dot purple"></span></a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProjectColor Color { get; set; }
+
+    [Parameter]
+    public EventCallback<ProjectColor> ColorChanged { get; set; }
+
+    public void OnSetColor(ProjectColor color)
+    {
+        Color = color;
+        ColorChanged.InvokeAsync(color);
+    }
+
+}

@@ -7,6 +7,7 @@ using System.Linq;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Utils;
 using System.Collections.Generic;
+using NoCrast.Shared.Model;
 
 namespace NoCrast.ServerTests
 {
@@ -157,12 +158,18 @@ namespace NoCrast.ServerTests
         public Project lastProject = null;
         public TestDatabase CreateProject(string name)
         {
+            return CreateProject(name, ProjectColor.Rose);
+        }
+
+        public TestDatabase CreateProject(string name, ProjectColor color)
+        {
             lastProject = new Project
             {
                 Id = Guid.NewGuid(),
                 Profile = profile,
                 PublicId = name,
                 Title = name,
+                Color = color,
                 CreateDate = TimeProvider.CurrentTime,
                 UpdateDate = TimeProvider.CurrentTime,
             };
