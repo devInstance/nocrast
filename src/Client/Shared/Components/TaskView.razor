@@ -31,8 +31,8 @@
                 <button class="btn btn-default timer-active-button" @onclick="@(() => Start())">
                     <span class="oi oi-large oi-play-circle" aria-hidden="true"></span>
                 </button>
-                <small class="text-muted">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
             }
+            <small class="text-muted">@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</small>
         </p>
         @if (TagLabels != null && TagLabels.Length > 0)
         {
