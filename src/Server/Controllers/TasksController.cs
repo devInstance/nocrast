@@ -198,11 +198,11 @@ namespace NoCrast.Server.Controllers
                 }
                 else
                 {
-                    taskRecord.Project = null;
+                    taskRecord.ProjectId = null;
                 }
                 taskRecord.UpdateDate = now;
+                DB.Update(taskRecord);
                 DB.SaveChanges();
-
                 var response = (from ts in DecorateTasks(SelectTasks(null, null, null, null), timeoffset)
                                 where ts.Id == taskRecord.PublicId
                                 select ts).FirstOrDefault();

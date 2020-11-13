@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NoCrast.Server.Model
 {
@@ -15,6 +17,8 @@ namespace NoCrast.Server.Model
         public virtual TimerTaskState State { get; set; }
 
         public virtual Project Project { get; set; }
+        [ForeignKey("Project")]
+        public Guid? ProjectId { get; set; }
 
         public string Descritpion { get; set; }
     }

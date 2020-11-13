@@ -508,6 +508,38 @@ namespace NoCrast.Server.Controllers.Tests
         }
 
         [Fact()]
+        public void RemoveProjectTest()
+        {
+            var timeProvider = TestUtils.CreateTimerProvider();
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateProject("P").CreateTask("Task")
+                    .EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                var controller = new TasksController(db_test.db, userManager, TestUtils.CreateTimerProvider());
+
+                var input = new TaskItem
+                {
+                    Id = db_test.lastTask.PublicId,
+                    Title = "Test 1",
+                    Project = null
+                };
+                var result = controller.UpdateTask(input.Id, input, 0);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resTask = ((TaskItem)((OkObjectResult)result.Result).Value);
+                Assert.Equal("Test 1", resTask.Title);
+                Assert.Null(resTask.Project);
+
+                var task = db_test.FetchTask(resTask.Id);
+                Assert.Equal("Test 1", task.Title);
+                Assert.Null(task.Project);
+            }
+        }
+
+        [Fact()]
         public void GetTimelogAsyncReturnAllTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);

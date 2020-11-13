@@ -505,7 +505,10 @@ namespace NoCrast.Client.Services
                 TaskItem newTask;
                 try
                 {
-                    item.Project = new ProjectItem { Id = id };
+                    if(id != null)
+                    {
+                        item.Project = new ProjectItem { Id = id };
+                    }
                     newTask = await TaskApi.UpdateTaskAsync(item.Id, item, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
                 }

@@ -346,12 +346,25 @@ ul {
             border-top-right-radius: 0;
         }
 
-.dot {
-    height: 25px;
-    width: 25px;
+.dot, .small-dot {
     background-color: #bbb;
     border-radius: 50%;
     display: inline-block;
+}
+
+.dot {
+    height: 25px;
+    width: 25px;
+}
+
+.small-dot {
+    height: 12px;
+    width: 12px;
+}
+
+.clear {
+    background-color: transparent !important;
+    color: transparent !important;
 }
 
 .blue {
