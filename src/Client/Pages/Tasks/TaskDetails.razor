@@ -29,28 +29,28 @@
                         <span class="sr-only">Change Project</span>
                     </button>
                 }
-                <div class="dropdown-menu">
-                    @if (Projects != null && Projects.Length > 0)
+            <div class="dropdown-menu">
+                @if (Projects != null && Projects.Length > 0)
+                {
+                    @foreach (var project in Projects)
                     {
-                        @foreach (var project in Projects)
-                        {
-                            @if (Item.Project == null || Item.Project.Id != project.Id)
-                            {
-                                <a class="dropdown-item align-items-center" href="#" @onclick="@(() => AddProjectByIdAsync(project.Id))" @onclick:preventDefault>
-                                    <span class="small-dot @project.Color.ToString().ToLower()"></span><span class="align-top">&nbsp;&nbsp;&nbsp;&nbsp;@project.Title</span>
-                                </a>
-                            }
-                        }
-                    }
-
-                    @if (Item.Project != null)
-                    {
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item align-middle" href="#" @onclick="@(() => ClearProject())" @onclick:preventDefault>
-                            <span class="dot clear"></span><span>Clear @Item.Project.Title</span>
+                        <a class="dropdown-item align-items-center @(Item.Project != null && Item.Project.Id == project.Id ? "disabled" : "")" href="#" @onclick="@(() => AddProjectByIdAsync(project.Id))" @onclick:preventDefault>
+                            <span class="small-dot @project.Color.ToString().ToLower()"></span><span class="align-top">&nbsp;&nbsp;&nbsp;&nbsp;@project.Title</span>
                         </a>
                     }
-                </div>
+                    <div class="dropdown-divider"></div>
+                }
+                @if (Item.Project != null)
+                {
+                    <a class="dropdown-item align-middle" href="#" @onclick="@(() => ClearProject())" @onclick:preventDefault>
+                        <span class="dot clear"></span><span>Clear @Item.Project.Title</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                }
+                <a class="dropdown-item align-middle" href="#" data-toggle="modal" data-target="#addProjectModal" @onclick:preventDefault>
+                    <span class="dot clear"></span><span>Add New ...</span>
+                </a>
+            </div>
             </div>
         </div>
     </div>
