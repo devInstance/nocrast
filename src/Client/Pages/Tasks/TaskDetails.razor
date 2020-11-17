@@ -79,7 +79,7 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row my-2">
         <div class="col">
             <button class="btn btn-default timer-button" data-toggle="dropdown">
                 @if (TagLabels != null && TagLabels.Length > 0)
@@ -117,35 +117,29 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col">
-            <ul class="list-group list-group-horizontal">
-                <li class="p-2">
-                    <img src="/img/today.svg" width="32" height="32" alt="Today" title="Today" />
-                    <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider))</strong> <small>hour(s)</small></span>
-                </li>
-                <li class="p-2">
-                    <img src="/img/week.svg" width="32" height="32" alt="This Week" title="This Week" />
-                    <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek())</strong> <small>hour(s)</small></span>
-                </li>
-                <li class="p-2">
-                    <img src="/img/total.svg" width="32" height="32" alt="Total" title="Total" />
-                    <span><strong>@String.Format("{0:F1}", Item.GetTotalHoursSpent())</strong> <small>hour(s)</small></span>
-                </li>
-            </ul>
-        </div>
-    </div>
     @if (TimeLog != null)
     {
-        <div class="row pt-2">
+        <div class="row my-2">
             <div class="col">
-                <h4>Time log</h4>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h5>This week (@TimeLog.Count):</h5>
-                <ul class="px-0 py-2 m-0">
+                <div class="btn-group btn-group-toggle mr-4" role="group">
+                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.Day ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.Day))">Today</button>
+                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.WeekExcludeToday ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.WeekExcludeToday))">This week</button>
+                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.AllExcludeThisWeek ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.AllExcludeThisWeek))">More</button>
+                </div>
+                @switch (selectedFilter)
+                {
+                    case TimeLogResultType.Day:
+                        <p>Today @String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hours</p>
+                        break;
+                    case TimeLogResultType.WeekExcludeToday:
+                        <p>This week @String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek()) hours</p>
+                        break;
+                    case TimeLogResultType.AllExcludeThisWeek:
+                        <p>Total @String.Format("{0:F1}", Item.GetTotalHoursSpent()) hours</p>
+                        break;
+                }
+
+                <ul class="p-0 m-0">
                     @foreach (var tl in TimeLog.Items)
                     {
                         <li class="timer-list-item">
@@ -156,243 +150,249 @@
                 </ul>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <a href="#">All records (@TimeLog.TotalCount)</a>
-            </div>
-        </div>
     }
     else
-    {
+                    {
         <div>Loading ...</div>
     }
 }
 else
-{
+                    {
     <div>Loading ...</div>
 }
 
-@using System.Timers;
+                    @using System.Timers;
 
-@inject TasksService Service;
-@inject ProjectsService PrjService;
-@inject ILogProvider LogProvider;
-@inject NavigationManager NavigationManager;
-@inject NotificationService NotificationServ;
-@inject ToolbarService ToolbarServ;
-@inject ITimeProvider TimeProvider;
+                    @inject TasksService Service;
+                    @inject ProjectsService PrjService;
+                    @inject ILogProvider LogProvider;
+                    @inject NavigationManager NavigationManager;
+                    @inject NotificationService NotificationServ;
+                    @inject ToolbarService ToolbarServ;
+                    @inject ITimeProvider TimeProvider;
 
-@implements IDisposable
+                    @implements IDisposable
 
 @code {
+
     [Parameter]
-    public string Id { get; set; }
+                    public string Id { get; set; }
 
-    private TaskItem Item { get; set; }
-    private ModelList<TimeLogItem> TimeLog { get; set; }
-    private ProjectItem[] Projects { get; set; }
+                    private TaskItem Item { get; set; }
+                    private ModelList<TimeLogItem> TimeLog { get; set; }
+                    private ProjectItem[] Projects { get; set; }
 
-    private System.Timers.Timer timer;
+                    private System.Timers.Timer timer;
 
-    private ILog log;
+                    private ILog log;
 
-    //tags begin
-    private TagItem[] Tags { get; set; }
+                    private TimeLogResultType selectedFilter { get; set; }
 
-    private TagItem[] NotAssignedTags { get; set; }
+                    //tags begin
+                    private TagItem[] Tags { get; set; }
 
-    private string[] TagLabels
-    {
-        get
-        {
-            //TODO: run only once and cache, optimize
-            var result = new List<string>();
-            if (Tags == null) return null;
-            for (int i = 0; i < Tags.Length; i++)
-            {
-                result.Add(Tags[i].Name);
-            }
-            return result.ToArray();
-        }
-    }
+                    private TagItem[] NotAssignedTags { get; set; }
 
-    private string NewTagLabel { get; set; }
+                    private string[] TagLabels
+                    {
+                        get
+                        {
+                            //TODO: run only once and cache, optimize
+                            var result = new List<string>();
+                            if (Tags == null) return null;
+                            for (int i = 0; i < Tags.Length; i++)
+                            {
+                                result.Add(Tags[i].Name);
+                            }
+                            return result.ToArray();
+                        }
+                    }
 
-    //tags end
+                    private string NewTagLabel { get; set; }
 
-    public bool IsActive
-    {
-        get
-        {
-            return Item.IsRunning;
-        }
-    }
+                    //tags end
 
-    protected async override Task OnInitializedAsync()
-    {
-        log = LogProvider.CreateLogger(this);
+                    public bool IsActive
+                    {
+                        get
+                        {
+                            return Item.IsRunning;
+                        }
+                    }
 
-        using (var scope = log.DebugScope())
-        {
-            ToolbarServ.Back += OnBack;
-            ToolbarServ.Delete += OnDelete;
-            ToolbarServ.TitleChanged += OnTitleChanged;
+                    protected async override Task OnInitializedAsync()
+                    {
+                        log = LogProvider.CreateLogger(this);
 
-            NotificationServ.DataHasChanged += OnDataHasChanged;
+                        using (var scope = log.DebugScope())
+                        {
+                            ToolbarServ.Back += OnBack;
+                            ToolbarServ.Delete += OnDelete;
+                            ToolbarServ.TitleChanged += OnTitleChanged;
 
-            await RefreshDataAsync();
+                            NotificationServ.DataHasChanged += OnDataHasChanged;
 
-            SetUpTimer();
-        }
-    }
+                            await RefreshDataAsync();
 
-    private void OnBack(object value)
-    {
-        NavigateBack();
-    }
+                            SetUpTimer();
+                        }
+                    }
 
-    private void OnDelete(object value)
-    {
-        Remove();
-    }
+                    private void OnBack(object value)
+                    {
+                        NavigateBack();
+                    }
 
-    private async void OnTitleChanged(object value)
-    {
-        Item = await Service.UpdateTaskTitleAsync(Item, value.ToString());
-    }
+                    private void OnDelete(object value)
+                    {
+                        Remove();
+                    }
 
-    private void SetUpTimer()
-    {
-        timer = new System.Timers.Timer(1000.0);
-        timer.Elapsed += OnTimedEvent;
-        timer.AutoReset = true;
-        timer.Enabled = true;
-    }
+                    private async void OnTitleChanged(object value)
+                    {
+                        Item = await Service.UpdateTaskTitleAsync(Item, value.ToString());
+                    }
 
-    public void Dispose()
-    {
-        using (var scope = log.DebugScope())
-        {
-            ToolbarServ.Back -= OnBack;
-            ToolbarServ.Delete -= OnDelete;
-            ToolbarServ.TitleChanged -= OnTitleChanged;
-            ToolbarServ.Update(null);
+                    private void SetUpTimer()
+                    {
+                        timer = new System.Timers.Timer(1000.0);
+                        timer.Elapsed += OnTimedEvent;
+                        timer.AutoReset = true;
+                        timer.Enabled = true;
+                    }
 
-            NotificationServ.DataHasChanged -= OnDataHasChanged;
+                    public void Dispose()
+                    {
+                        using (var scope = log.DebugScope())
+                        {
+                            ToolbarServ.Back -= OnBack;
+                            ToolbarServ.Delete -= OnDelete;
+                            ToolbarServ.TitleChanged -= OnTitleChanged;
+                            ToolbarServ.Update(null);
 
-            if (timer != null)
-            {
-                timer.Elapsed -= OnTimedEvent;
-                timer.Dispose();
-            }
-        }
-    }
+                            NotificationServ.DataHasChanged -= OnDataHasChanged;
 
-    private void OnTimedEvent(Object source, ElapsedEventArgs e)
-    {
-        StateHasChanged();
-    }
+                            if (timer != null)
+                            {
+                                timer.Elapsed -= OnTimedEvent;
+                                timer.Dispose();
+                            }
+                        }
+                    }
 
-    private async void Remove()
-    {
-        var tempId = Id;
-        Id = null;
-        if (await Service.RemoveTaskAsync(Item))
-        {
-            NavigateBack();
-        }
-        else
-        {
-            Id = tempId;
-        }
-    }
+                    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+                    {
+                        StateHasChanged();
+                    }
 
-    private void OnDataHasChanged(Object sender, EventArgs e)
-    {
-        using (var scope = log.DebugScope())
-        {
-            RefreshDataAsync();
-        }
-    }
+                    private async void Remove()
+                    {
+                        var tempId = Id;
+                        Id = null;
+                        if (await Service.RemoveTaskAsync(Item))
+                        {
+                            NavigateBack();
+                        }
+                        else
+                        {
+                            Id = tempId;
+                        }
+                    }
 
-    private void NavigateBack()
-    {
-        NavigationManager.NavigateTo("/");
-    }
+                    private void OnDataHasChanged(Object sender, EventArgs e)
+                    {
+                        using (var scope = log.DebugScope())
+                        {
+                            RefreshDataAsync();
+                        }
+                    }
 
-    private void NavigateToProject(string id)
-    {
-        NavigationManager.NavigateTo($"projects/{id}");
-    }
+                    private void NavigateBack()
+                    {
+                        NavigationManager.NavigateTo("/");
+                    }
 
-    private async Task<bool> RefreshDataAsync()
-    {
-        using (var scope = log.DebugScope())
-        {
-            NewTagLabel = "";
-            if (!String.IsNullOrEmpty(Id))
-            {
-                Projects = await PrjService.GetProjectsAsync(false);
-                Item = await Service.GetTaskAsync(Id);
-                if (Item != null)
-                {
-                    ToolbarServ.Update(Item.Title);
+                    private void NavigateToProject(string id)
+                    {
+                        NavigationManager.NavigateTo($"projects/{id}");
+                    }
 
-                    TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Week);
+                    private async Task<bool> RefreshDataAsync()
+                    {
+                        using (var scope = log.DebugScope())
+                        {
+                            NewTagLabel = "";
+                            if (!String.IsNullOrEmpty(Id))
+                            {
+                                Projects = await PrjService.GetProjectsAsync(false);
+                                Item = await Service.GetTaskAsync(Id);
+                                if (Item != null)
+                                {
+                                    ToolbarServ.Update(Item.Title);
 
-                    Tags = await Service.GetTagsAsync(Item);
-                    NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);
-                }
-                else
-                {
-                    scope.E($"Cannot find task {Id}");
-                    return false;
-                }
-            }
-        }
-        StateHasChanged();
+                                    TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
 
-        return true;
-    }
+                                    Tags = await Service.GetTagsAsync(Item);
+                                    NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);
+                                }
+                                else
+                                {
+                                    scope.E($"Cannot find task {Id}");
+                                    return false;
+                                }
+                            }
+                        }
+                        StateHasChanged();
 
-    private async void AddProjectByIdAsync(string id)
-    {
-        Item = await Service.UpdateProjectAsync(Item, id);
-        StateHasChanged();
-    }
+                        return true;
+                    }
 
-    private async void ClearProject()
-    {
-        Item.Project = null;
-        Item = await Service.UpdateProjectAsync(Item, null);
-        StateHasChanged();
-    }
+                    private async void AddProjectByIdAsync(string id)
+                    {
+                        Item = await Service.UpdateProjectAsync(Item, id);
+                        StateHasChanged();
+                    }
+
+                    private async void ClearProject()
+                    {
+                        Item.Project = null;
+                        Item = await Service.UpdateProjectAsync(Item, null);
+                        StateHasChanged();
+                    }
 
 
-    private void Start()
-    {
-        Service.StartTaskAsync(Item);
-    }
+                    private void Start()
+                    {
+                        Service.StartTaskAsync(Item);
+                    }
 
-    private void Stop()
-    {
-        Service.StopTaskAsync(Item);
-    }
+                    private void Stop()
+                    {
+                        Service.StopTaskAsync(Item);
+                    }
 
-    private async void AddTagAsync()
-    {
-        log.D("ApplyChanges");
+                    private async void AddTagAsync()
+                    {
+                        log.D("ApplyChanges");
 
-        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
-        //await RefreshDataAsync();
-    }
+                        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
+                        //await RefreshDataAsync();
+                    }
 
-    private async void AddTagByIdAsync(string id)
-    {
-        log.D("ApplyChanges");
+                    private async void AddTagByIdAsync(string id)
+                    {
+                        log.D("ApplyChanges");
 
-        await Service.AddTagAsync(Item, id);
-        //await RefreshDataAsync();
-    }
+                        await Service.AddTagAsync(Item, id);
+                        //await RefreshDataAsync();
+                    }
 
+                    private async void RequestReportAsync(TimeLogResultType filter)
+                    {
+                        TimeLog = null;
+                        StateHasChanged();
+                        selectedFilter = filter;
+                        TimeLog = await Service.GetTimeLogItemsAsync(Item, filter);
+                        StateHasChanged();
+                    }
 }

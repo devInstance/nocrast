@@ -247,16 +247,25 @@ namespace NoCrast.Server.Controllers
             return HandleWebRequest<ModelList<TimeLogItem>>(() =>
             {
                 DateTime now = TimeProvider.CurrentTime;
-                DateTime? dateFilter = null;
-                if(type.HasValue)
+                DateTime? dateStartFilter = null;
+                DateTime? dateEndFilter = null;
+                if (type.HasValue)
                 {
                     switch (type.Value) 
                     {
                         case TimeLogResultType.Day:
-                            dateFilter = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
+                            dateStartFilter = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
                             break;
                         case TimeLogResultType.Week:
-                            dateFilter = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
+                            dateStartFilter = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
+                            break;
+                        case TimeLogResultType.WeekExcludeToday:
+                            dateStartFilter = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
+                            dateEndFilter = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
+                            break;
+                        case TimeLogResultType.AllExcludeThisWeek:
+                            //dateStartFilter = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
+                            dateEndFilter = TimeConverter.GetStartOfTheWeekForTimeOffset(now, timeoffset);
                             break;
 
                     }
@@ -268,7 +277,8 @@ namespace NoCrast.Server.Controllers
                                  select timeLog);
 
                 var filteredQuery = (from timeLog in coreQuery
-                                     where (dateFilter == null || timeLog.StartTime >= dateFilter.Value)
+                                     where (dateStartFilter == null || timeLog.StartTime >= dateStartFilter.Value)
+                                        && (dateEndFilter == null || timeLog.StartTime < dateEndFilter.Value)
                                      select timeLog);
 
                 var items = (from timeLog in filteredQuery

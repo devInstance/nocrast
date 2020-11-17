@@ -6,7 +6,9 @@ namespace NoCrast.Shared.Model
     {
         Day,
         Week,
-        All
+        All,
+        WeekExcludeToday,
+        AllExcludeThisWeek
     }
     public class TimeLogItem : ModelItem
     {
