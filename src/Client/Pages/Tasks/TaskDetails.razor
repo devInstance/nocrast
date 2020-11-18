@@ -29,28 +29,28 @@
                         <span class="sr-only">Change Project</span>
                     </button>
                 }
-            <div class="dropdown-menu">
-                @if (Projects != null && Projects.Length > 0)
-                {
-                    @foreach (var project in Projects)
+                <div class="dropdown-menu">
+                    @if (Projects != null && Projects.Length > 0)
                     {
-                        <a class="dropdown-item align-items-center @(Item.Project != null && Item.Project.Id == project.Id ? "disabled" : "")" href="#" @onclick="@(() => AddProjectByIdAsync(project.Id))" @onclick:preventDefault>
-                            <span class="small-dot @project.Color.ToString().ToLower()"></span><span class="align-top">&nbsp;&nbsp;&nbsp;&nbsp;@project.Title</span>
-                        </a>
+                        @foreach (var project in Projects)
+                        {
+                            <a class="dropdown-item align-items-center @(Item.Project != null && Item.Project.Id == project.Id ? "disabled" : "")" href="#" @onclick="@(() => AddProjectByIdAsync(project.Id))" @onclick:preventDefault>
+                                <span class="small-dot @project.Color.ToString().ToLower()"></span><span class="align-top">&nbsp;&nbsp;&nbsp;&nbsp;@project.Title</span>
+                            </a>
+                        }
+                        <div class="dropdown-divider"></div>
                     }
-                    <div class="dropdown-divider"></div>
-                }
-                @if (Item.Project != null)
-                {
-                    <a class="dropdown-item align-middle" href="#" @onclick="@(() => ClearProject())" @onclick:preventDefault>
-                        <span class="dot clear"></span><span>Clear @Item.Project.Title</span>
+                    @if (Item.Project != null)
+                    {
+                        <a class="dropdown-item align-middle" href="#" @onclick="@(() => ClearProject())" @onclick:preventDefault>
+                            <span class="dot clear"></span><span>Clear @Item.Project.Title</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                    }
+                    <a class="dropdown-item align-middle" href="#" data-toggle="modal" data-target="#addProjectModal" @onclick:preventDefault>
+                        <span class="dot clear"></span><span>Add New ...</span>
                     </a>
-                    <div class="dropdown-divider"></div>
-                }
-                <a class="dropdown-item align-middle" href="#" data-toggle="modal" data-target="#addProjectModal" @onclick:preventDefault>
-                    <span class="dot clear"></span><span>Add New ...</span>
-                </a>
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,29 +81,43 @@
     </div>
     <div class="row my-2">
         <div class="col">
-            <button class="btn btn-default timer-button" data-toggle="dropdown">
-                @if (TagLabels != null && TagLabels.Length > 0)
+            @if (Tags != null && Tags.Length > 0)
+            {
+                @foreach (var label in Tags)
                 {
-                    @foreach (var label in TagLabels)
+                    @if (label.added)
                     {
-                        <span class="badge badge-info">@label</span>
+                        <NavLink class="mr-2" href="@("tags/" + label.tag.Id)">
+                            <span class="oi oi-tag" style="font-size:14px" aria-hidden="true"></span>
+                            <span class="ml-1">@label.tag.Name</span>
+                        </NavLink>
+
                     }
                 }
-                <span class="badge badge-primary">Add Tag</span>
+            }
+            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                Add Tag
             </button>
             <div class="dropdown-menu">
-                @if (NotAssignedTags != null && NotAssignedTags.Length > 0)
+                @if (Tags != null && Tags.Length > 0)
                 {
-                    <ul>
-                        @foreach (var tag in NotAssignedTags)
+                    @foreach (var tag in Tags)
+                    {
+                        @if (@tag.added)
                         {
-                            <li>
-                                <button class="btn btn-default timer-button" @onclick="@(() => AddTagByIdAsync(tag.Id))">
-                                    <span class="badge badge-info">@tag.Name</span>
-                                </button>
-                            </li>
+                            <button class="dropdown-item btn btn-default" @onclick="@(() => RemoveTagByIdAsync(tag.tag.Id))">
+                                <span class="oi oi-check" style="font-size:14px" aria-hidden="true"></span>
+                                <span class="ml-1">@tag.tag.Name</span>
+                            </button>
                         }
-                    </ul>
+                        else
+                        {
+                            <button class="dropdown-item btn btn-default" @onclick="@(() => AddTagByIdAsync(tag.tag.Id))">
+                                <span class="ml-4">@tag.tag.Name</span>
+                            </button>
+                        }
+                    }
+                    <div class="dropdown-divider"></div>
                 }
                 <EditForm Model="@NewTagLabel" OnValidSubmit="@(() => AddTagAsync())" class="px-4 py-3">
                     <div class="form-group">
@@ -152,247 +166,248 @@
         </div>
     }
     else
-                    {
+    {
         <div>Loading ...</div>
     }
 }
 else
-                    {
+{
     <div>Loading ...</div>
 }
 
-                    @using System.Timers;
+@using System.Timers;
 
-                    @inject TasksService Service;
-                    @inject ProjectsService PrjService;
-                    @inject ILogProvider LogProvider;
-                    @inject NavigationManager NavigationManager;
-                    @inject NotificationService NotificationServ;
-                    @inject ToolbarService ToolbarServ;
-                    @inject ITimeProvider TimeProvider;
+@inject TasksService Service;
+@inject ProjectsService PrjService;
+@inject ILogProvider LogProvider;
+@inject NavigationManager NavigationManager;
+@inject NotificationService NotificationServ;
+@inject ToolbarService ToolbarServ;
+@inject ITimeProvider TimeProvider;
 
-                    @implements IDisposable
+@implements IDisposable
 
 @code {
 
     [Parameter]
-                    public string Id { get; set; }
+    public string Id { get; set; }
 
-                    private TaskItem Item { get; set; }
-                    private ModelList<TimeLogItem> TimeLog { get; set; }
-                    private ProjectItem[] Projects { get; set; }
+    private TaskItem Item { get; set; }
+    private ModelList<TimeLogItem> TimeLog { get; set; }
+    private ProjectItem[] Projects { get; set; }
 
-                    private System.Timers.Timer timer;
+    private System.Timers.Timer timer;
 
-                    private ILog log;
+    private ILog log;
 
-                    private TimeLogResultType selectedFilter { get; set; }
+    private TimeLogResultType selectedFilter { get; set; }
 
-                    //tags begin
-                    private TagItem[] Tags { get; set; }
+    struct TagMenuItem
+    {
+        public TagItem tag;
+        public bool added;
+    }
 
-                    private TagItem[] NotAssignedTags { get; set; }
+    private TagMenuItem[] Tags { get; set; }
 
-                    private string[] TagLabels
-                    {
-                        get
-                        {
-                            //TODO: run only once and cache, optimize
-                            var result = new List<string>();
-                            if (Tags == null) return null;
-                            for (int i = 0; i < Tags.Length; i++)
-                            {
-                                result.Add(Tags[i].Name);
-                            }
-                            return result.ToArray();
-                        }
-                    }
+    private string NewTagLabel { get; set; }
 
-                    private string NewTagLabel { get; set; }
+    public bool IsActive
+    {
+        get
+        {
+            return Item.IsRunning;
+        }
+    }
 
-                    //tags end
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
 
-                    public bool IsActive
-                    {
-                        get
-                        {
-                            return Item.IsRunning;
-                        }
-                    }
+        using (var scope = log.DebugScope())
+        {
+            ToolbarServ.Back += OnBack;
+            ToolbarServ.Delete += OnDelete;
+            ToolbarServ.TitleChanged += OnTitleChanged;
 
-                    protected async override Task OnInitializedAsync()
-                    {
-                        log = LogProvider.CreateLogger(this);
+            NotificationServ.DataHasChanged += OnDataHasChanged;
 
-                        using (var scope = log.DebugScope())
-                        {
-                            ToolbarServ.Back += OnBack;
-                            ToolbarServ.Delete += OnDelete;
-                            ToolbarServ.TitleChanged += OnTitleChanged;
+            await RefreshDataAsync();
 
-                            NotificationServ.DataHasChanged += OnDataHasChanged;
+            SetUpTimer();
+        }
+    }
 
-                            await RefreshDataAsync();
+    private void OnBack(object value)
+    {
+        NavigateBack();
+    }
 
-                            SetUpTimer();
-                        }
-                    }
+    private void OnDelete(object value)
+    {
+        Remove();
+    }
 
-                    private void OnBack(object value)
-                    {
-                        NavigateBack();
-                    }
+    private async void OnTitleChanged(object value)
+    {
+        Item = await Service.UpdateTaskTitleAsync(Item, value.ToString());
+    }
 
-                    private void OnDelete(object value)
-                    {
-                        Remove();
-                    }
+    private void SetUpTimer()
+    {
+        timer = new System.Timers.Timer(1000.0);
+        timer.Elapsed += OnTimedEvent;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
 
-                    private async void OnTitleChanged(object value)
-                    {
-                        Item = await Service.UpdateTaskTitleAsync(Item, value.ToString());
-                    }
+    public void Dispose()
+    {
+        using (var scope = log.DebugScope())
+        {
+            ToolbarServ.Back -= OnBack;
+            ToolbarServ.Delete -= OnDelete;
+            ToolbarServ.TitleChanged -= OnTitleChanged;
+            ToolbarServ.Update(null);
 
-                    private void SetUpTimer()
-                    {
-                        timer = new System.Timers.Timer(1000.0);
-                        timer.Elapsed += OnTimedEvent;
-                        timer.AutoReset = true;
-                        timer.Enabled = true;
-                    }
+            NotificationServ.DataHasChanged -= OnDataHasChanged;
 
-                    public void Dispose()
-                    {
-                        using (var scope = log.DebugScope())
-                        {
-                            ToolbarServ.Back -= OnBack;
-                            ToolbarServ.Delete -= OnDelete;
-                            ToolbarServ.TitleChanged -= OnTitleChanged;
-                            ToolbarServ.Update(null);
+            if (timer != null)
+            {
+                timer.Elapsed -= OnTimedEvent;
+                timer.Dispose();
+            }
+        }
+    }
 
-                            NotificationServ.DataHasChanged -= OnDataHasChanged;
+    private void OnTimedEvent(Object source, ElapsedEventArgs e)
+    {
+        StateHasChanged();
+    }
 
-                            if (timer != null)
-                            {
-                                timer.Elapsed -= OnTimedEvent;
-                                timer.Dispose();
-                            }
-                        }
-                    }
+    private async void Remove()
+    {
+        var tempId = Id;
+        Id = null;
+        if (await Service.RemoveTaskAsync(Item))
+        {
+            NavigateBack();
+        }
+        else
+        {
+            Id = tempId;
+        }
+    }
 
-                    private void OnTimedEvent(Object source, ElapsedEventArgs e)
-                    {
-                        StateHasChanged();
-                    }
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        using (var scope = log.DebugScope())
+        {
+            RefreshDataAsync();
+        }
+    }
 
-                    private async void Remove()
-                    {
-                        var tempId = Id;
-                        Id = null;
-                        if (await Service.RemoveTaskAsync(Item))
-                        {
-                            NavigateBack();
-                        }
-                        else
-                        {
-                            Id = tempId;
-                        }
-                    }
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
 
-                    private void OnDataHasChanged(Object sender, EventArgs e)
-                    {
-                        using (var scope = log.DebugScope())
-                        {
-                            RefreshDataAsync();
-                        }
-                    }
+    private void NavigateToProject(string id)
+    {
+        NavigationManager.NavigateTo($"projects/{id}");
+    }
 
-                    private void NavigateBack()
-                    {
-                        NavigationManager.NavigateTo("/");
-                    }
+    private async Task<bool> RefreshDataAsync()
+    {
+        using (var scope = log.DebugScope())
+        {
+            NewTagLabel = "";
+            if (!String.IsNullOrEmpty(Id))
+            {
+                Projects = await PrjService.GetProjectsAsync(false);
+                Item = await Service.GetTaskAsync(Id);
+                if (Item != null)
+                {
+                    ToolbarServ.Update(Item.Title);
 
-                    private void NavigateToProject(string id)
-                    {
-                        NavigationManager.NavigateTo($"projects/{id}");
-                    }
+                    TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
 
-                    private async Task<bool> RefreshDataAsync()
-                    {
-                        using (var scope = log.DebugScope())
-                        {
-                            NewTagLabel = "";
-                            if (!String.IsNullOrEmpty(Id))
-                            {
-                                Projects = await PrjService.GetProjectsAsync(false);
-                                Item = await Service.GetTaskAsync(Id);
-                                if (Item != null)
-                                {
-                                    ToolbarServ.Update(Item.Title);
+                    await RefreshTagsAsync();
+                }
+                else
+                {
+                    scope.E($"Cannot find task {Id}");
+                    return false;
+                }
+            }
+        }
+        StateHasChanged();
 
-                                    TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
+        return true;
+    }
 
-                                    Tags = await Service.GetTagsAsync(Item);
-                                    NotAssignedTags = await Service.GetNotAssignedTagsAsync(Tags);
-                                }
-                                else
-                                {
-                                    scope.E($"Cannot find task {Id}");
-                                    return false;
-                                }
-                            }
-                        }
-                        StateHasChanged();
+    private async Task<bool> RefreshTagsAsync()
+    {
+        var alltags = await Service.GetAllTagsAsync();
+        var itemtags = await Service.GetTagsAsync(Item);
+        Tags = (from tg in alltags
+                join it in itemtags on tg.Id equals it.Id
+                into tgt
+                from res in tgt.DefaultIfEmpty()
+                select new TagMenuItem { tag = tg, added = res != null }).ToArray();
 
-                        return true;
-                    }
+        return true;
+    }
 
-                    private async void AddProjectByIdAsync(string id)
-                    {
-                        Item = await Service.UpdateProjectAsync(Item, id);
-                        StateHasChanged();
-                    }
+    private async void AddProjectByIdAsync(string id)
+    {
+        Item = await Service.UpdateProjectAsync(Item, id);
+        StateHasChanged();
+    }
 
-                    private async void ClearProject()
-                    {
-                        Item.Project = null;
-                        Item = await Service.UpdateProjectAsync(Item, null);
-                        StateHasChanged();
-                    }
+    private async void ClearProject()
+    {
+        Item.Project = null;
+        Item = await Service.UpdateProjectAsync(Item, null);
+        StateHasChanged();
+    }
 
 
-                    private void Start()
-                    {
-                        Service.StartTaskAsync(Item);
-                    }
+    private void Start()
+    {
+        Service.StartTaskAsync(Item);
+    }
 
-                    private void Stop()
-                    {
-                        Service.StopTaskAsync(Item);
-                    }
+    private void Stop()
+    {
+        Service.StopTaskAsync(Item);
+    }
 
-                    private async void AddTagAsync()
-                    {
-                        log.D("ApplyChanges");
+    private async void AddTagAsync()
+    {
+        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
+    }
 
-                        await Service.AddOrCreateTagAsync(Item, NewTagLabel);
-                        //await RefreshDataAsync();
-                    }
+    private async void AddTagByIdAsync(string id)
+    {
+        await Service.AddTagAsync(Item, id);
+        await RefreshTagsAsync();
+        StateHasChanged();
+    }
 
-                    private async void AddTagByIdAsync(string id)
-                    {
-                        log.D("ApplyChanges");
+    private async void RemoveTagByIdAsync(string id)
+    {
+        await Service.RemoveTagAsync(Item, id);
+        await RefreshTagsAsync();
+        StateHasChanged();
+    }
 
-                        await Service.AddTagAsync(Item, id);
-                        //await RefreshDataAsync();
-                    }
-
-                    private async void RequestReportAsync(TimeLogResultType filter)
-                    {
-                        TimeLog = null;
-                        StateHasChanged();
-                        selectedFilter = filter;
-                        TimeLog = await Service.GetTimeLogItemsAsync(Item, filter);
-                        StateHasChanged();
-                    }
+    private async void RequestReportAsync(TimeLogResultType filter)
+    {
+        TimeLog = null;
+        StateHasChanged();
+        selectedFilter = filter;
+        TimeLog = await Service.GetTimeLogItemsAsync(Item, filter);
+        StateHasChanged();
+    }
 }

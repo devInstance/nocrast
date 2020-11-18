@@ -402,30 +402,17 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<TagItem[]> GetNotAssignedTagsAsync(TagItem[] exclude)
+        public async Task<TagItem[]> GetAllTagsAsync()
         {
             using (var l = Log.DebugScope())
             {
                 try
                 {
-                    var tags = await TagsApi.GetTagsAsync(false); //TODO: should be cached
+                    var res = await TagsApi.GetTagsAsync(false); //TODO: should be cached
 
                     ResetNetworkError();
 
-                    //TODO: re-write this code
-                    var result = new List<TagItem>(tags);
-                    foreach (var ex in exclude)
-                    {
-                        for(int i = 0; i < result.Count; i ++)
-                        {
-                            if (result[i].Id == ex.Id)
-                            {
-                                result.RemoveAt(i);
-                            }
-                        }
-                    }
-
-                    return result.ToArray();
+                    return res;
                 }
                 catch (Exception ex)
                 {
@@ -481,20 +468,20 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<TagItem> RemoveTagAsync(TaskItem item, TagItem tag)
+        public async Task<bool> RemoveTagAsync(TaskItem item, string id)
         {
             using (var l = Log.DebugScope())
             {
                 try
                 {
-                    return await TagsApi.AddTagTaskAsync(item.Id, tag.Id);
+                    return await TagsApi.RemoveTagTaskAsync(item.Id, id);
                 }
                 catch (Exception ex)
                 {
                     l.E(ex);
                     NotifyNetworkError(ex);
                 }
-                return tag;
+                return false;
             }
         }
 
