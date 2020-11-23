@@ -79,6 +79,11 @@
             </div>
         </div>
     </div>
+    <div class="row pt-2">
+        <div class="col">
+            <TimeLinePanel Item="Item" Log="TodayTimeLog"></TimeLinePanel>
+        </div>
+    </div>
     <div class="row my-2">
         <div class="col">
             @if (Tags != null && Tags.Length > 0)
@@ -194,6 +199,7 @@ else
 
     private TaskItem Item { get; set; }
     private ModelList<TimeLogItem> TimeLog { get; set; }
+    private ModelList<TimeLogItem> TodayTimeLog { get; set; }
     private ProjectItem[] Projects { get; set; }
 
     private System.Timers.Timer timer;
@@ -330,7 +336,7 @@ else
                 {
                     ToolbarServ.Update(Item.Title);
 
-                    TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
+                    TodayTimeLog = TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
 
                     await RefreshTagsAsync();
                 }

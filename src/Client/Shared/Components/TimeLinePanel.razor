@@ -1,0 +1,111 @@
+﻿@{
+    for (DateTime time = StartDate; time.Hour <= EndDate.Hour; time = time.AddHours(1))
+    {
+        if (time == StartDate)
+        {
+            <div style="@($"float:left;max-width: {CellWidthPercent - 1}%;width:{CellWidthPercent - 1}%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
+        }
+        else if (time.Hour == EndDate.Hour - 1)
+        {
+            <div style="@($"float:left;max-width: {CellWidthPercent - 1}%;width:{CellWidthPercent - 1}%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
+        }
+        else if (time.Hour == EndDate.Hour)
+        {
+            <div style="@($"float:left;max-width: 1%;width:1%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
+        }
+        else
+        {
+            <div style="@($"float:left;max-width: {CellWidthPercent}%;width:{CellWidthPercent}%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
+        }
+    }
+}
+
+<svg class="chart" width="100%" height="46" aria-labelledby="title desc" role="img">
+    @*<title id="title">A bar chart showing information</title>
+        <desc id="desc">4 apples; 8 bananas; 15 kiwis; 16 oranges; 23 lemons</desc>*@
+    @for (int i = 0, count = EndDate.Hour - StartDate.Hour; i < count; i++)
+    {
+        <line x1="@($"{i*CellWidthPercent}%")" y1="0" x2="@($"{i*CellWidthPercent}%")" y2="16" stroke="grey"></line>
+        <line x1="@($"{i*CellWidthPercent + CellWidthPercent/2}%")" y1="0" x2="@($"{i*CellWidthPercent + CellWidthPercent/2}%")" y2="8" stroke="grey"></line>
+    }
+    @if (Log != null)
+    {
+        @foreach (var tl in Log.Items)
+        {
+            <g class="@("bar " + (Item.Project != null ? Item.Project.Color.ToString().ToLower() : "white"))">
+                <rect x="@(((tl.StartTime.ToLocalTime().Hour  + (tl.StartTime.ToLocalTime().Minute / 60.0f) - (float)StartDate.Hour) * CellWidthPercent).ToString() + "%")"
+                      y="10"
+                      width="@(((float)tl.GetElapsedThisPeriod(TimeProvider) / 1000.0f / 60.0f / 60.0f * CellWidthPercent).ToString() + "%")"
+                      height="26">
+                </rect>
+            </g>
+        }
+    }
+
+    @*<g class="@("bar " + Item.Project.Color.ToString().ToLower())">
+            <rect x="0" width="10%" height="26"></rect>
+        </g>
+        <g class="@("bar " + Item.Project.Color.ToString().ToLower())">
+            <rect x="50%" width="10%" height="26"></rect>
+        </g>*@
+</svg>
+
+@inject TasksService Service;
+@inject NotificationService NotificationServ;
+@inject ITimeProvider TimeProvider;
+
+@code {
+    [Parameter]
+    public TaskItem Item { get; set; }
+
+    [Parameter]
+    public ModelList<TimeLogItem> Log { get; set; }
+
+    private DateTime StartDate { get; set; }
+    private DateTime EndDate { get; set; }
+    private float CellWidthPercent { get; set; }
+    protected override void OnInitialized()
+    {
+        DateTime now = DateTime.Now;
+
+        StartDate = DateTime.Today;
+
+        if (now.Hour < 8)
+        {
+            if (now.Hour > 1)
+            {
+                StartDate = DateTime.Today.AddHours(now.Hour - 1);
+            }
+        }
+        else
+        {
+            StartDate = DateTime.Today.AddHours(8);
+        }
+
+        if (now.Hour > 20)
+        {
+            if (now.Hour < 23)
+            {
+                EndDate = DateTime.Today.AddHours(now.Hour + 1);
+            }
+            else
+            {
+                EndDate = DateTime.Today.AddHours(now.Hour);
+            }
+        }
+        else
+        {
+            EndDate = DateTime.Today.AddHours(20);
+        }
+
+        CellWidthPercent = 100.0f / (EndDate.Hour - StartDate.Hour);
+
+        NotificationServ.DataHasChanged += OnDataHasChanged;
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+
+}
