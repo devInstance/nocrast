@@ -286,34 +286,10 @@ ul {
 
 .clear {
   background-color: transparent !important;
-  color: transparent !important; }
+  color: transparent !important;
+  fill: transparent; }
 
-.blue {
-  background-color: #007bff !important;
-  color: #FFFFFF !important;
-  fill: #007bff; }
-
-.red {
-  background-color: #dc3545 !important;
-  color: #FFFFFF !important; }
-
-.green {
-  background-color: #28a745 !important;
-  color: #FFFFFF !important;
-  fill: #28a745; }
-
-.yellow {
-  background-color: #ffc107 !important;
-  color: #FFFFFF !important;
-  fill: #ffc107;
-  stroke: #c97b00; }
-
-.yellow:focus,
-.yellow:hover {
-  background-color: #e07e00 !important;
-  color: #FFFFFF !important;
-  fill: #e07e00; }
-
+/*TODO: refactor this code. Why do we need white?*/
 .white {
   background-color: #f0f0f0 !important;
   color: #FFFFFF !important;
@@ -327,29 +303,145 @@ ul {
   fill: #b0b0b0;
   stroke: #a0a0a0; }
 
+.blue {
+  background-color: #007bff !important;
+  color: #ffffff !important;
+  fill: #007bff;
+  stroke: #003e80; }
+  .blue:hover {
+    background-color: #4da3ff !important;
+    color: #ffffff !important;
+    fill: #4da3ff; }
+  .blue:focus {
+    background-color: #003e80 !important;
+    color: #ffffff !important;
+    fill: #003e80; }
+
+.red {
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
+  fill: #dc3545;
+  stroke: #6e1b23; }
+  .red:hover {
+    background-color: #e7727d !important;
+    color: #ffffff !important;
+    fill: #e7727d; }
+  .red:focus {
+    background-color: #6e1b23 !important;
+    color: #ffffff !important;
+    fill: #6e1b23; }
+
+.green {
+  background-color: #28a745 !important;
+  color: #ffffff !important;
+  fill: #28a745;
+  stroke: #145423; }
+  .green:hover {
+    background-color: #69c17d !important;
+    color: #ffffff !important;
+    fill: #69c17d; }
+  .green:focus {
+    background-color: #145423 !important;
+    color: #ffffff !important;
+    fill: #145423; }
+
+.yellow {
+  background-color: #ffc107 !important;
+  color: #ffffff !important;
+  fill: #ffc107;
+  stroke: #806104; }
+  .yellow:hover {
+    background-color: #ffd451 !important;
+    color: #ffffff !important;
+    fill: #ffd451; }
+  .yellow:focus {
+    background-color: #806104 !important;
+    color: #ffffff !important;
+    fill: #806104; }
+
 .aqua {
   background-color: #17a2b8 !important;
-  color: #000000 !important; }
+  color: #ffffff !important;
+  fill: #17a2b8;
+  stroke: #0c515c; }
+  .aqua:hover {
+    background-color: #5dbecd !important;
+    color: #ffffff !important;
+    fill: #5dbecd; }
+  .aqua:focus {
+    background-color: #0c515c !important;
+    color: #ffffff !important;
+    fill: #0c515c; }
 
 .orange {
   background-color: #d36b3b !important;
-  color: #FFFFFF !important; }
+  color: #ffffff !important;
+  fill: #d36b3b;
+  stroke: #6a361e; }
+  .orange:hover {
+    background-color: #e09776 !important;
+    color: #ffffff !important;
+    fill: #e09776; }
+  .orange:focus {
+    background-color: #6a361e !important;
+    color: #ffffff !important;
+    fill: #6a361e; }
 
 .darkblue {
   background-color: #0507fd !important;
-  color: #FFFFFF !important; }
+  color: #ffffff !important;
+  fill: #0507fd;
+  stroke: #03047f; }
+  .darkblue:hover {
+    background-color: #5051fe !important;
+    color: #ffffff !important;
+    fill: #5051fe; }
+  .darkblue:focus {
+    background-color: #03047f !important;
+    color: #ffffff !important;
+    fill: #03047f; }
 
 .purple {
   background-color: #7005fd !important;
-  color: #FFFFFF !important; }
+  color: #ffffff !important;
+  fill: #7005fd;
+  stroke: #38037f; }
+  .purple:hover {
+    background-color: #9b50fe !important;
+    color: #ffffff !important;
+    fill: #9b50fe; }
+  .purple:focus {
+    background-color: #38037f !important;
+    color: #ffffff !important;
+    fill: #38037f; }
 
 .lightblue {
   background-color: #2874a7 !important;
-  color: #FFFFFF !important; }
+  color: #ffffff !important;
+  fill: #2874a7;
+  stroke: #143a54; }
+  .lightblue:hover {
+    background-color: #699ec1 !important;
+    color: #ffffff !important;
+    fill: #699ec1; }
+  .lightblue:focus {
+    background-color: #143a54 !important;
+    color: #ffffff !important;
+    fill: #143a54; }
 
 .rose {
   background-color: #9a28a7 !important;
-  color: #FFFFFF !important; }
+  color: #ffffff !important;
+  fill: #9a28a7;
+  stroke: #4d1454; }
+  .rose:hover {
+    background-color: #b869c1 !important;
+    color: #ffffff !important;
+    fill: #b869c1; }
+  .rose:focus {
+    background-color: #4d1454 !important;
+    color: #ffffff !important;
+    fill: #4d1454; }
 
 .bar {
   height: 21px;

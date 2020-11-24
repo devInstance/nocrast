@@ -1,4 +1,25 @@
-﻿.dot, .small-dot {
+﻿$color-clear: transparent;
+$color-white: #ffffff;
+$color-blue: #007bff;
+$color-red: #dc3545;
+$color-green: #28a745;
+$color-yellow: #ffc107;
+$color-aqua: #17a2b8;
+$color-orange: #d36b3b;
+$color-darkblue: #0507fd;
+$color-purple: #7005fd;
+$color-lightblue: #2874a7;
+$color-rose: #9a28a7;
+
+@function tint($color) {
+    @return mix(white, $color, 30%);
+}
+
+@function shade($color) {
+    @return mix(black, $color, 50%);
+}
+
+.dot, .small-dot {
     background-color: #bbb;
     border-radius: 50%;
     display: inline-block;
@@ -15,41 +36,12 @@
 }
 
 .clear {
-    background-color: transparent !important;
-    color: transparent !important;
+    background-color: $color-clear !important;
+    color: $color-clear !important;
+    fill: $color-clear;
 }
 
-.blue {
-    background-color: #007bff !important;
-    color: #FFFFFF !important;
-    fill: #007bff;
-}
-
-.red {
-    background-color: #dc3545 !important;
-    color: #FFFFFF !important;
-}
-
-.green {
-    background-color: #28a745 !important;
-    color: #FFFFFF !important;
-    fill: #28a745;
-}
-
-.yellow {
-    background-color: #ffc107 !important;
-    color: #FFFFFF !important;
-    fill: #ffc107;
-    stroke: #c97b00;
-}
-
-.yellow:focus,
-.yellow:hover {
-    background-color: #e07e00 !important;
-    color: #FFFFFF !important;
-    fill: #e07e00;
-}
-
+/*TODO: refactor this code. Why do we need white?*/
 .white {
     background-color: #f0f0f0 !important;
     color: #FFFFFF !important;
@@ -65,32 +57,61 @@
     stroke: #a0a0a0;
 }
 
+@mixin dot-color($bg-color, $fg-color) {
+    background-color: $bg-color !important;
+    color: $fg-color !important;
+    fill: $bg-color;
+    stroke: shade($bg-color);
+
+    &:hover {
+        background-color: tint($bg-color) !important;
+        color: $fg-color !important;
+        fill: tint($bg-color);
+    }
+
+    &:focus {
+        background-color: shade($bg-color) !important;
+        color: $fg-color !important;
+        fill: shade($bg-color);
+    }
+}
+
+.blue {
+    @include dot-color($color-blue, $color-white)
+}
+
+.red {
+    @include dot-color($color-red, $color-white)
+}
+
+.green {
+    @include dot-color($color-green, $color-white)
+}
+
+.yellow {
+    @include dot-color($color-yellow, $color-white)
+}
+
 .aqua {
-    background-color: #17a2b8 !important;
-    color: #000000 !important;
+    @include dot-color($color-aqua, $color-white);
 }
 
 .orange {
-    background-color: #d36b3b !important;
-    color: #FFFFFF !important;
+    @include dot-color($color-orange, $color-white);
 }
 
 .darkblue {
-    background-color: #0507fd !important;
-    color: #FFFFFF !important;
+    @include dot-color($color-darkblue, $color-white);
 }
 
 .purple {
-    background-color: #7005fd !important;
-    color: #FFFFFF !important;
+    @include dot-color($color-purple, $color-white);
 }
 
 .lightblue {
-    background-color: #2874a7 !important;
-    color: #FFFFFF !important;
+    @include dot-color($color-lightblue, $color-white);
 }
 
 .rose {
-    background-color: #9a28a7 !important;
-    color: #FFFFFF !important;
+    @include dot-color($color-rose, $color-white);
 }
