@@ -81,7 +81,7 @@
     </div>
     <div class="row pt-2">
         <div class="col">
-            <TimeLinePanel Item="Item" Log="TodayTimeLog"></TimeLinePanel>
+            <TimeLinePanel Items="Items" Logs="Logs"></TimeLinePanel>
         </div>
     </div>
     <div class="row my-2">
@@ -197,10 +197,18 @@ else
     [Parameter]
     public string Id { get; set; }
 
-    private TaskItem Item { get; set; }
+    private TaskItem _item;
+    private TaskItem Item { get { return _item; } set { _item = value; Items[0] = _item; } }
+
     private ModelList<TimeLogItem> TimeLog { get; set; }
-    private ModelList<TimeLogItem> TodayTimeLog { get; set; }
+
+    private ModelList<TimeLogItem> _todayTimeLog;
+    private ModelList<TimeLogItem> TodayTimeLog { get { return _todayTimeLog; } set { _todayTimeLog = value; Logs[0] = _todayTimeLog; } }
+
     private ProjectItem[] Projects { get; set; }
+
+    private TaskItem[] Items = new TaskItem[1];
+    private ModelList<TimeLogItem>[] Logs = new ModelList<TimeLogItem>[1];
 
     private System.Timers.Timer timer;
 
@@ -337,8 +345,6 @@ else
                     ToolbarServ.Update(Item.Title);
 
                     TodayTimeLog = TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
-
-                    await RefreshTagsAsync();
                 }
                 else
                 {

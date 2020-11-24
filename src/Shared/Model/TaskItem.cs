@@ -7,7 +7,8 @@ namespace NoCrast.Shared.Model
     {
         All = 0,
         RunningOnly = 1,
-        StoppedOnly = 2
+        StoppedOnly = 2,
+        Today = 3
     }
 
     public class TaskItem : ModelItem

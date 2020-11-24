@@ -1,0 +1,121 @@
+﻿
+@if (ActiveTasksList != null)
+{
+    @foreach (var item in ActiveTasksList)
+    {
+        <div class="row">
+            <div class="col">
+                @if (item.Project != null)
+                {
+                }
+                <NavLink href="@($"tasks/{item.Id}")" Match="NavLinkMatch.All">
+                    <strong><span>@item.Title</span></strong>
+                </NavLink>
+                @if (item.Project != null)
+                {
+                    <strong>
+                        <span class="@("small-dot mx-1 " + item.Project.Color.ToString().ToLower())"></span>
+                        <NavLink href="@($"projects/{item.Project.Id}")"
+                                 Match="NavLinkMatch.All">
+                            @item.Project.Title
+                        </NavLink>
+                    </strong>
+                }
+
+                <small class="ml-4 text-muted">
+                    <span class="oi oi-clock small-timer-button" aria-hidden="true"></span>
+                    <span>@String.Format("{0:F1}", item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hrs today</span>
+                </small>
+
+            </div>
+        </div>
+        <div class="row pt-2">
+            <div class="col">
+                <div class="d-flex flex-row">
+                    <div class="container-fluid timer-link" role="document">
+                        <div class="d-flex align-items-center">
+                            <span class="timer-text timer-text-timespan-lg">
+                                @FormatingUtils.FormatTimerElapsedTime(item, TimeProvider)
+                            </span>
+                            @if (item.IsRunning)
+                            {
+                                <button class="btn btn-default ml-2" @onclick="@(() => Stop(item))">
+                                    <span class="oi oi-media-pause timer-text-timespan-lg" aria-hidden="true"></span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-default ml-2" @onclick="@(() => Start(item))">
+                                    <span class="oi oi-media-play timer-text-timespan-lg" aria-hidden="true"></span>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<div class="row my-2">
+                <div class="col">
+                    @if (Tags != null && Tags.Length > 0)
+                    {
+                        @foreach (var label in Tags)
+                        {
+                            @if (label.added)
+                            {
+                                <NavLink class="mr-2" href="@("tags/" + label.tag.Id)">
+                                    <span class="oi oi-tag" style="font-size:14px" aria-hidden="true"></span>
+                                    <span class="ml-1">@label.tag.Name</span>
+                                </NavLink>
+
+                            }
+                        }
+                    }
+                </div>
+            </div>*@
+    }
+}
+
+@if (Items != null && TodayTimeLog != null)
+{
+    <div class="row pt-2">
+        <div class="col">
+            <TimeLinePanel Items="Items" Logs="TodayTimeLog"></TimeLinePanel>
+        </div>
+    </div>
+}
+
+@inject ITimeProvider TimeProvider;
+@inject TasksService Service;
+@inject ILogProvider LogProvider;
+
+@code {
+    [Parameter]
+    public TaskItem[] ActiveTasksList { get; set; }
+
+    [Parameter]
+    public TaskItem[] Items { get; set; }
+
+    [Parameter]
+    public ModelList<TimeLogItem>[] TodayTimeLog { get; set; }
+
+    private ILog log;
+
+    protected override void OnInitialized()
+    {
+        log = LogProvider.CreateLogger(this);
+        using (var l = log.DebugScope())
+        {
+        }
+    }
+
+    private void Start(TaskItem item)
+    {
+        Service.StartTaskAsync(item);
+    }
+
+    private void Stop(TaskItem item)
+    {
+        Service.StopTaskAsync(item);
+    }
+
+}

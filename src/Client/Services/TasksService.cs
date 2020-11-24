@@ -148,6 +148,27 @@ namespace NoCrast.Client.Services
             }
         }
 
+        public async Task<TaskItem[]> GetTodayTasksAsync()
+        {
+            using (var l = Log.DebugScope())
+            {
+                ResetUIError();
+                try
+                {
+                    var tasks = await TaskApi.GetTasksAsync(TimeProvider.UtcTimeOffset, null, null, TaskFilter.Today);
+
+                    ResetNetworkError();
+
+                    return tasks;
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
+
         public async Task<TaskItem> GetTaskAsync(string taskId)
         {
             using (var l = Log.DebugScope())

@@ -10,10 +10,7 @@
     {
         <PageTitle Value="@FormatingUtils.GetTimerTitle(ActiveTasksList[0], TimeProvider)" />
     }
-    @foreach (var item in ActiveTasksList)
-    {
-        <TaskView Item="item" />
-    }
+    <ActiveTaskPanel ActiveTasksList="ActiveTasksList" Items="Items" TodayTimeLog="TodayTimeLog" />
 }
 else
 {
@@ -22,7 +19,7 @@ else
 
 @if (PassiveTasksList != null)
 {
-    <h2>Recent Tasks</h2>
+    <h2 class="mt-4">Recent Tasks</h2>
 
     <div class="card-deck">
         <div class="card timer-card">
@@ -68,6 +65,8 @@ else
 
     private TaskItem[] ActiveTasksList { get; set; }
     private TaskItem[] PassiveTasksList { get; set; }
+    private TaskItem[] Items { get; set; }
+    private ModelList<TimeLogItem>[] TodayTimeLog { get; set; }
 
     private ILog log;
 
@@ -127,12 +126,30 @@ else
 
     private async Task<bool> RefreshData()
     {
-        ActiveTasksList = await Service.GetRunningTasksAsync();
-        StateHasChanged();
 
-        PassiveTasksList = await Service.GetTasksForDashboardAsync();
-        StateHasChanged();
+        using (var l = log.DebugScope())
+        {
+            ActiveTasksList = await Service.GetRunningTasksAsync();
+            StateHasChanged();
 
-        return true;
+            PassiveTasksList = await Service.GetTasksForDashboardAsync();
+            StateHasChanged();
+
+            Items = await Service.GetTodayTasksAsync();
+            l.D($"Items = {Items}");
+            if (Items != null)
+            {
+                l.D($"Length = {Items.Length}");
+                TodayTimeLog = new ModelList<TimeLogItem>[Items.Length];
+                for (int i = 0; i < Items.Length; i++)
+                {
+                    l.D($"i = {i}");
+                    TodayTimeLog[i] = await Service.GetTimeLogItemsAsync(Items[i], TimeLogResultType.Day);
+                }
+            }
+            StateHasChanged();
+
+            return true;
+        }
     }
 }
