@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <DisableImplicitComponentsAnalyzers>true</DisableImplicitComponentsAnalyzers>
+        <UserSecretsId>16ab6d90-64d2-4acc-97af-c2010848940c</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
