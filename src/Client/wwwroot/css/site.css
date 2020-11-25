@@ -453,3 +453,7 @@ ul {
 
 .chart {
   background-color: #D0E0FF; }
+
+@media (max-width: 800px) {
+  .odd-lavel {
+    visibility: hidden; } }

@@ -11,3 +11,13 @@
 .chart {
     background-color: #D0E0FF;
 }
+
+.even-label {
+}
+
+@media (max-width: 800px) {
+
+    .odd-lavel {
+        visibility: hidden;
+    }
+}
