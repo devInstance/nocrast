@@ -23,6 +23,9 @@ app {
 .oi-large {
   font-size: 32px !important; }
 
+.oi-small {
+  font-size: 14px !important; }
+
 .top-row {
   height: 3.5rem;
   display: flex;

@@ -8,54 +8,47 @@
     }
     <div class="row">
         <div class="col">
-            <div class="btn-group">
-                @if (Item.Project == null)
+            <!-- Select project -->
+            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                @if (Item.Project != null)
                 {
-                    <button class="btn btn-outline-primary" data-toggle="modal" data-target="#addProjectModal" title="New project">
-                        New Project
-                    </button>
-                    <button type="button" class="btn btn-lg btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Select Project</span>
-                    </button>
+                    <span class="@("small-dot mx-1 " + Item.Project.Color.ToString().ToLower())"></span>
+                    <span>
+                        @Item.Project.Title
+                    </span>
                 }
                 else
                 {
-                    <button class="@("text-white btn btn-primary " + Item.Project.Color.ToString().ToLower())" @onclick="()=>NavigateToProject(Item.Project.Id)">
-                        @Item.Project.Title
-                    </button>
-                    <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split @Item.Project.Color.ToString().ToLower()"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Change Project</span>
-                    </button>
+                    <span>Add Project</span>
                 }
-                <div class="dropdown-menu">
-                    @if (Projects != null && Projects.Length > 0)
+            </button>
+            <div class="dropdown-menu">
+                @if (Projects != null && Projects.Length > 0)
+                {
+                    @foreach (var project in Projects)
                     {
-                        @foreach (var project in Projects)
-                        {
-                            <a class="dropdown-item align-items-center @(Item.Project != null && Item.Project.Id == project.Id ? "disabled" : "")" href="#" @onclick="@(() => AddProjectByIdAsync(project.Id))" @onclick:preventDefault>
-                                <span class="small-dot @project.Color.ToString().ToLower()"></span><span class="align-top">&nbsp;&nbsp;&nbsp;&nbsp;@project.Title</span>
-                            </a>
-                        }
-                        <div class="dropdown-divider"></div>
-                    }
-                    @if (Item.Project != null)
-                    {
-                        <a class="dropdown-item align-middle" href="#" @onclick="@(() => ClearProject())" @onclick:preventDefault>
-                            <span class="dot clear"></span><span>Clear @Item.Project.Title</span>
+                        <a class="dropdown-item align-items-center @(Item.Project != null && Item.Project.Id == project.Id ? "disabled" : "")" href="#" @onclick="@(() => AddProjectByIdAsync(project.Id))" @onclick:preventDefault>
+                            <span class="small-dot @project.Color.ToString().ToLower()"></span><span class="align-top">&nbsp;&nbsp;&nbsp;&nbsp;@project.Title</span>
                         </a>
-                        <div class="dropdown-divider"></div>
                     }
-                    <a class="dropdown-item align-middle" href="#" data-toggle="modal" data-target="#addProjectModal" @onclick:preventDefault>
-                        <span class="dot clear"></span><span>Add New ...</span>
+                    <div class="dropdown-divider"></div>
+                }
+                @if (Item.Project != null)
+                {
+                    <a class="dropdown-item align-middle" href="#" @onclick="@(() => ClearProject())" @onclick:preventDefault>
+                        <span class="dot clear"></span><span>Clear @Item.Project.Title</span>
                     </a>
-                </div>
+                    <div class="dropdown-divider"></div>
+                }
+                <a class="dropdown-item align-middle" href="#" data-toggle="modal" data-target="#addProjectModal" @onclick:preventDefault>
+                    <span class="dot clear"></span><span>Add New ...</span>
+                </a>
             </div>
         </div>
     </div>
     <div class="row pt-2">
         <div class="col">
+            <!-- Timer -->
             <div class="d-flex flex-row">
                 <div class="container-fluid timer-link" role="document">
                     <div class="d-flex align-items-center">
@@ -93,15 +86,17 @@
                     @if (label.added)
                     {
                         <NavLink class="mr-2" href="@("tags/" + label.tag.Id)">
-                            <span class="oi oi-tag" style="font-size:14px" aria-hidden="true"></span>
-                            <span class="ml-1">@label.tag.Name</span>
+                            <small>
+                                <span class="oi oi-tag oi-small" aria-hidden="true"></span>
+                                <span>@label.tag.Name</span>
+                            </small>
                         </NavLink>
 
                     }
                 }
             }
-            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                Add Tag
+            <button class="btn btn-default btn-outline-primary dropdown-toggle" data-toggle="dropdown">
+                <small>Add Tag</small>
             </button>
             <div class="dropdown-menu">
                 @if (Tags != null && Tags.Length > 0)
@@ -111,14 +106,18 @@
                         @if (@tag.added)
                         {
                             <button class="dropdown-item btn btn-default" @onclick="@(() => RemoveTagByIdAsync(tag.tag.Id))">
-                                <span class="oi oi-check" style="font-size:14px" aria-hidden="true"></span>
-                                <span class="ml-1">@tag.tag.Name</span>
+                                <small>
+                                    <span class="oi oi-check" style="font-size:14px" aria-hidden="true"></span>
+                                    <span class="ml-1">@tag.tag.Name</span>
+                                </small>
                             </button>
                         }
                         else
                         {
                             <button class="dropdown-item btn btn-default" @onclick="@(() => AddTagByIdAsync(tag.tag.Id))">
-                                <span class="ml-4">@tag.tag.Name</span>
+                                <small>
+                                    <span class="ml-4">@tag.tag.Name</span>
+                                </small>
                             </button>
                         }
                     }
@@ -127,7 +126,7 @@
                 <EditForm Model="@NewTagLabel" OnValidSubmit="@(() => AddTagAsync())" class="px-4 py-3">
                     <div class="form-group">
                         <label class="form-check-label" for="newTagEdit">
-                            New tag
+                            <small>New tag</small>
                         </label>
                         <InputText @bind-Value="@NewTagLabel" class="form-control" placeholder="tag name" id="newTagEdit"></InputText>
                     </div>
@@ -138,26 +137,34 @@
     </div>
     @if (TimeLog != null)
     {
-        <div class="row my-2">
+        <div class="row mt-4">
             <div class="col">
-                <div class="btn-group btn-group-toggle mr-4" role="group">
+                <div class="btn-group btn-group-toggle mr-4" style="float:left" role="group">
                     <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.Day ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.Day))">Today</button>
                     <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.WeekExcludeToday ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.WeekExcludeToday))">This week</button>
                     <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.AllExcludeThisWeek ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.AllExcludeThisWeek))">More</button>
                 </div>
-                @switch (selectedFilter)
-                {
-                    case TimeLogResultType.Day:
-                        <p>Today @String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hours</p>
-                        break;
-                    case TimeLogResultType.WeekExcludeToday:
-                        <p>This week @String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek()) hours</p>
-                        break;
-                    case TimeLogResultType.AllExcludeThisWeek:
-                        <p>Total @String.Format("{0:F1}", Item.GetTotalHoursSpent()) hours</p>
-                        break;
-                }
-
+                <div class="pt-2" style="float:left;">
+                    <strong class="text-muted pt-2">
+                        <span class="oi oi-clock small-timer-button mr-2" aria-hidden="true"></span>
+                        @switch (selectedFilter)
+                        {
+                            case TimeLogResultType.Day:
+                                <span>Today @String.Format("{0:F1}", Item.GetTotalHoursSpentTodayTillNow(TimeProvider)) hours</span>
+                                break;
+                            case TimeLogResultType.WeekExcludeToday:
+                                <span>This week @String.Format("{0:F1}", Item.GetTotalHoursSpentThisWeek()) hours</span>
+                                break;
+                            case TimeLogResultType.AllExcludeThisWeek:
+                                <span>Total @String.Format("{0:F1}", Item.GetTotalHoursSpent()) hours</span>
+                                break;
+                        }
+                    </strong>
+                </div>
+            </div>
+        </div>
+        <div class="row my-2">
+            <div class="col">
                 <ul class="p-0 m-0">
                     @foreach (var tl in TimeLog.Items)
                     {
@@ -345,6 +352,8 @@ else
                     ToolbarServ.Update(Item.Title);
 
                     TodayTimeLog = TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
+
+                    await RefreshTagsAsync();
                 }
                 else
                 {

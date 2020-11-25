@@ -5,9 +5,6 @@
     {
         <div class="row">
             <div class="col">
-                @if (item.Project != null)
-                {
-                }
                 <NavLink href="@($"tasks/{item.Id}")" Match="NavLinkMatch.All">
                     <strong><span>@item.Title</span></strong>
                 </NavLink>

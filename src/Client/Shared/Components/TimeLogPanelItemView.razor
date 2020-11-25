@@ -3,7 +3,7 @@
     <span class="timer-list-item">@FormatTime(Log)</span>
     @if (!IsActive || Item.ActiveTimeLogItem.Id != Log.Id)
     {
-        <button class="btn btn-default timer-button" @onclick="@(() => StartEditing())">
+        <button class="btn btn-default timer-button ml-2" @onclick="@(() => StartEditing())">
             <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
         </button>
     }
