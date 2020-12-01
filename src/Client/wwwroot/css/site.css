@@ -449,14 +449,19 @@ ul {
 .bar {
   height: 21px;
   transition: fill .3s ease;
-  cursor: pointer; }
+  cursor: pointer;
+  stroke-width: 0.5px; }
 
 .bar text {
-  color: black; }
+  fill: #fff !important;
+  font-size: 14px; }
 
 .chart {
   background-color: #D0E0FF; }
 
+.even-label, .odd-label {
+  float: left; }
+
 @media (max-width: 800px) {
-  .odd-lavel {
+  .odd-label {
     visibility: hidden; } }

@@ -44,7 +44,7 @@ namespace NoCrast.Shared.Logging
 
         public static ILog DebugScope(this ILog log, [CallerMemberName] string scope = "scope")
         {
-            return log.CreateScope(LogLevel.DEBUG, scope);
+            return log.CreateScope(LogLevel.DEBUG_EXTRA, scope);
         }
     }
 }

@@ -1,56 +1,38 @@
-﻿@{
-    for (DateTime time = StartDate; time.Hour <= EndDate.Hour; time = time.AddHours(1))
-    {
-        if (time == StartDate)
-        {
-            <div class="@(time.Hour % 2 == 1 ? "odd-lavel" : "even-label")" style="@($"float:left;max-width: {CellWidthPercent - 1}%;width:{CellWidthPercent - 1}%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
-        }
-        else if (time.Hour == EndDate.Hour - 1)
-        {
-            <div class="@(time.Hour % 2 == 1 ? "odd-lavel" : "even-label")" style="@($"float:left;max-width: {CellWidthPercent - 1}%;width:{CellWidthPercent - 1}%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
-        }
-        else if (time.Hour == EndDate.Hour)
-        {
-            <div class="@(time.Hour % 2 == 1 ? "odd-lavel" : "even-label")" style="@($"float:left;max-width: 1%;width:1%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
-        }
-        else
-        {
-            <div class="@(time.Hour % 2 == 1 ? "odd-lavel" : "even-label")" style="@($"float:left;max-width: {CellWidthPercent}%;width:{CellWidthPercent}%")"><small>@(time.ToString("hhtt").ToLower())</small></div>
-        }
-    }
-}
-
-@if (Items != null)
+﻿@if (TimeScaleLabel != null)
 {
-    <svg class="chart" width="100%" height="@(Items.Length * 36 + 10)" aria-labelledby="title desc" role="img">
-        @for (int i = 0, count = EndDate.Hour - StartDate.Hour; i < count; i++)
-        {
-            <line x1="@($"{i * CellWidthPercent}%")" y1="0" x2="@($"{i * CellWidthPercent}%")" y2="16" stroke="grey"></line>
-            <line x1="@($"{i * CellWidthPercent + CellWidthPercent / 2}%")" y1="0" x2="@($"{i * CellWidthPercent + CellWidthPercent / 2}%")" y2="8" stroke="grey"></line>
-        }
-        @if (Logs != null && Logs.Length == Items.Length)
-        {
-            @for (int n = 0; n < Items.Length; n++)
+    @foreach (var item in TimeScaleLabel)
+    {
+        <div class="@(item.cssClass)" style="@(item.divStyle)"><small>@(item.labelText)</small></div>
+    }
+    <div>
+        <svg class="chart" width="100%" style="z-index:-1;" height="@(svgHeight)" role="img">
+            @foreach (var item in TimeScale)
             {
-                @if (Logs[n] != null)
-                {
-                    @foreach (var tl in Logs[n].Items)
-                    {
-                        <g class="@("bar " + (Items[n].Project != null ? Items[n].Project.Color.ToString().ToLower() : "white"))">
-                            <rect x="@(((tl.StartTime.ToLocalTime().Hour + (tl.StartTime.ToLocalTime().Minute / 60.0f) - (float)StartDate.Hour) * CellWidthPercent).ToString() + "%")"
-                                  y="@(n * 36 + 10)"
-                                  width="@(((float)tl.GetElapsedThisPeriod(TimeProvider) / 1000.0f / 60.0f / 60.0f * CellWidthPercent).ToString() + "%")"
-                                  height="26">
-                            </rect>
-                        </g>
-                    }
-                }
-                @*<g>
-                    <text x="10" y="@(n * 36 + 20)">@Items[n].Title</text>
-                </g>*@
+                <line x1="@(item.lineonex)" y1="0" x2="@(item.lineonex)" y2="@(item.lineoney)" stroke="grey"></line>
+                <line x1="@(item.linetwox)" y1="0" x2="@(item.linetwox)" y2="@(item.linetwoy)" stroke="grey"></line>
             }
-        }
-    </svg>
+            @foreach (var bar in TimeBars)
+            {
+                <g class="@(bar.cssClass)">
+                    <rect x="@(bar.x)"
+                          y="@(bar.y)"
+                          width="@(bar.width)"
+                          height="@(bar.height)">
+                        <title>@(bar.labeltooltip)</title>
+                    </rect>
+                </g>
+                @if (!string.IsNullOrEmpty(bar.label))
+                {
+                    <g class="bar">
+                        <text x="@(bar.labelx)"
+                              y="@(bar.labely)">
+                            @(bar.label)
+                        </text>
+                    </g>
+                }
+            }
+        </svg>
+    </div>
 }
 
 @inject TasksService Service;
@@ -61,22 +43,166 @@
 @code {
     [Parameter]
     public TaskItem[] Items { get; set; }
-
     [Parameter]
     public ModelList<TimeLogItem>[] Logs { get; set; }
+
+    struct TimeScaleLabelItem
+    {
+        public string cssClass;
+        public string divStyle;
+        public string labelText;
+    }
+
+    struct TimeScaleItem
+    {
+        public string lineonex;
+        public string lineoney;
+
+        public string linetwox;
+        public string linetwoy;
+    }
+
+    struct TimeBar
+    {
+        public string cssClass;
+        public string x;
+        public string y;
+        public string width;
+        public string height;
+        public string label;
+        public string labelx;
+        public string labely;
+        public string labeltooltip;
+    }
 
     private DateTime StartDate { get; set; }
     private DateTime EndDate { get; set; }
     private float CellWidthPercent { get; set; }
 
+    private TimeScaleLabelItem[] TimeScaleLabel;
+    private TimeScaleItem[] TimeScale;
+    private TimeBar[] TimeBars;
+
+    private int svgHeight;
+
     private ILog log;
+
+    private void InitializeTimeScale()
+    {
+        using (var l = log.DebugScope())
+        {
+            var labels = new List<TimeScaleLabelItem>();
+            for (DateTime time = StartDate; time.Hour <= EndDate.Hour; time = time.AddHours(1))
+            {
+                var item = new TimeScaleLabelItem();
+
+                item.cssClass = time.Hour % 2 == 1 ? "odd-label" : "even-label";
+                item.labelText = time.ToString("hhtt").ToLower();
+
+                if (time == StartDate || time.Hour == EndDate.Hour - 1)
+                {
+                    item.divStyle = $"max-width:{CellWidthPercent - 1}%;width:{CellWidthPercent - 1}%";
+                }
+                else if (time.Hour == EndDate.Hour)
+                {
+                    item.divStyle = $"max-width:1%;width:1%";
+                }
+                else
+                {
+                    item.divStyle = $"max-width:{CellWidthPercent}%;width:{CellWidthPercent}%";
+                }
+                labels.Add(item);
+            }
+            TimeScaleLabel = labels.ToArray();
+
+            var items = new List<TimeScaleItem>();
+            @for (int i = 0, count = EndDate.Hour - StartDate.Hour; i < count; i++)
+            {
+                var item = new TimeScaleItem
+                {
+                    lineonex = $"{i * CellWidthPercent}%",
+                    lineoney = "16",
+                    linetwox = $"{i * CellWidthPercent + CellWidthPercent / 2}%",
+                    linetwoy = "8"
+                };
+                items.Add(item);
+            }
+
+            TimeScale = items.ToArray();
+
+            if (Items != null)
+            {
+                svgHeight = Items.Length * 36 + 10;
+            }
+            else
+            {
+                svgHeight = 46;
+            }
+        }
+    }
+
+    private void InitializeTimeBars()
+    {
+        var bars = new List<TimeBar>();
+
+        @if (Items != null && Logs != null && Logs.Length == Items.Length)
+        {
+            @for (int n = 0; n < Items.Length; n++)
+            {
+                @if (Logs[n] != null)
+                {
+                    var task = Items[n];
+                    @foreach (var tl in Logs[n].Items)
+                    {
+                        float x = ((tl.StartTime.ToLocalTime().Hour + (tl.StartTime.ToLocalTime().Minute / 60.0f) - (float)StartDate.Hour) * CellWidthPercent);
+                        int y = n * 36 + 10;
+                        float width = ((float)tl.GetElapsedThisPeriod(TimeProvider) / 1000.0f / 60.0f / 60.0f * CellWidthPercent);
+                        int height = 26;
+                        var item = new TimeBar
+                        {
+                            cssClass = "bar " + (Items[n].Project != null ? Items[n].Project.Color.ToString().ToLower() : "white"),
+                            x = $"{x}%",
+                            y = $"{y}",
+                            width = $"{width}%",
+                            height = $"{height}",
+                            labelx = $"{x + 0.25}%",
+                            labely = $"{y + 18}"
+                        };
+
+                        if (width > 3.0)
+                        {
+                            //if (task.IsRunning && task.ActiveTimeLogItem.Id == tl.Id)
+                            //{
+                            //    item.label = String.Format("{0:F1} hrs", task.GetTotalHoursSpentTodayTillNow(TimeProvider));
+                            //}
+                            //else
+                            //{
+                            // item.label = String.Format("{0:F1}", tl.GetElapsedThisPeriodHours(TimeProvider));
+                            //}
+                        }
+                        var tm = tl.GetElapsedTimeSpan(TimeProvider);
+                        if (tm.Hours > 0)
+                        {
+                            item.labeltooltip = String.Format("{0}: {1:hh} hours and {1:%m} minutes", task.Title, tl.GetElapsedTimeSpan(TimeProvider));
+                        }
+                        else
+                        {
+                            item.labeltooltip = String.Format("{0}: {1:%m} minutes", task.Title, tl.GetElapsedTimeSpan(TimeProvider));
+                        }
+                        bars.Add(item);
+                    }
+                }
+            }
+        }
+
+        TimeBars = bars.ToArray();
+    }
 
     protected override void OnInitialized()
     {
         log = LogProvider.CreateLogger(this);
         using (var l = log.DebugScope())
         {
-
             DateTime now = DateTime.Now;
 
             StartDate = DateTime.Today;
@@ -111,6 +237,8 @@
 
             CellWidthPercent = 100.0f / (EndDate.Hour - StartDate.Hour);
 
+            InitializeTimeScale();
+            InitializeTimeBars();
             NotificationServ.DataHasChanged += OnDataHasChanged;
             StateHasChanged();
         }
@@ -118,7 +246,20 @@
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
-        StateHasChanged();
+        using (var l = log.DebugScope())
+        {
+            InitializeTimeBars();
+            StateHasChanged();
+        }
     }
 
+    protected override bool ShouldRender()
+    {
+        using (var l = log.DebugScope())
+        {
+            InitializeTimeBars();
+
+            return true;
+        }
+    }
 }

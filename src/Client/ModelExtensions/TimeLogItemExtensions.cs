@@ -26,5 +26,11 @@ namespace NoCrast.Client.ModelExtensions
         {
             return TimeSpan.FromMilliseconds(GetElapsedThisPeriod(logItem, provider));
         }
+
+        public static float GetElapsedThisPeriodHours(this TimeLogItem logItem, ITimeProvider provider)
+        {
+            return (float)logItem.GetElapsedThisPeriod(provider) / (60 * 60 * 1000);
+        }
+
     }
 }
