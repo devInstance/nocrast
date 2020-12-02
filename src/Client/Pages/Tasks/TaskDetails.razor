@@ -7,7 +7,7 @@
         <PageTitle Value="@FormatingUtils.GetTimerTitle(Item, TimeProvider)" />
     }
     <div class="row">
-        <div class="col">
+        <div class="col-2">
             <!-- Select project -->
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                 @if (Item.Project != null)
@@ -45,39 +45,6 @@
                 </a>
             </div>
         </div>
-    </div>
-    <div class="row pt-2">
-        <div class="col">
-            <!-- Timer -->
-            <div class="d-flex flex-row">
-                <div class="container-fluid timer-link" role="document">
-                    <div class="d-flex align-items-center">
-                        <span class="timer-text timer-text-timespan-lg">
-                            @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
-                        </span>
-                        @if (IsActive)
-                        {
-                            <button class="btn btn-default ml-2" @onclick="@(() => Stop())">
-                                <span class="oi oi-media-pause timer-text-timespan-lg" aria-hidden="true"></span>
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn btn-default ml-2" @onclick="@(() => Start())">
-                                <span class="oi oi-media-play timer-text-timespan-lg" aria-hidden="true"></span>
-                            </button>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row pt-2">
-        <div class="col">
-            <TimeLinePanel Items="Items" Logs="Logs"></TimeLinePanel>
-        </div>
-    </div>
-    <div class="row my-2">
         <div class="col">
             @if (Tags != null && Tags.Length > 0)
             {
@@ -95,8 +62,8 @@
                     }
                 }
             }
-            <button class="btn btn-default btn-outline-primary dropdown-toggle" data-toggle="dropdown">
-                <small>Add Tag</small>
+            <button class="btn btn-default btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown">
+                Add Tag
             </button>
             <div class="dropdown-menu">
                 @if (Tags != null && Tags.Length > 0)
@@ -133,6 +100,37 @@
                     <button type="submit" class="btn btn-primary">Add</button>
                 </EditForm>
             </div>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col">
+            <!-- Timer -->
+            <div class="d-flex flex-row">
+                <div class="container-fluid timer-link" role="document">
+                    <div class="d-flex align-items-center">
+                        <span class="timer-text timer-text-timespan-lg">
+                            @FormatingUtils.FormatTimerElapsedTime(Item, TimeProvider)
+                        </span>
+                        @if (IsActive)
+                        {
+                            <button class="btn btn-default ml-2" @onclick="@(() => Stop())">
+                                <span class="oi oi-media-pause timer-text-timespan-lg" aria-hidden="true"></span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-default ml-2" @onclick="@(() => Start())">
+                                <span class="oi oi-media-play timer-text-timespan-lg" aria-hidden="true"></span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pt-2">
+        <div class="col">
+            <TimeLinePanel Items="Items" Logs="Logs"></TimeLinePanel>
         </div>
     </div>
     @if (TimeLog != null)
