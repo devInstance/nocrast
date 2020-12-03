@@ -1,0 +1,132 @@
+﻿<EditForm Model="@editLog" OnValidSubmit="@(() => ApplyChangesAsync())">
+    <table class="table table-hover table-sm">
+        @foreach (var tl in Log.Items)
+        {
+
+        <tr>
+            @if (editLog.IsEditing && editLog.Id == tl.Id)
+            {
+                <td class="col-1">
+                </td>
+                <td class="col-auto col-lg-1">
+                    <small>
+                        <InputText @bind-Value="@editLog.StartTime"></InputText>
+                    </small>
+                </td>
+                <td class="col-auto col-lg-1">
+                    <small>
+                        @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
+                        {
+                            <InputText @bind-Value="@editLog.EndTime"></InputText>
+                        }
+                    </small>
+                </td>
+                <td class="col-auto">
+                    <button type="submit" class="btn timer-button">
+                        <span class="oi oi-circle-check" aria-hidden="true"></span>
+                    </button>
+                </td>
+                <td class="col-auto">
+                    <button class="btn timer-button" @onclick="@(() => ResetChanges())" @onclick:preventDefault>
+                        <span class="oi oi-circle-x" aria-hidden="true"></span>
+                    </button>
+                </td>
+            }
+            else
+            {
+                <td class="col-1">
+                    <button class="btn btn-default timer-button ml-2" @onclick="@(() => StartEditing(tl))">
+                        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                    </button>
+                </td>
+                <td class="col-auto col-lg-1"><small>@tl.StartTime.ToLocalTime()</small></td>
+                <td class="col-auto col-lg-1"><small>@FormatTime(tl)</small></td>
+                <td class="col-1">
+                    @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
+                    {
+                        <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(tl))">
+                            <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
+                        </button>
+                    }
+                </td>
+            }
+        </tr>
+        }
+    </table>
+</EditForm>
+@inject TasksService Service;
+@inject NotificationService NotificationServ;
+@inject ITimeProvider TimeProvider;
+
+@code {
+    [Parameter]
+    public TaskItem Item { get; set; }
+
+    [Parameter]
+    public ModelList<TimeLogItem> Log { get; set; }
+
+    class EditTimeLog
+    {
+        public bool IsEditing { get; set; }
+        public string Id { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+    }
+
+    EditTimeLog editLog = new EditTimeLog();
+
+    protected override void OnInitialized()
+    {
+        NotificationServ.DataHasChanged += OnDataHasChanged;
+    }
+
+    private void OnDataHasChanged(Object sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private string FormatTime(TimeLogItem time)
+    {
+        return String.Format("{0:hh}:{0:mm}:{0:ss}", time.GetElapsedTimeSpan(TimeProvider));
+    }
+
+    private async void RemoveLog(TimeLogItem log)
+    {
+        Item = await Service.RemoveTimelogAsync(Item, log);
+        StateHasChanged();
+    }
+
+    private void StartEditing(TimeLogItem log)
+    {
+        editLog.IsEditing = true;
+        editLog.Id = log.Id;
+        editLog.StartTime = String.Format("{0}", log.StartTime.ToLocalTime());
+        editLog.EndTime = String.Format("{0}", log.StartTime.ToLocalTime().Add(log.GetElapsedTimeSpan(TimeProvider)));
+    }
+
+    private async void ApplyChangesAsync()
+    {
+        DateTime startTime = DateTime.Parse(editLog.StartTime).ToUniversalTime();
+        DateTime endTime = DateTime.Parse(editLog.EndTime).ToUniversalTime();
+
+        var newTimelog = new TimeLogItem
+        {
+            StartTime = startTime,
+            ElapsedMilliseconds = (long)(endTime - startTime).TotalMilliseconds,
+            Id = editLog.Id
+        };
+
+        Item = await Service.UpdateTimelogAsync(Item, newTimelog);
+        //editLog.SelectedLog = newTimelog;
+
+        editLog.IsEditing = false;
+
+        StateHasChanged();
+    }
+
+    private void ResetChanges()
+    {
+        editLog.IsEditing = false;
+    }
+
+}

@@ -161,17 +161,37 @@
                 </div>
             </div>
         </div>
+        @*<div class="row">
+            <div class="col-sm-12 col-md-10 col-lg-6 col-xl-4">
+                <table class="table table-hover table-sm">
+                    <thead>
+                            <tr>
+                                <th scope="col">Start</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                    <tr>
+                        <td class="col-1">
+                            <button class="btn btn-default timer-button ml-2">
+                                <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                            </button>
+                        </td>
+                        <td class="col-auto col-lg-1"><small>11:46:34 AM</small></td>
+                        <td class="col-auto col-lg-1"><small>34 minutes</small></td>
+                        <td class="col-1">
+                            <button class="btn btn-default timer-button ml-2">
+                                <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>*@
         <div class="row my-2">
-            <div class="col">
-                <ul class="p-0 m-0">
-                    @foreach (var tl in TimeLog.Items)
-                    {
-                        <li class="timer-list-item">
-                            <TimeLogPanelItemView Item="Item" Log="tl" IsActive="IsActive">
-                            </TimeLogPanelItemView>
-                        </li>
-                    }
-                </ul>
+            <div class="col-sm-12 col-md-10 col-lg-6 col-xl-4">
+                <TimeLogPanel Item="Item" Log="TimeLog">
+                </TimeLogPanel>
             </div>
         </div>
     }
