@@ -144,7 +144,7 @@ else
                 for (int i = 0; i < Items.Length; i++)
                 {
                     l.D($"i = {i}");
-                    TodayTimeLog[i] = await Service.GetTimeLogItemsAsync(Items[i], TimeLogResultType.Day);
+                    TodayTimeLog[i] = await Service.GetTimeLogItemsAsync(Items[i], TimeLogResultType.Day, null, null);
                 }
             }
             StateHasChanged();

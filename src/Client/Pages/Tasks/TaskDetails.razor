@@ -138,9 +138,9 @@
         <div class="row mt-4">
             <div class="col">
                 <div class="btn-group btn-group-toggle mr-4" style="float:left" role="group">
-                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.Day ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.Day))">Today</button>
-                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.WeekExcludeToday ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.WeekExcludeToday))">This week</button>
-                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.AllExcludeThisWeek ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.AllExcludeThisWeek))">More</button>
+                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.Day ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.Day, 0))">Today</button>
+                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.WeekExcludeToday ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.WeekExcludeToday, 0))">This week</button>
+                    <button type="button" class="btn btn-outline-primary @(selectedFilter == TimeLogResultType.AllExcludeThisWeek ? "active" : "")" @onclick="@(() => RequestReportAsync(TimeLogResultType.AllExcludeThisWeek, 0))">More</button>
                 </div>
                 <div class="pt-2" style="float:left;">
                     <strong class="text-muted pt-2">
@@ -161,36 +161,9 @@
                 </div>
             </div>
         </div>
-        @*<div class="row">
-            <div class="col-sm-12 col-md-10 col-lg-6 col-xl-4">
-                <table class="table table-hover table-sm">
-                    <thead>
-                            <tr>
-                                <th scope="col">Start</th>
-                                <th scope="col">Duration</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                    <tr>
-                        <td class="col-1">
-                            <button class="btn btn-default timer-button ml-2">
-                                <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
-                            </button>
-                        </td>
-                        <td class="col-auto col-lg-1"><small>11:46:34 AM</small></td>
-                        <td class="col-auto col-lg-1"><small>34 minutes</small></td>
-                        <td class="col-1">
-                            <button class="btn btn-default timer-button ml-2">
-                                <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
-                            </button>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>*@
         <div class="row my-2">
             <div class="col-sm-12 col-md-10 col-lg-6 col-xl-4">
-                <TimeLogPanel Item="Item" Log="TimeLog">
+                <TimeLogPanel Item="Item" Log="TimeLog" OnRequestData="@RequestDataAsync">
                 </TimeLogPanel>
             </div>
         </div>
@@ -218,6 +191,7 @@ else
 @implements IDisposable
 
 @code {
+    int ItemsPerPage = 15;
 
     [Parameter]
     public string Id { get; set; }
@@ -262,6 +236,8 @@ else
     protected async override Task OnInitializedAsync()
     {
         log = LogProvider.CreateLogger(this);
+
+        selectedFilter = TimeLogResultType.Day;
 
         using (var scope = log.DebugScope())
         {
@@ -369,8 +345,8 @@ else
                 {
                     ToolbarServ.Update(Item.Title);
 
-                    TodayTimeLog = TimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day);
-
+                    TodayTimeLog = await Service.GetTimeLogItemsAsync(Item, TimeLogResultType.Day, null, null);
+                    TimeLog = await Service.GetTimeLogItemsAsync(Item, selectedFilter, ItemsPerPage, TimeLog != null ? TimeLog.Page : 0);
                     await RefreshTagsAsync();
                 }
                 else
@@ -441,12 +417,17 @@ else
         StateHasChanged();
     }
 
-    private async void RequestReportAsync(TimeLogResultType filter)
+    private async void RequestReportAsync(TimeLogResultType filter, int page)
     {
         TimeLog = null;
         StateHasChanged();
         selectedFilter = filter;
-        TimeLog = await Service.GetTimeLogItemsAsync(Item, filter);
+        TimeLog = await Service.GetTimeLogItemsAsync(Item, filter, ItemsPerPage, page);
         StateHasChanged();
+    }
+
+    private void RequestDataAsync(int page)
+    {
+        RequestReportAsync(selectedFilter, page);
     }
 }

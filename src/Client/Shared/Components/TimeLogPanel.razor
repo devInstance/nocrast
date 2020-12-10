@@ -3,56 +3,79 @@
         @foreach (var tl in Log.Items)
         {
 
-        <tr>
-            @if (editLog.IsEditing && editLog.Id == tl.Id)
-            {
-                <td class="col-1">
-                </td>
-                <td class="col-auto col-lg-1">
-                    <small>
-                        <InputText @bind-Value="@editLog.StartTime"></InputText>
-                    </small>
-                </td>
-                <td class="col-auto col-lg-1">
-                    <small>
+            <tr>
+                @if (editLog.IsEditing && editLog.Id == tl.Id)
+                {
+                    <td class="col-1">
+                    </td>
+                    <td class="col-auto col-lg-1">
+                        <small>
+                            <InputText @bind-Value="@editLog.StartTime"></InputText>
+                        </small>
+                    </td>
+                    <td class="col-auto col-lg-1">
+                        <small>
+                            @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
+                            {
+                                <InputText @bind-Value="@editLog.EndTime"></InputText>
+                            }
+                        </small>
+                    </td>
+                    <td class="col-auto">
+                        <button type="submit" class="btn timer-button">
+                            <span class="oi oi-circle-check" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                    <td class="col-auto">
+                        <button class="btn timer-button" @onclick="@(() => ResetChanges())" @onclick:preventDefault>
+                            <span class="oi oi-circle-x" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                }
+                else
+                {
+                    <td class="col-1">
+                        <button class="btn btn-default timer-button ml-2" @onclick="@(() => StartEditing(tl))">
+                            <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                    <td class="col-auto col-lg-1"><small>@tl.StartTime.ToLocalTime()</small></td>
+                    <td class="col-auto col-lg-1"><small>@FormatTime(tl)</small></td>
+                    <td class="col-1">
                         @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
                         {
-                            <InputText @bind-Value="@editLog.EndTime"></InputText>
+                            <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(tl))">
+                                <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
+                            </button>
                         }
-                    </small>
-                </td>
-                <td class="col-auto">
-                    <button type="submit" class="btn timer-button">
-                        <span class="oi oi-circle-check" aria-hidden="true"></span>
-                    </button>
-                </td>
-                <td class="col-auto">
-                    <button class="btn timer-button" @onclick="@(() => ResetChanges())" @onclick:preventDefault>
-                        <span class="oi oi-circle-x" aria-hidden="true"></span>
-                    </button>
-                </td>
-            }
-            else
-            {
-                <td class="col-1">
-                    <button class="btn btn-default timer-button ml-2" @onclick="@(() => StartEditing(tl))">
-                        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
-                    </button>
-                </td>
-                <td class="col-auto col-lg-1"><small>@tl.StartTime.ToLocalTime()</small></td>
-                <td class="col-auto col-lg-1"><small>@FormatTime(tl)</small></td>
-                <td class="col-1">
-                    @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
-                    {
-                        <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(tl))">
-                            <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
-                        </button>
-                    }
-                </td>
-            }
-        </tr>
+                    </td>
+                }
+            </tr>
         }
     </table>
+    @if (Log.PagesCount > 1)
+    {
+    <nav aria-label="Pages">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link" href="#" aria-label="Previous" @onclick:preventDefault @onclick="@(() => RequestDataAsync(Log.Page - 1))">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @foreach(var p in Enumerable.Range(0, Log.PagesCount))
+            {
+                <li class="@(p == Log.Page ? "page-item active" : "page-item")">
+                    <a class="page-link" href="#" @onclick:preventDefault @onclick="@(() => RequestDataAsync(p))">@((p + 1).ToString())</a>
+                </li>
+            }
+            <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next" @onclick:preventDefault @onclick="@(() => RequestDataAsync(Log.Page + 1))">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    }
 </EditForm>
 @inject TasksService Service;
 @inject NotificationService NotificationServ;
@@ -64,6 +87,9 @@
 
     [Parameter]
     public ModelList<TimeLogItem> Log { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnRequestData { get; set; }
 
     class EditTimeLog
     {
@@ -129,4 +155,8 @@
         editLog.IsEditing = false;
     }
 
+    private async void RequestDataAsync(int page)
+    {
+        await OnRequestData.InvokeAsync(page);
+    }
 }

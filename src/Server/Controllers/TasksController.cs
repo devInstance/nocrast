@@ -294,25 +294,40 @@ namespace NoCrast.Server.Controllers
                                StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
                            });
 
-                if (page.HasValue && top.HasValue)
+                var pageIndex = 0;
+                var totalItemsCount = coreQuery.Count();
+                var queryItemsCount = filteredQuery.Count();
+                var totalPageCount = 1;
+                var pageSize = 0;
+                if (top.HasValue && top.Value > 0)
                 {
-                    items = items.Skip(page.Value * top.Value);
+                    totalPageCount = (int)Math.Ceiling((double)queryItemsCount / (double)top.Value);
+                    pageSize = top.Value;
                 }
-                if (top.HasValue)
+                if(page.HasValue && page.Value >= 0)
                 {
-                    items = items.Take(top.Value);
+                    pageIndex = page.Value;
+                    if(pageIndex >= totalPageCount)
+                    {
+                        pageIndex = totalPageCount - 1;
+                    }
+                }
+                if (pageIndex > 0)
+                {
+                    items = items.Skip(pageIndex * pageSize);
+                }
+                if (pageSize > 0)
+                {
+                    items = items.Take(pageSize);
                 }
                 var result = new ModelList<TimeLogItem>()
                 {
                     Items = items.ToList().ToArray(),
-                    TotalCount = coreQuery.Count(),
-                    Count = filteredQuery.Count(),
+                    TotalCount = totalItemsCount,
+                    Count = queryItemsCount,
+                    PagesCount = totalPageCount,
+                    Page = pageIndex
                 };
-
-                if (page.HasValue)
-                {
-                    result.Page = page.Value;
-                }
 
                 return Ok(result);
             });

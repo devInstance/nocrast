@@ -567,6 +567,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(6, resultList.TotalCount);
                 Assert.Equal(6, resultList.Count);
                 Assert.Equal(0, resultList.Page);
+                Assert.Equal(1, resultList.PagesCount);
                 Assert.Equal(time.AddDays(-2f), resultList.Items[0].StartTime);
             }
         }
@@ -602,6 +603,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(9, resultList.TotalCount);
                 Assert.Equal(3, resultList.Count);
                 Assert.Equal(0, resultList.Page);
+                Assert.Equal(1, resultList.PagesCount);
                 Assert.Equal(time.AddHours(-2f), resultList.Items[0].StartTime);
             }
         }
@@ -637,6 +639,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(9, resultList.TotalCount);
                 Assert.Equal(5, resultList.Count);
                 Assert.Equal(0, resultList.Page);
+                Assert.Equal(1, resultList.PagesCount);
                 Assert.Equal(time.AddHours(-2f), resultList.Items[0].StartTime);
             }
         }
@@ -672,6 +675,7 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(9, resultList.TotalCount);
                 Assert.Equal(9, resultList.Count);
                 Assert.Equal(0, resultList.Page);
+                Assert.Equal(2, resultList.PagesCount);
                 Assert.Equal(time.AddHours(-2f), resultList.Items[0].StartTime);
             }
         }
@@ -707,10 +711,99 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Equal(9, resultList.TotalCount);
                 Assert.Equal(9, resultList.Count);
                 Assert.Equal(1, resultList.Page);
+                Assert.Equal(2, resultList.PagesCount);
                 Assert.Equal(time.AddDays(-4f), resultList.Items[0].StartTime);
             }
         }
 
+        [Fact()]
+        public void GetTimelogAsyncReturnTop3PageCount4Test()
+        {
+            var time = new DateTime(2020, 8, 12, 0, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-24f * 2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-1f), 1 * HOURS, false)
+                    .EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, 3, 1, TimeLogResultType.All);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(3, resultList.Items.Length);
+                Assert.Equal(10, resultList.TotalCount);
+                Assert.Equal(10, resultList.Count);
+                Assert.Equal(1, resultList.Page);
+                Assert.Equal(4, resultList.PagesCount);
+                Assert.Equal(time.AddDays(-1f), resultList.Items[0].StartTime);
+            }
+        }
+
+        [Theory]
+        [InlineData(0, 5, TimeLogResultType.All, 10, 5, 0, 2)]
+        [InlineData(1, 5, TimeLogResultType.All, 10, 5, 1, 2)]
+        [InlineData(2, 5, TimeLogResultType.All, 10, 5, 1, 2)]
+        [InlineData(3, 5, TimeLogResultType.All, 10, 5, 1, 2)]
+        [InlineData(0, 3, TimeLogResultType.All, 10, 3, 0, 4)]
+        [InlineData(1, 3, TimeLogResultType.All, 10, 3, 1, 4)]
+        [InlineData(2, 3, TimeLogResultType.All, 10, 3, 2, 4)]
+        [InlineData(3, 3, TimeLogResultType.All, 10, 1, 3, 4)]
+        [InlineData(4, 3, TimeLogResultType.All, 10, 1, 3, 4)]
+        [InlineData(5, 3, TimeLogResultType.All, 10, 1, 3, 4)]
+        [InlineData(-5, 3, TimeLogResultType.All, 10, 3, 0, 4)]
+        [InlineData(1, -3, TimeLogResultType.All, 10, 10, 0, 1)]
+        [InlineData(-1, -3, TimeLogResultType.All, 10, 10, 0, 1)]
+        [InlineData(0, 5, TimeLogResultType.Day, 3, 3, 0, 1)]
+        [InlineData(0, 5, TimeLogResultType.Week, 6, 5, 0, 2)]
+        [InlineData(0, 2, TimeLogResultType.Week, 6, 2, 0, 3)]
+        public void GetTimelogAsyncReturnTopPageSizeTest(int? page, int? top, TimeLogResultType? type, int expectedQueryCount, int expectedItemsCount, int expectedPage, int expectedPagesCount)
+        {
+            var time = new DateTime(2020, 8, 12, 15, 0, 0);
+            var timeProvider = TestUtils.CreateTimerProvider(time);
+            using (TestDatabase db_test = new TestDatabase(timeProvider))
+            {
+                db_test.UserProfile().CreateTask("Task 1")
+                    .CreateTimeLog(time.AddHours(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-12f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddHours(-24f * 2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-10f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-8f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-6f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-4f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-2f), 2 * HOURS, false)
+                    .CreateTimeLog(time.AddDays(-1f), 1 * HOURS, false)
+                    .EndSetup();
+
+                UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
+
+                var controller = new TasksController(db_test.db, userManager, timeProvider);
+
+                var result = controller.GetTimelogAsync(db_test.lastTask.PublicId, 0, top, page, type);
+
+                Assert.True(result.Result is OkObjectResult);
+                var resultList = ((ModelList<TimeLogItem>)((OkObjectResult)result.Result).Value);
+                Assert.Equal(expectedItemsCount, resultList.Items.Length);
+                Assert.Equal(10, resultList.TotalCount);
+                Assert.Equal(expectedQueryCount, resultList.Count);
+                Assert.Equal(expectedPage, resultList.Page);
+                Assert.Equal(expectedPagesCount, resultList.PagesCount);
+            }
+        }
 
         [Fact()]
         public void DeleteTimerLogAsyncNullActiveLogItemTest()

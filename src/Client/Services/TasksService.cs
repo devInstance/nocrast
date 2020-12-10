@@ -340,7 +340,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<ModelList<TimeLogItem>> GetTimeLogItemsAsync(TaskItem item, TimeLogResultType type)
+        public async Task<ModelList<TimeLogItem>> GetTimeLogItemsAsync(TaskItem item, TimeLogResultType type, int? top, int? page)
         {
             using (var l = Log.DebugScope())
             {
@@ -352,7 +352,7 @@ namespace NoCrast.Client.Services
                 ModelList<TimeLogItem> response = null;
                 try
                 {
-                    response = await TaskApi.GetTimelogAsync(item.Id, TimeProvider.UtcTimeOffset, null, null, type);
+                    response = await TaskApi.GetTimelogAsync(item.Id, TimeProvider.UtcTimeOffset, top, page, type);
                     ResetNetworkError();
                 }
                 catch (Exception ex)
