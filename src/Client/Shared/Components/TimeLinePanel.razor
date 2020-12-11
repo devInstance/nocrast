@@ -248,6 +248,7 @@
     {
         using (var l = log.DebugScope())
         {
+            InitializeTimeScale();
             InitializeTimeBars();
             StateHasChanged();
         }
@@ -257,6 +258,7 @@
     {
         using (var l = log.DebugScope())
         {
+            InitializeTimeScale();
             InitializeTimeBars();
 
             return true;
