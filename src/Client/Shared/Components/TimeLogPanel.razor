@@ -2,7 +2,6 @@
     <table class="table table-hover table-sm">
         @foreach (var tl in Log.Items)
         {
-
             <tr>
                 @if (editLog.IsEditing && editLog.Id == tl.Id)
                 {
@@ -39,8 +38,8 @@
                             <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
                         </button>
                     </td>
-                    <td class="col-auto col-lg-1"><small>@tl.StartTime.ToLocalTime()</small></td>
-                    <td class="col-auto col-lg-1"><small>@FormatTime(tl)</small></td>
+                    <td class="col-auto col-lg-1"><small>@FormatStartTime(tl)</small></td>
+                    <td class="col-auto col-lg-1"><small>@FormatTimeSpan(tl)</small></td>
                     <td class="col-1">
                         @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
                         {
@@ -89,6 +88,9 @@
     public ModelList<TimeLogItem> Log { get; set; }
 
     [Parameter]
+    public bool ShowDate { get; set; }
+
+    [Parameter]
     public EventCallback<int> OnRequestData { get; set; }
 
     class EditTimeLog
@@ -111,7 +113,17 @@
         StateHasChanged();
     }
 
-    private string FormatTime(TimeLogItem time)
+    private string FormatStartTime(TimeLogItem time)
+    {
+        if(ShowDate)
+        {
+            return time.StartTime.ToLocalTime().ToString();
+        }
+
+        return time.StartTime.ToLocalTime().ToLongTimeString();
+    }
+
+    private string FormatTimeSpan(TimeLogItem time)
     {
         return String.Format("{0:hh}:{0:mm}:{0:ss}", time.GetElapsedTimeSpan(TimeProvider));
     }

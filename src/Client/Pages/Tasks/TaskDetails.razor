@@ -163,7 +163,7 @@
         </div>
         <div class="row my-2">
             <div class="col-sm-12 col-md-10 col-lg-6 col-xl-4">
-                <TimeLogPanel Item="Item" Log="TimeLog" OnRequestData="@RequestDataAsync">
+                <TimeLogPanel Item="Item" Log="TimeLog" ShowDate="@(selectedFilter != TimeLogResultType.Day)" OnRequestData="@RequestDataAsync">
                 </TimeLogPanel>
             </div>
         </div>
