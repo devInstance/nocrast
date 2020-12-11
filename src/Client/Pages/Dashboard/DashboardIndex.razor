@@ -2,7 +2,7 @@
 
 @if (ActiveTasksList != null)
 {
-    if (ActiveTasksList.Length == 0 || ActiveTasksList.Length > 1)
+    if (ActiveTasksList.Count == 0 || ActiveTasksList.Count > 1)
     {
         <PageTitle Value="Dashboard" />
     }
@@ -63,8 +63,8 @@ else
 
 @code {
 
-    private TaskItem[] ActiveTasksList { get; set; }
-    private TaskItem[] PassiveTasksList { get; set; }
+    private List<TaskItem> ActiveTasksList { get; set; }
+    private List<TaskItem> PassiveTasksList { get; set; }
     private TaskItem[] Items { get; set; }
     private ModelList<TimeLogItem>[] TodayTimeLog { get; set; }
 
@@ -78,6 +78,9 @@ else
 
         try
         {
+            ActiveTasksList = new List<TaskItem>();
+            PassiveTasksList = new List<TaskItem>();
+
             using (var scope = log.DebugScope())
             {
                 SetUpTimer();
@@ -129,11 +132,25 @@ else
 
         using (var l = log.DebugScope())
         {
-            ActiveTasksList = await Service.GetRunningTasksAsync();
-            StateHasChanged();
+            var activeTasks = await Service.GetRunningTasksAsync();
+            if(activeTasks != null)
+            {
+                ActiveTasksList.Clear();
+                ActiveTasksList.AddRange(activeTasks);
+            }
 
-            PassiveTasksList = await Service.GetTasksForDashboardAsync();
-            StateHasChanged();
+            var passiveTasks = await Service.GetTasksForDashboardAsync();
+            if(passiveTasks != null)
+            {
+                PassiveTasksList.Clear();
+                PassiveTasksList.AddRange(passiveTasks);
+            }
+            if(ActiveTasksList != null && ActiveTasksList.Count == 0 && PassiveTasksList != null && PassiveTasksList.Count > 0)
+            {
+                // keep last active
+                ActiveTasksList.Add(PassiveTasksList[0]);
+                PassiveTasksList.RemoveAt(0);
+            }
 
             Items = await Service.GetTodayTasksAsync();
             l.D($"Items = {Items}");
