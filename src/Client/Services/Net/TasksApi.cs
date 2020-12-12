@@ -60,7 +60,7 @@ namespace NoCrast.Client.Services.Net
 
         public async Task<ModelList<TimeLogItem>> GetTimelogAsync(string id, int timeoffset, int? top, int? page, TimeLogResultType? type)
         {
-            string url = $"{Controller}{id}/timelog?&timeoffset={timeoffset}";
+            string url = $"{Controller}{id}/timelog?timeoffset={timeoffset}";
             if(top.HasValue)
             {
                 url += $"&top={top}";
@@ -81,7 +81,7 @@ namespace NoCrast.Client.Services.Net
             var url = $"{Controller}{id}/timelog?timeoffset={timeoffset}";
             if(startTask.HasValue)
             {
-                url = $"start={startTask}";
+                url += $"&start={startTask}";
             }
             var result = await httpClient.PostAsJsonAsync(url, log);
             result.EnsureSuccessStatusCode();
