@@ -384,6 +384,26 @@ namespace NoCrast.Client.Services
             }
         }
 
+        public async Task<TaskItem> InsertTimelogAsync(TaskItem item, TimeLogItem log)
+        {
+            using (var l = Log.DebugExScope())
+            {
+                try
+                {
+                    item = await TaskApi.InsertTimerAsync(item.Id, null, log, TimeProvider.UtcTimeOffset);
+                    ResetNetworkError();
+
+                    NotifyDataHasChanged();
+                }
+                catch (Exception ex)
+                {
+                    l.E(ex);
+                    NotifyNetworkError(ex);
+                }
+                return item;
+            }
+        }
+
         public async Task<TaskItem> RemoveTimelogAsync(TaskItem item, TimeLogItem log)
         {
             using (var l = Log.DebugExScope())
@@ -392,7 +412,7 @@ namespace NoCrast.Client.Services
                 {
                     var result = await TaskApi.RemoveTimerAsync(item.Id, log.Id, TimeProvider.UtcTimeOffset);
                     ResetNetworkError();
-                    NotifyDataHasChanged();
+                    //NotifyDataHasChanged();
                     return result;
                 }
                 catch (Exception ex)

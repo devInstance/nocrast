@@ -24,7 +24,7 @@ namespace NoCrast.Client.Services.Api
 
         Task<ModelList<TimeLogItem>> GetTimelogAsync(string id, int timeoffset, int? top, int? page, TimeLogResultType? type);
 
-        Task<TaskItem> InsertTimerAsync(string id, bool startTask, TimeLogItem log, int timeoffset);
+        Task<TaskItem> InsertTimerAsync(string id, bool? startTask, TimeLogItem log, int timeoffset);
 
         Task<TaskItem> UpdateTimerAsync(string id, string timerId, bool startTask, TimeLogItem log, int timeoffset);
 

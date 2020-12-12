@@ -37,9 +37,9 @@ namespace NoCrast.Server.Controllers
                         join prj in DB.Projects on tks.Project equals prj
                         into projectTasks
                         from tksp in projectTasks.DefaultIfEmpty()
-                        where tks.Profile == CurrentProfile 
+                        where tks.Profile == CurrentProfile
                                 && (id == null || tks.PublicId == id)
-                                && (filter == null 
+                                && (filter == null
                                         || (filter.Value == TaskFilter.RunningOnly && sts.IsRunning)
                                         || (filter.Value == TaskFilter.StoppedOnly && !sts.IsRunning)
                                         || (filter.Value == TaskFilter.Today && tks.UpdateDate >= startOfTheDay)
@@ -104,7 +104,7 @@ namespace NoCrast.Server.Controllers
         public ActionResult<TaskItem[]> GetTasks(int timeoffset, int? top, int? page, TaskFilter? filter)
         {
             return HandleWebRequest<TaskItem[]>(() =>
-            { 
+            {
                 var tasks = DecorateTasks(SelectTasks(null, top, page, timeoffset, filter), timeoffset).ToList();
 
                 return Ok(tasks.ToArray());
@@ -190,8 +190,8 @@ namespace NoCrast.Server.Controllers
                 if (task.Project != null)
                 {
                     var projectRecord = (from prj in DB.Projects
-                                      where prj.PublicId == task.Project.Id && prj.Profile == CurrentProfile
-                                      select prj).FirstOrDefault();
+                                         where prj.PublicId == task.Project.Id && prj.Profile == CurrentProfile
+                                         select prj).FirstOrDefault();
 
                     if (projectRecord == null)
                     {
@@ -255,7 +255,7 @@ namespace NoCrast.Server.Controllers
                 DateTime? dateEndFilter = null;
                 if (type.HasValue)
                 {
-                    switch (type.Value) 
+                    switch (type.Value)
                     {
                         case TimeLogResultType.Day:
                             dateStartFilter = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
@@ -286,13 +286,13 @@ namespace NoCrast.Server.Controllers
                                      select timeLog);
 
                 var items = (from timeLog in filteredQuery
-                           orderby timeLog.StartTime descending
-                           select new TimeLogItem
-                           {
-                               Id = timeLog.PublicId,
-                               ElapsedMilliseconds = timeLog.ElapsedMilliseconds,
-                               StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
-                           });
+                             orderby timeLog.StartTime descending
+                             select new TimeLogItem
+                             {
+                                 Id = timeLog.PublicId,
+                                 ElapsedMilliseconds = timeLog.ElapsedMilliseconds,
+                                 StartTime = new DateTime(timeLog.StartTime.Ticks, DateTimeKind.Utc) //TODO: ???
+                             });
 
                 var pageIndex = 0;
                 var totalItemsCount = coreQuery.Count();
@@ -304,10 +304,10 @@ namespace NoCrast.Server.Controllers
                     totalPageCount = (int)Math.Ceiling((double)queryItemsCount / (double)top.Value);
                     pageSize = top.Value;
                 }
-                if(page.HasValue && page.Value >= 0)
+                if (page.HasValue && page.Value >= 0)
                 {
                     pageIndex = page.Value;
-                    if(pageIndex >= totalPageCount)
+                    if (pageIndex >= totalPageCount)
                     {
                         pageIndex = totalPageCount - 1;
                     }
@@ -367,9 +367,12 @@ namespace NoCrast.Server.Controllers
                 };
                 DB.TimeLog.Add(timeLog);
 
-                taskRecord.State.IsRunning = start ?? false;
-                taskRecord.UpdateDate = now;
-                taskRecord.State.ActiveTimeLogItem = timeLog;
+                if (start != null)
+                {
+                    taskRecord.State.IsRunning = start.Value;
+                    taskRecord.UpdateDate = now;
+                    taskRecord.State.ActiveTimeLogItem = timeLog;
+                }
 
                 DB.SaveChanges();
 
@@ -442,7 +445,7 @@ namespace NoCrast.Server.Controllers
                 {
                     return NotFound();
                 }
-                if(timeLogRecord.timeLog.Id == timeLogRecord.taskState.ActiveTimeLogItem?.Id)
+                if (timeLogRecord.timeLog.Id == timeLogRecord.taskState.ActiveTimeLogItem?.Id)
                 {
                     timeLogRecord.taskState.ActiveTimeLogItem = null;
                 }

@@ -2,54 +2,66 @@
     <table class="table table-hover table-sm">
         @foreach (var tl in Log.Items)
         {
-            <tr>
-                @if (editLog.IsEditing && editLog.Id == tl.Id)
-                {
-                    <td class="col-1">
-                    </td>
-                    <td class="col-auto col-lg-1">
-                        <small>
-                            <InputText @bind-Value="@editLog.StartTime"></InputText>
-                        </small>
-                    </td>
-                    <td class="col-auto col-lg-1">
-                        <small>
-                            @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
-                            {
-                                <InputText @bind-Value="@editLog.EndTime"></InputText>
-                            }
-                        </small>
-                    </td>
-                    <td class="col-auto">
-                        <button type="submit" class="btn timer-button">
-                            <span class="oi oi-circle-check" aria-hidden="true"></span>
-                        </button>
-                    </td>
-                    <td class="col-auto">
-                        <button class="btn timer-button" @onclick="@(() => ResetChanges())" @onclick:preventDefault>
-                            <span class="oi oi-circle-x" aria-hidden="true"></span>
-                        </button>
-                    </td>
-                }
-                else
-                {
-                    <td class="col-1">
-                        <button class="btn btn-default timer-button ml-2" @onclick="@(() => StartEditing(tl))">
-                            <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
-                        </button>
-                    </td>
-                    <td class="col-auto col-lg-1"><small>@FormatStartTime(tl)</small></td>
-                    <td class="col-auto col-lg-1"><small>@FormatTimeSpan(tl)</small></td>
-                    <td class="col-1">
+        <tr>
+            @if (editLog.IsEditing && editLog.Id == tl.Id)
+            {
+                <td class="col-1">
+                </td>
+                <td class="col-auto col-lg-1">
+                    <small>
+                        <InputText @bind-Value="@editLog.StartTime"></InputText>
+                    </small>
+                </td>
+                <td class="col-auto col-lg-1">
+                    <small>
                         @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
                         {
-                            <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(tl))">
-                                <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
-                            </button>
+                            <InputText @bind-Value="@editLog.EndTime"></InputText>
                         }
-                    </td>
-                }
-            </tr>
+                    </small>
+                </td>
+                <td class="col-auto">
+                    <button type="submit" class="btn timer-button">
+                        <span class="oi oi-circle-check" aria-hidden="true"></span>
+                    </button>
+                </td>
+                <td class="col-auto">
+                    <button class="btn timer-button" @onclick="@(() => ResetChanges())" @onclick:preventDefault>
+                        <span class="oi oi-circle-x" aria-hidden="true"></span>
+                    </button>
+                </td>
+            }
+            else if (lastDeletedLog != null && lastDeletedLog.Id == tl.Id)
+            {
+                <td class="col-1">
+                </td>
+                <td class="col-auto col-lg-1"><del><small>@FormatStartTime(tl)</small></del></td>
+                <td class="col-auto col-lg-1"><del><small>@FormatTimeSpan(tl)</small></del></td>
+                <td class="col-auto">
+                    <button class="btn timer-button" @onclick="@(() => RestoreChangeAsync(tl))" @onclick:preventDefault>
+                        <span class="oi oi-action-redo" aria-hidden="true"></span>
+                    </button>
+                </td>
+            }
+            else
+            {
+                <td class="col-1">
+                    <button class="btn btn-default timer-button ml-2" @onclick="@(() => StartEditing(tl))">
+                        <span class="oi oi-pencil small-timer-button" aria-hidden="true"></span>
+                    </button>
+                </td>
+                <td class="col-auto col-lg-1"><small>@FormatStartTime(tl)</small></td>
+                <td class="col-auto col-lg-1"><small>@FormatTimeSpan(tl)</small></td>
+                <td class="col-1">
+                    @if (!Item.IsRunning || Item.ActiveTimeLogItem.Id != tl.Id)
+                    {
+                        <button class="btn btn-default timer-button" @onclick="@(() => RemoveLog(tl))">
+                            <span class="oi oi-trash small-timer-button" aria-hidden="true"></span>
+                        </button>
+                    }
+                </td>
+            }
+        </tr>
         }
     </table>
     @if (Log.PagesCount > 1)
@@ -81,17 +93,17 @@
 @inject ITimeProvider TimeProvider;
 
 @code {
-        [Parameter]
-        public TaskItem Item { get; set; }
+    [Parameter]
+    public TaskItem Item { get; set; }
 
-        [Parameter]
-        public ModelList<TimeLogItem> Log { get; set; }
+    [Parameter]
+    public ModelList<TimeLogItem> Log { get; set; }
 
-        [Parameter]
-        public bool ShowDate { get; set; }
+    [Parameter]
+    public bool ShowDate { get; set; }
 
-        [Parameter]
-        public EventCallback<int> OnRequestData { get; set; }
+    [Parameter]
+    public EventCallback<int> OnRequestData { get; set; }
 
     class EditTimeLog
     {
@@ -102,6 +114,8 @@
     }
 
     EditTimeLog editLog = new EditTimeLog();
+
+    TimeLogItem lastDeletedLog = null;
 
     protected override void OnInitialized()
     {
@@ -130,6 +144,7 @@
 
     private async void RemoveLog(TimeLogItem log)
     {
+        lastDeletedLog = log;
         Item = await Service.RemoveTimelogAsync(Item, log);
         StateHasChanged();
     }
@@ -173,5 +188,10 @@
     private async void RequestDataAsync(int page)
     {
         await OnRequestData.InvokeAsync(page);
+    }
+
+    private async void RestoreChangeAsync(TimeLogItem log)
+    {
+        await Service.InsertTimelogAsync(Item, log);
     }
 }
