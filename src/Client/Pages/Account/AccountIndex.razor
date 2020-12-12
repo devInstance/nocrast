@@ -38,7 +38,7 @@ else
     protected async override Task OnInitializedAsync()
     {
         log = LogProvider.CreateLogger(this);
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             ToolbarServ.Back += OnBack;
             ToolbarServ.Delete += OnDelete;
@@ -52,7 +52,7 @@ else
 
     public void Dispose()
     {
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             ToolbarServ.Back -= OnBack;
             ToolbarServ.Delete -= OnDelete;

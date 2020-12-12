@@ -239,7 +239,7 @@ else
 
         selectedFilter = TimeLogResultType.Day;
 
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             ToolbarServ.Back += OnBack;
             ToolbarServ.Delete += OnDelete;
@@ -278,7 +278,7 @@ else
 
     public void Dispose()
     {
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             ToolbarServ.Back -= OnBack;
             ToolbarServ.Delete -= OnDelete;
@@ -316,7 +316,7 @@ else
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             RefreshDataAsync();
         }
@@ -334,7 +334,7 @@ else
 
     private async Task<bool> RefreshDataAsync()
     {
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             NewTagLabel = "";
             if (!String.IsNullOrEmpty(Id))

@@ -25,7 +25,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ReportItem> GetReportAsync(ReportItem.RIType rIType, DateTime start)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetNetworkError();
 

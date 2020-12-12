@@ -30,7 +30,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem[]> GetTagsAsync()
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetUIError();
                 try
@@ -49,7 +49,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem> GetTagAsync(string id)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetUIError();
                 try
@@ -68,7 +68,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem[]> GetTasksAsync(string id)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetUIError();
                 try
@@ -87,7 +87,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem> AddNewTagAsync(string newTag)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetUIError();
 
@@ -113,7 +113,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem> UpdateTagNameAsync(TagItem tag, string newName)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 TagItem newTag;
                 try
@@ -134,7 +134,7 @@ namespace NoCrast.Client.Services
 
         public async Task<bool> RemoveTagAsync(TagItem item)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 try
                 {

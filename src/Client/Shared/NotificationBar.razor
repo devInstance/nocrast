@@ -24,7 +24,7 @@
     protected async override Task OnInitializedAsync()
     {
         log = LogProvider.CreateLogger(this);
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             NotificationServ.ErrorHasOccured += OnError;
         }
@@ -32,7 +32,7 @@
 
     private void OnError(Object sender, ServiceErrorEventArgs e)
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             l.E(e.Message);
             if (e.IsNetworkError)

@@ -5,15 +5,17 @@ namespace NoCrast.Shared.Logging
     public class LogToConsole : ILog
     {
         private DateTime timeStart;
-        public LogLevel Level { get; }
+        public ILogProvider Provider { get; }
+        public LogLevel ScopeLevel { get; }
         public string ScopeName { get; }
 
-        public LogToConsole(LogLevel level, string scope, bool logConstructor)
+        public LogToConsole(ILogProvider provider, LogLevel scopeLevel, string scope, bool logConstructor)
         {
             timeStart = DateTime.Now;
-            Level = level;
+            ScopeLevel = scopeLevel;
             ScopeName = scope;
-            if (logConstructor && Level >= LogLevel.DEBUG && !String.IsNullOrEmpty(ScopeName))
+            Provider = provider;
+            if (logConstructor && ScopeLevel <= provider.Level && !String.IsNullOrEmpty(ScopeName))
             {
                 Console.WriteLine($"--> begin of {ScopeName}");
             }
@@ -26,12 +28,12 @@ namespace NoCrast.Shared.Logging
             {
                 s = $"{ScopeName}:{childScope}";
             }
-            return new LogToConsole(level, s, true);
+            return new LogToConsole(Provider, level, s, true);
         }
 
         public void Dispose()
         {
-            if (Level >= LogLevel.DEBUG)
+            if (ScopeLevel <= Provider.Level)
             {
                 var execTime = DateTime.Now - timeStart;
                 Console.WriteLine($"<-- end of {ScopeName}, time:{execTime.TotalMilliseconds} msec");
@@ -40,7 +42,7 @@ namespace NoCrast.Shared.Logging
 
         public void Line(LogLevel l, string message)
         {
-            if (l <= Level)
+            if (l <= Provider.Level)
             {
                 if (String.IsNullOrEmpty(ScopeName))
                 {

@@ -65,7 +65,7 @@ else
         log = LogProvider.CreateLogger(this);
         try
         {
-            using (var scope = log.DebugScope())
+            using (var scope = log.DebugExScope())
             {
                 ToolbarServ.EnableAddProject = true;
                 ToolbarServ.Update();
@@ -88,7 +88,7 @@ else
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             RefreshData();
         }

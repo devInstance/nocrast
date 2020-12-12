@@ -58,7 +58,7 @@ else
         log = LogProvider.CreateLogger(this);
         try
         {
-            using (var scope = log.DebugScope())
+            using (var scope = log.DebugExScope())
             {
                 ToolbarServ.EnableAddTag = true;
                 ToolbarServ.Update();

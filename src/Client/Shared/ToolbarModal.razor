@@ -112,7 +112,7 @@
     protected async override Task OnInitializedAsync()
     {
         log = LogProvider.CreateLogger(this);
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             ProjectClr = ProjectColor.Blue;
             ToolbarServ.ToolbarHasChanged += OnChange;
@@ -121,7 +121,7 @@
 
     private void OnChange(object value)
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             StateHasChanged();
         }
@@ -135,7 +135,7 @@
 
     private async void OnAddTask()
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             var task = await TasksServ.AddNewTaskAsync(TaskTitle);
             if(CanStartTask)
@@ -147,7 +147,7 @@
 
     private async void OnAddTag()
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             await TagsServ.AddNewTagAsync(TagTitle);
         }
@@ -155,7 +155,7 @@
 
     private async void OnAddProject()
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             await ProjectsServ.AddNewProjectAsync(ProjectTitle, ProjectDescription, ProjectClr);
         }
@@ -163,7 +163,7 @@
 
     private async void OnDelete()
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             ToolbarServ.InvokeDelete();
         }

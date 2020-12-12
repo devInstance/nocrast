@@ -4,16 +4,16 @@ namespace NoCrast.Shared.Logging
 {
     public class ConsoleLogProvider : ILogProvider
     {
-        private LogLevel _Level;
+        public LogLevel Level { get; private set; }
 
         public ConsoleLogProvider(LogLevel level)
         {
-            _Level = level;
+            Level = level;
         }
 
         public ILog CreateLogger([CallerMemberName] string scope = null)
         {
-            return new LogToConsole(_Level, scope, false);
+            return new LogToConsole(this, Level, scope, false);
         }
 
     }

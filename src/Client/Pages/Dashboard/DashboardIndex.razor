@@ -81,7 +81,7 @@ else
             ActiveTasksList = new List<TaskItem>();
             PassiveTasksList = new List<TaskItem>();
 
-            using (var scope = log.DebugScope())
+            using (var scope = log.DebugExScope())
             {
                 SetUpTimer();
 
@@ -112,7 +112,7 @@ else
 
     public void Dispose()
     {
-        using (var scope = log.DebugScope())
+        using (var scope = log.DebugExScope())
         {
             if (timer != null)
             {
@@ -130,7 +130,7 @@ else
     private async Task<bool> RefreshData()
     {
 
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             var activeTasks = await Service.GetRunningTasksAsync();
             if(activeTasks != null)

@@ -89,7 +89,7 @@
 
     private void InitializeTimeScale()
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             var labels = new List<TimeScaleLabelItem>();
             for (DateTime time = StartDate; time.Hour <= EndDate.Hour; time = time.AddHours(1))
@@ -201,7 +201,7 @@
     protected override void OnInitialized()
     {
         log = LogProvider.CreateLogger(this);
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             DateTime now = DateTime.Now;
 
@@ -246,7 +246,7 @@
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             InitializeTimeScale();
             InitializeTimeBars();
@@ -256,7 +256,7 @@
 
     protected override bool ShouldRender()
     {
-        using (var l = log.DebugScope())
+        using (var l = log.DebugExScope())
         {
             InitializeTimeScale();
             InitializeTimeBars();

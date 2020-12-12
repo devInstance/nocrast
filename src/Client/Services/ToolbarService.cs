@@ -32,7 +32,7 @@ namespace NoCrast.Client.Services
 
         public void Update(string title)
         {
-            using(var l = log.DebugScope())
+            using(var l = log.DebugExScope())
             {
                 Title = title;
                 ToolbarHasChanged?.Invoke(null);
@@ -41,7 +41,7 @@ namespace NoCrast.Client.Services
 
         public void Update()
         {
-            using (var l = log.DebugScope())
+            using (var l = log.DebugExScope())
             {
                 ToolbarHasChanged?.Invoke(null);
             }
@@ -49,7 +49,7 @@ namespace NoCrast.Client.Services
 
         public void InvokeBack()
         {
-            using (var l = log.DebugScope())
+            using (var l = log.DebugExScope())
             {
                 Back?.Invoke(null);
             }
@@ -57,7 +57,7 @@ namespace NoCrast.Client.Services
 
         public void InvokeDelete()
         {
-            using (var l = log.DebugScope())
+            using (var l = log.DebugExScope())
             {
                 Delete?.Invoke(null);
             }
@@ -65,7 +65,7 @@ namespace NoCrast.Client.Services
 
         public void InvokeTitleChanged(string value)
         {
-            using (var l = log.DebugScope())
+            using (var l = log.DebugExScope())
             {
                 Title = value;
                 TitleChanged?.Invoke(value);

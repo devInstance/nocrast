@@ -23,7 +23,7 @@ namespace NoCrast.Client.Services
 
         public async Task<UserProfileItem> GetAccountAsync()
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetUIError();
                 try
@@ -42,7 +42,7 @@ namespace NoCrast.Client.Services
 
         public async Task<UserProfileItem> UpdateAccountNameAsync(UserProfileItem item, string newName)
         {
-            using (var l = Log.DebugScope())
+            using (var l = Log.DebugExScope())
             {
                 ResetUIError();
                 try

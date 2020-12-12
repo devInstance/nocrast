@@ -109,7 +109,7 @@
         {
             selectedDate = TimeProvider.CurrentTime;
 
-            using (var scope = log.DebugScope())
+            using (var scope = log.DebugExScope())
             {
                 RequestReportAsync(ReportItem.RIType.Daily);
             }

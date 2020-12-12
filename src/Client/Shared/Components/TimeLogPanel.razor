@@ -81,17 +81,17 @@
 @inject ITimeProvider TimeProvider;
 
 @code {
-    [Parameter]
-    public TaskItem Item { get; set; }
+        [Parameter]
+        public TaskItem Item { get; set; }
 
-    [Parameter]
-    public ModelList<TimeLogItem> Log { get; set; }
+        [Parameter]
+        public ModelList<TimeLogItem> Log { get; set; }
 
-    [Parameter]
-    public bool ShowDate { get; set; }
+        [Parameter]
+        public bool ShowDate { get; set; }
 
-    [Parameter]
-    public EventCallback<int> OnRequestData { get; set; }
+        [Parameter]
+        public EventCallback<int> OnRequestData { get; set; }
 
     class EditTimeLog
     {
@@ -144,22 +144,25 @@
 
     private async void ApplyChangesAsync()
     {
-        DateTime startTime = DateTime.Parse(editLog.StartTime).ToUniversalTime();
-        DateTime endTime = DateTime.Parse(editLog.EndTime).ToUniversalTime();
-
-        var newTimelog = new TimeLogItem
+        if (editLog.IsEditing)
         {
-            StartTime = startTime,
-            ElapsedMilliseconds = (long)(endTime - startTime).TotalMilliseconds,
-            Id = editLog.Id
-        };
+            DateTime startTime = DateTime.Parse(editLog.StartTime).ToUniversalTime();
+            DateTime endTime = DateTime.Parse(editLog.EndTime).ToUniversalTime();
 
-        Item = await Service.UpdateTimelogAsync(Item, newTimelog);
-        //editLog.SelectedLog = newTimelog;
+            var newTimelog = new TimeLogItem
+            {
+                StartTime = startTime,
+                ElapsedMilliseconds = (long)(endTime - startTime).TotalMilliseconds,
+                Id = editLog.Id
+            };
 
-        editLog.IsEditing = false;
+            Item = await Service.UpdateTimelogAsync(Item, newTimelog);
+            //editLog.SelectedLog = newTimelog;
 
-        StateHasChanged();
+            editLog.IsEditing = false;
+
+            StateHasChanged();
+        }
     }
 
     private void ResetChanges()
