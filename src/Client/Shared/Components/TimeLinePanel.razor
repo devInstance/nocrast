@@ -92,7 +92,7 @@
         using (var l = log.DebugExScope())
         {
             var labels = new List<TimeScaleLabelItem>();
-            for (DateTime time = StartDate; time.Hour <= EndDate.Hour; time = time.AddHours(1))
+            for (DateTime time = StartDate; time <= EndDate; time = time.AddHours(1))
             {
                 var item = new TimeScaleLabelItem();
 
