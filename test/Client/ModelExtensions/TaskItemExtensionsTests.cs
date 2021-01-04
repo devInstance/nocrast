@@ -1,6 +1,5 @@
 ﻿using Moq;
-using NoCrast.Client.Utils;
-using NoCrast.Shared.Model;
+using NoCrast.Shared.Utils;
 using System;
 using Xunit;
 
