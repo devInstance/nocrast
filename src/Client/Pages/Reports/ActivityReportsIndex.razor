@@ -1,0 +1,78 @@
+﻿@page "/reports/activity"
+
+<PageTitle Value="Report"></PageTitle>
+@if (Report != null)
+{
+    <div class="row p-2">
+        <div class="col">
+            <svg width="100%" style="z-index:-1;" height="100px" role="img">
+                @for (int i = 0; i < Report.Columns.Length; i += 8)
+                {
+                    var item = Report.Columns[i];
+                    <g>
+                        <text x="@(i + 1)%" y="30">@TimeConverter.ConvertToLocal(item, TimeProvider.UtcTimeOffset).ToString("hh:mm")</text>
+                    </g>
+                }
+                @for (int i = 0; i < Report.Rows[0].Data.Length; i++)
+                {
+                    var item = Report.Rows[0].Data[i];
+                    <g>
+                        <circle cx="@(i + 1)%" cy="70" r="10" style="fill:blue;fill-opacity:@item;">
+                            <title>some text</title>
+                        </circle>
+                    </g>
+                }
+            </svg>
+        </div>
+    </div>
+}
+else
+{
+    <p>Loading ...</p>
+}
+
+@inject ReportService Service;
+@inject ILogProvider LogProvider;
+@inject ITimeProvider TimeProvider;
+
+@code {
+
+    string ErrorText { get; set; }
+
+    private ILog log;
+
+    private DateTime selectedDate;
+    private DateTime startDate;
+    private DateTime endDate;
+
+    private string selectedPeriod = "";
+
+    private ReportItem Report { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = LogProvider.CreateLogger(this);
+        try
+        {
+            selectedDate = TimeProvider.CurrentTime;
+
+            using (var scope = log.DebugExScope())
+            {
+                RequestReportAsync(ReportItem.RIType.Daily);
+            }
+        }
+        catch (Exception ex)
+        {
+            log.E(ex);
+        }
+    }
+
+    public async void RequestReportAsync(ReportItem.RIType type)
+    {
+        Report = null;
+        Report = await Service.GetActivityReportAsync();
+
+        StateHasChanged();
+    }
+
+}

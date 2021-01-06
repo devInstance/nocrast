@@ -14,7 +14,7 @@ using System.Linq;
 namespace NoCrast.Server.Controllers
 {
     [ApiController]
-    [Route("api/data/report")]
+    [Route("api/data/reports")]
     public class ReportController : UserBaseController
     {
         public ITimeProvider TimeProvider { get; }
@@ -27,7 +27,7 @@ namespace NoCrast.Server.Controllers
             TimeProvider = timeProvider;
         }
 
-        private ReportItem GetReport(ReportItem.RIType tp, DateTime start, int ColumnsCount)
+        private ReportItem GetAggregateReport(ReportItem.RIType tp, DateTime start, int ColumnsCount)
         {
             var result = new ReportItem()
             {
@@ -42,7 +42,7 @@ namespace NoCrast.Server.Controllers
             {
                 dateRanges[i] = columnDate;
                 result.Columns[i] = columnDate;
-                switch(tp)
+                switch (tp)
                 {
                     case ReportItem.RIType.Daily:
                         columnDate = columnDate.AddDays(1);
@@ -51,6 +51,7 @@ namespace NoCrast.Server.Controllers
                         columnDate = columnDate.AddDays(7);
                         break;
                     case ReportItem.RIType.Monthly:
+                    default:
                         columnDate = columnDate.AddMonths(1);
                         break;
                 }
@@ -89,7 +90,7 @@ namespace NoCrast.Server.Controllers
 
         [Authorize]
         [HttpGet]
-        [Route("daily")]
+        [Route("aggregate/daily")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ReportItem> GetDailyReport(int timeoffset, DateTime start)
@@ -98,7 +99,7 @@ namespace NoCrast.Server.Controllers
             {
                 DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset);
 
-                var result = GetReport(ReportItem.RIType.Daily, startOfTheWeek, 7);
+                var result = GetAggregateReport(ReportItem.RIType.Daily, startOfTheWeek, 7);
 
                 return Ok(result);
             });
@@ -106,7 +107,7 @@ namespace NoCrast.Server.Controllers
 
         [Authorize]
         [HttpGet]
-        [Route("weekly")]
+        [Route("aggregate/weekly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ReportItem> GetWeeklyReport(int timeoffset, DateTime start)
@@ -116,7 +117,7 @@ namespace NoCrast.Server.Controllers
 
                 DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset).AddDays(-4 * 7);
 
-                var result = GetReport(ReportItem.RIType.Weekly, startOfTheWeek, 5);
+                var result = GetAggregateReport(ReportItem.RIType.Weekly, startOfTheWeek, 5);
 
                 return Ok(result);
             });
@@ -124,7 +125,7 @@ namespace NoCrast.Server.Controllers
 
         [Authorize]
         [HttpGet]
-        [Route("monthly")]
+        [Route("aggregate/monthly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ReportItem> GetMonthlyReport(int timeoffset, DateTime start)
@@ -133,7 +134,85 @@ namespace NoCrast.Server.Controllers
             {
                 DateTime startOfTheYear = TimeConverter.GetStartOfTheYearForTimeOffset(start, timeoffset);
 
-                var result = GetReport(ReportItem.RIType.Monthly, startOfTheYear, 12);
+                var result = GetAggregateReport(ReportItem.RIType.Monthly, startOfTheYear, 12);
+
+                return Ok(result);
+            });
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("activity")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public ActionResult<ReportItem> GetActivityReport(int timeoffset)
+        {
+            return HandleWebRequest<ReportItem>(() =>
+            {
+                DateTime now = TimeProvider.CurrentTime;
+                DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
+
+                var result = new ReportItem()
+                {
+                    RiType = ReportItem.RIType.Unknown
+                };
+
+                var intervalMinutes = 15;
+                var columnsCount = 24 * 60 / intervalMinutes; //every 15 minutes
+                var columnDate = startOfDay;
+                result.Columns = new DateTime[columnsCount];
+                var dateRanges = new DateTime[columnsCount + 1];
+                for (int i = 0; i < columnsCount; i++)
+                {
+                    dateRanges[i] = columnDate;
+                    result.Columns[i] = columnDate;
+                    columnDate = columnDate.AddMinutes(intervalMinutes);
+                }
+                dateRanges[columnsCount] = columnDate;
+
+                result.Rows = new ReportItem.Row[1/*tasks.Count*/];
+
+                for (int i = 0; i < 1; i++)
+                {
+                    var data = new long[columnsCount];
+                    long maxValue = 0;
+                    for (int n = 0; n < columnsCount; n++)
+                    {
+                        long startTime = dateRanges[n].Hour * 60 + dateRanges[n].Minute;
+                        long endTime = dateRanges[n + 1].Hour * 60 + dateRanges[n + 1].Minute;
+
+                        // https://scicomp.stackexchange.com/questions/26258/the-easiest-way-to-find-intersection-of-two-intervals
+                        var q = (from tl in DB.TimeLog
+                                 join ts in DB.Tasks on tl.Task equals ts
+                                 where ts.Profile == CurrentProfile &&
+                                 !(startTime > (tl.StartTime.Hour * 60 + tl.StartTime.Minute + (tl.ElapsedMilliseconds / 1000 / 60))
+                                 || (endTime < tl.StartTime.Hour * 60 + tl.StartTime.Minute))
+                                 select Math.Min(endTime, (tl.StartTime.Hour * 60 + tl.StartTime.Minute + (tl.ElapsedMilliseconds / 1000 / 60))) 
+                                        - Math.Max(startTime, tl.StartTime.Hour * 60 + tl.StartTime.Minute)
+                                        );
+
+                        var d = q.Sum();
+                        var test = q.Count();
+
+                        if (d > maxValue)
+                        {
+                            maxValue = d;
+                        }
+                        data[n] = d;
+                    }
+
+                    var finalData = new float[columnsCount];
+                    for (int n = 0; n < columnsCount; n++)
+                    {
+                        finalData[n] = (float)(data[n]) / (float)maxValue;
+                    }
+
+                    result.Rows[i] = new ReportItem.Row
+                    {
+                        //TaskTitle = tasks[i].Title,
+                        Data = finalData
+                    };
+                }
 
                 return Ok(result);
             });

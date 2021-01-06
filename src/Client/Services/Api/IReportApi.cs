@@ -11,5 +11,7 @@ namespace NoCrast.Client.Services.Api
         Task<ReportItem> GetWeeklyReportAsync(int timeoffset, DateTime startTime);
         Task<ReportItem> GetMonthlyReportAsync(int timeoffset, DateTime startTime);
         Task<ReportItem> GetDailyReportAsync(int timeoffset, DateTime startTime);
+
+        Task<ReportItem> GetActivityReportAsync(int timeoffset);
     }
 }

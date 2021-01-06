@@ -36,6 +36,8 @@
 
     <ItemGroup>
       <Watch Remove="Pages\Dashboard\DashboardIndex.razor" />
+      <Watch Remove="Pages\Reports\ActivityReportsIndex.razor" />
+      <Watch Remove="Pages\Reports\AggregateReportsIndex.razor" />
       <Watch Remove="Shared\Components\ActiveTaskPanel.razor" />
       <Watch Remove="Shared\Components\ColorDropdown.razor" />
       <Watch Remove="Shared\Components\TimeLinePanel.razor" />

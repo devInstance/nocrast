@@ -49,5 +49,23 @@ namespace NoCrast.Client.Services
                 return null;
             }
         }
+
+        public async Task<ReportItem> GetActivityReportAsync()
+        {
+            using (var l = Log.DebugExScope())
+            {
+                ResetNetworkError();
+
+                try
+                {
+                    return await Api.GetActivityReportAsync(TimeProvider.UtcTimeOffset);
+                }
+                catch (Exception ex)
+                {
+                    NotifyNetworkError(ex);
+                }
+                return null;
+            }
+        }
     }
 }

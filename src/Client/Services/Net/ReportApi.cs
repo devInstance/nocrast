@@ -10,7 +10,7 @@ namespace NoCrast.Client.Services.Net
 {
     public class ReportApi : ApiBase, IReportApi
     {
-        private const string Controller = "api/data/report";
+        private const string Controller = "api/data/reports";
 
         public ReportApi(HttpClient http) : base(http)
         {
@@ -18,17 +18,22 @@ namespace NoCrast.Client.Services.Net
 
         public async Task<ReportItem> GetDailyReportAsync(int timeoffset, DateTime startTime)
         {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/daily?timeoffset={timeoffset}&start={startTime}");
+            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/daily?timeoffset={timeoffset}&start={startTime}");
         }
 
         public async Task<ReportItem> GetMonthlyReportAsync(int timeoffset, DateTime startTime)
         {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/monthly?timeoffset={timeoffset}&start={startTime}");
+            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/monthly?timeoffset={timeoffset}&start={startTime}");
         }
 
         public async Task<ReportItem> GetWeeklyReportAsync(int timeoffset, DateTime startTime)
         {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/weekly?timeoffset={timeoffset}&start={startTime}");
+            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/weekly?timeoffset={timeoffset}&start={startTime}");
+        }
+
+        public async Task<ReportItem> GetActivityReportAsync(int timeoffset)
+        {
+            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/activity?timeoffset={timeoffset}");
         }
     }
 }
