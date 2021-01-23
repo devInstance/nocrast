@@ -1,4 +1,4 @@
-﻿using NoCrast.Shared.Logging;
+﻿using DevInstance.LogScope;
 using System;
 using System.Collections.Generic;
 using System.Linq;

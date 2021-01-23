@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NoCrast.Client.Services;
 using System.Net.Http;
-using NoCrast.Shared.Logging;
 using Blazored.LocalStorage;
 using NoCrast.Client.Services.Api;
 using NoCrast.Client.Services.Net;
 using NoCrast.Shared.Utils;
+using DevInstance.LogScope;
 
 namespace NoCrast.Client
 {

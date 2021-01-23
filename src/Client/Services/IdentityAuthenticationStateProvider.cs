@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using NoCrast.Shared.Logging;
+﻿using DevInstance.LogScope;
+using Microsoft.AspNetCore.Components.Authorization;
 using NoCrast.Shared.Model;
 using System.Linq;
 using System.Net.Http;

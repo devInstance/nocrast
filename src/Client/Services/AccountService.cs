@@ -1,9 +1,7 @@
-﻿using NoCrast.Client.Services.Api;
-using NoCrast.Shared.Logging;
+﻿using DevInstance.LogScope;
+using NoCrast.Client.Services.Api;
 using NoCrast.Shared.Model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services

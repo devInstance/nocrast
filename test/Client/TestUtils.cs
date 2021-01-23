@@ -1,10 +1,8 @@
-﻿using Blazored.LocalStorage;
+﻿using DevInstance.LogScope;
 using Moq;
 using NoCrast.Client.Services.Api;
-using NoCrast.Shared.Logging;
 using NoCrast.Shared.Utils;
 using System;
-using System.Threading.Tasks;
 
 namespace NoCrast.ClientTests
 {
