@@ -10,6 +10,7 @@ using NoCrast.Client.Services.Api;
 using NoCrast.Client.Services.Net;
 using NoCrast.Shared.Utils;
 using DevInstance.LogScope;
+using DevInstance.LogScope.Extensions;
 
 namespace NoCrast.Client
 {
@@ -25,8 +26,9 @@ namespace NoCrast.Client
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
 
+            builder.Services.AddConsoleLogging(LogLevel.DEBUG_EXTRA);
+
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
-            builder.Services.AddSingleton<ILogProvider>(new ConsoleLogProvider(LogLevel.DEBUG));
 
             builder.Services.AddScoped<IAuthorizationApi, AuthorizationApi>();
             builder.Services.AddScoped<ITasksApi, TasksApi>();

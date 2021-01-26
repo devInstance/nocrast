@@ -76,7 +76,7 @@
 {
     <div class="row pt-2">
         <div class="col">
-            <TimeLinePanel Items="Items" Logs="TodayTimeLog"></TimeLinePanel>
+            <DevInstance.TimelineLib.Timeline Data="Lines" IsTimeRangeFlexible="true"></DevInstance.TimelineLib.Timeline>
         </div>
     </div>
 }
@@ -84,6 +84,8 @@
 @inject ITimeProvider TimeProvider;
 @inject TasksService Service;
 @inject ILogProvider LogProvider;
+
+@using DevInstance.TimelineLib;
 
 @code {
     [Parameter]
@@ -95,24 +97,5 @@
     [Parameter]
     public ModelList<TimeLogItem>[] TodayTimeLog { get; set; }
 
-    private ILog log;
-
-    protected override void OnInitialized()
-    {
-        log = LogProvider.CreateLogger(this);
-        using (var l = log.DebugExScope())
-        {
-        }
-    }
-
-    private void Start(TaskItem item)
-    {
-        Service.StartTaskAsync(item);
-    }
-
-    private void Stop(TaskItem item)
-    {
-        Service.StopTaskAsync(item);
-    }
 
 }
