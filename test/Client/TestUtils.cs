@@ -15,12 +15,12 @@ namespace NoCrast.ClientTests
             return timeProvider.Object;
         }
 
-        internal static ILogProvider CreateLogProvider()
+        internal static IScopeManager CreateLogProvider()
         {
-            var log = new Mock<ILogProvider>();
+            var log = new Mock<IScopeManager>();
             log.Setup(
                 x => x.CreateLogger(It.IsAny<string>()))
-                        .Returns(new Mock<ILog>().Object);
+                        .Returns(new Mock<IScopeLog>().Object);
             return log.Object;
         }
 

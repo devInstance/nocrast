@@ -53,7 +53,7 @@ else
 @using System.Timers;
 
 @inject TasksService Service;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
 @inject IJSRuntime JSRuntime;
@@ -68,13 +68,13 @@ else
     private TaskItem[] Items { get; set; }
     private ModelList<TimeLogItem>[] TodayTimeLog { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     private Timer timer;
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
 
         try
         {
@@ -133,19 +133,19 @@ else
         using (var l = log.DebugExScope())
         {
             var activeTasks = await Service.GetRunningTasksAsync();
-            if(activeTasks != null)
+            if (activeTasks != null)
             {
                 ActiveTasksList.Clear();
                 ActiveTasksList.AddRange(activeTasks);
             }
 
             var passiveTasks = await Service.GetTasksForDashboardAsync();
-            if(passiveTasks != null)
+            if (passiveTasks != null)
             {
                 PassiveTasksList.Clear();
                 PassiveTasksList.AddRange(passiveTasks);
             }
-            if(ActiveTasksList != null && ActiveTasksList.Count == 0 && PassiveTasksList != null && PassiveTasksList.Count > 0)
+            if (ActiveTasksList != null && ActiveTasksList.Count == 0 && PassiveTasksList != null && PassiveTasksList.Count > 0)
             {
                 // keep last active
                 ActiveTasksList.Add(PassiveTasksList[0]);

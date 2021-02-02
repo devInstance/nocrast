@@ -1,16 +1,16 @@
 ﻿@inject IJSRuntime JSRuntime
 
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 
 @code{
     [Parameter]
     public string Value { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         using (var l = log.DebugExScope())
         {
         }
@@ -21,7 +21,7 @@
         using (var l = log.DebugExScope())
         {
             l.D($"Title: {Value}");
-            if(String.IsNullOrEmpty(Value))
+            if (String.IsNullOrEmpty(Value))
             {
                 await JSRuntime.InvokeVoidAsync("blazor_setTitle", $"Nocrast");
             }

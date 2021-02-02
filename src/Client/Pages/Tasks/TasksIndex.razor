@@ -17,38 +17,38 @@
         </thead>
         @foreach (var item in TasksList)
         {
-    <tr>
-        <td>
-            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
-                <strong>@item.Title @(item.IsRunning ? "(Running)" : "")</strong>
-            </NavLink>
-        </td>
-        <td>
-            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
-                @String.Format("{0:F1}", item.TimeLogCount)
-            </NavLink>
-        </td>
-        <td>
-            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
-                @String.Format("{0:F1}", item.TotalTimeSpentToday.ToHours())
-            </NavLink>
-        </td>
-        <td>
-            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
-                @String.Format("{0:F1}", item.TotalTimeSpentThisWeek.ToHours())
-            </NavLink>
-        </td>
-        <td>
-            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
-                @String.Format("{0:F1}", item.TotalTimeSpent.ToHours())
-            </NavLink>
-        </td>
-        <td>
-            <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
-                @String.Format("{0:g}", item.UpdateDate.ToLocalTime())
-            </NavLink>
-        </td>
-    </tr>
+            <tr>
+                <td>
+                    <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                        <strong>@item.Title @(item.IsRunning ? "(Running)" : "")</strong>
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                        @String.Format("{0:F1}", item.TimeLogCount)
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                        @String.Format("{0:F1}", item.TotalTimeSpentToday.ToHours())
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                        @String.Format("{0:F1}", item.TotalTimeSpentThisWeek.ToHours())
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                        @String.Format("{0:F1}", item.TotalTimeSpent.ToHours())
+                    </NavLink>
+                </td>
+                <td>
+                    <NavLink class="nav-link" href="@($"tasks/{item.Id}")">
+                        @String.Format("{0:g}", item.UpdateDate.ToLocalTime())
+                    </NavLink>
+                </td>
+            </tr>
         }
     </table>
 
@@ -61,7 +61,7 @@ else
 @using System.Timers;
 
 @inject TasksService Service;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
 @inject IJSRuntime JSRuntime;
@@ -74,11 +74,11 @@ else
 
     private System.Timers.Timer timer;
 
-    private ILog log;
+    private IScopeLog log;
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
 
         try
         {

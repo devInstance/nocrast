@@ -13,17 +13,17 @@
 }
 
 @inject NotificationService NotificationServ;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 
 @code {
 
     string ErrorText { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         using (var l = log.DebugExScope())
         {
             NotificationServ.ErrorHasOccured += OnError;

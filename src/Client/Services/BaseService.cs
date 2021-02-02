@@ -5,7 +5,7 @@ namespace NoCrast.Client.Services
 {
     public class BaseService
     {
-        public ILog Log { get; protected set; }
+        public IScopeLog Log { get; protected set; }
 
         protected NotificationService NotificationServ { get; }
 

@@ -8,7 +8,7 @@ namespace NoCrast.Client.Services
 {
     public class NotificationService
     {
-        public ILog Log { get; protected set; }
+        public IScopeLog Log { get; protected set; }
 
         public event EventHandler DataHasChanged;
         public event ServiceErrorEventHandler ErrorHasOccured;

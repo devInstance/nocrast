@@ -16,7 +16,7 @@ namespace NoCrast.Client.Services
 
         public TasksService(NotificationService notification,
                         ITimeProvider provider,
-                        ILogProvider logProvider,
+                        IScopeManager logProvider,
                         ITasksApi tasksApi,
                         ITagsApi tagsApi) : base(notification)
         {

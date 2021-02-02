@@ -38,11 +38,11 @@
                     <input type="text" class="form-control" placeholder="Tag's name" aria-label="Tag's name" @bind="TagTitle" />
                 </div>
             </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="OnAddTag">Add</button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" @onclick="OnAddTag">Add</button>
             </div>
+        </div>
     </div>
 </div>
 <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
@@ -62,7 +62,7 @@
                     <textarea type="text" class="form-control" placeholder="Project's description" aria-label="Project's description" @bind="ProjectDescription" />
                 </div>
                 <div class="form-group">
-                    <ColorDropdown Color="ProjectClr"  ColorChanged="(color)=>OnSetColor(color)"/>
+                    <ColorDropdown Color="ProjectClr" ColorChanged="(color)=>OnSetColor(color)" />
                 </div>
             </div>
             <div class="modal-footer">
@@ -92,14 +92,14 @@
     </div>
 </div>
 
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject TasksService TasksServ;
 @inject TagsService TagsServ;
 @inject ProjectsService ProjectsServ;
 @inject ToolbarService ToolbarServ;
 
 @code {
-    private ILog log;
+    private IScopeLog log;
 
     string TaskTitle { get; set; }
     bool CanStartTask { get; set; }
@@ -111,7 +111,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         using (var l = log.DebugExScope())
         {
             ProjectClr = ProjectColor.Blue;
@@ -138,7 +138,7 @@
         using (var l = log.DebugExScope())
         {
             var task = await TasksServ.AddNewTaskAsync(TaskTitle);
-            if(CanStartTask)
+            if (CanStartTask)
             {
                 TasksServ.StartTaskAsync(task);
             }

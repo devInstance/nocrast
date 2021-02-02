@@ -33,11 +33,11 @@
                 {
                     <h2>
                         @ToolbarServ.Title
-                        @if(ToolbarServ.EnableTitileChange)
+                        @if (ToolbarServ.EnableTitileChange)
                         {
-                        <button class="btn btn-default" @onclick="@(() => StartEditing())">
-                            <span class="oi oi-pencil" aria-hidden="true"></span>
-                        </button>
+                            <button class="btn btn-default" @onclick="@(() => StartEditing())">
+                                <span class="oi oi-pencil" aria-hidden="true"></span>
+                            </button>
                         }
                     </h2>
                 }
@@ -69,17 +69,17 @@
 </div>
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 
 @code {
 
-    private ILog log;
+    private IScopeLog log;
     private bool IsEditing { get; set; }
     private string TitleEditText { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         using (var l = log.DebugExScope())
         {
             ToolbarServ.ToolbarHasChanged += OnChange;

@@ -9,11 +9,11 @@ namespace NoCrast.Client.Shared.Components
     {
         private Timeline.Line[] Lines = new Timeline.Line[0];
 
-        private ILog log;
+        private IScopeLog log;
 
         protected override void OnInitialized()
         {
-            log = LogProvider.CreateLogger(this);
+            log = ScopeManager.CreateLogger(this);
             using (var l = log.DebugExScope())
             {
             }

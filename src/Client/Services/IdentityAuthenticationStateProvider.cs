@@ -10,10 +10,10 @@ namespace NoCrast.Client.Services
 {
     public class IdentityAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly ILog log;
+        private readonly IScopeLog log;
         private readonly AuthorizationService service;
 
-        public IdentityAuthenticationStateProvider(ILogProvider l, AuthorizationService s)
+        public IdentityAuthenticationStateProvider(IScopeManager l, AuthorizationService s)
         {
             log = l.CreateLogger(this);
             service = s;

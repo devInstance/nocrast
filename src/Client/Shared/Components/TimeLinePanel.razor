@@ -38,7 +38,7 @@
 @inject TasksService Service;
 @inject NotificationService NotificationServ;
 @inject ITimeProvider TimeProvider;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 
 @code {
     [Parameter]
@@ -85,7 +85,7 @@
 
     private int svgHeight;
 
-    private ILog log;
+    private IScopeLog log;
 
     private void InitializeTimeScale()
     {
@@ -200,7 +200,7 @@
 
     protected override void OnInitialized()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         using (var l = log.DebugExScope())
         {
             DateTime now = DateTime.Now;

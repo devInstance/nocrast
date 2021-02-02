@@ -27,7 +27,7 @@ else
 @inject TagsService Service;
 @inject NotificationService NotificationServ;
 
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject ITimeProvider TimeProvider;
 
 @inject NavigationManager NavigationManager
@@ -45,11 +45,11 @@ else
 
     private System.Timers.Timer timer;
 
-    private ILog log;
+    private IScopeLog log;
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
 
         using (var scope = log.DebugExScope())
         {

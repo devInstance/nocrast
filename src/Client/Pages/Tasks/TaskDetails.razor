@@ -182,7 +182,7 @@ else
 
 @inject TasksService Service;
 @inject ProjectsService PrjService;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject NavigationManager NavigationManager;
 @inject NotificationService NotificationServ;
 @inject ToolbarService ToolbarServ;
@@ -211,7 +211,7 @@ else
 
     private System.Timers.Timer timer;
 
-    private ILog log;
+    private IScopeLog log;
 
     private TimeLogResultType selectedFilter { get; set; }
 
@@ -235,7 +235,7 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
 
         selectedFilter = TimeLogResultType.Day;
 

@@ -21,7 +21,7 @@ else
 }
 
 @inject ToolbarService ToolbarServ;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject AccountService Service;
 @inject AuthorizationService AuthorizationServ;
 @inject NotificationService NotificationServ;
@@ -33,11 +33,11 @@ else
 
     private UserProfileItem Item { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         using (var l = log.DebugExScope())
         {
             ToolbarServ.Back += OnBack;

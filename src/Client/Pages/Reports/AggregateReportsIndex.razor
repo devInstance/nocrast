@@ -83,14 +83,14 @@
 </div>
 
 @inject ReportService Service;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject ITimeProvider TimeProvider;
 
 @code {
 
     string ErrorText { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     private ReportItem.RIType selectedType = ReportItem.RIType.Unknown;
 
@@ -104,7 +104,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         try
         {
             selectedDate = TimeProvider.CurrentTime;

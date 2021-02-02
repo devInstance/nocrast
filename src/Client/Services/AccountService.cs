@@ -11,7 +11,7 @@ namespace NoCrast.Client.Services
         private IUserProfileApi UserProfileApi { get; }
 
         public AccountService(NotificationService notificationService,
-                                ILogProvider logProvider,
+                                IScopeManager logProvider,
                                 IUserProfileApi api) : base(notificationService)
         {
             UserProfileApi = api;

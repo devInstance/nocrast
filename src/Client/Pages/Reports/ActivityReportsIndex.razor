@@ -3,28 +3,6 @@
 <PageTitle Value="Report"></PageTitle>
 @if (Report != null)
 {
-    @*<div class="row p-2">
-            <div class="col">
-                <svg width="100%" style="z-index:-1;" height="100px" role="img">
-                    @for (int i = 0; i < Report.Columns.Length; i += 8)
-                    {
-                        var item = Report.Columns[i];
-                        <g>
-                            <text x="@(i + 1)%" y="30">@TimeConverter.ConvertToLocal(item, TimeProvider.UtcTimeOffset).ToString("hh:mm")</text>
-                        </g>
-                    }
-                    @for (int i = 0; i < Report.Rows[0].Data.Length; i++)
-                    {
-                        var item = Report.Rows[0].Data[i];
-                        <g>
-                            <circle cx="@(i + 1)%" cy="70" r="10" style="fill:blue;fill-opacity:@item;">
-                                <title>some text</title>
-                            </circle>
-                        </g>
-                    }
-                </svg>
-            </div>
-        </div>*@
     <div class="row pt-2">
         <div class="col">
             <DevInstance.TimelineLib.Heatline Data="Lines" IsTimeRangeFlexible="true" TimeInterval="0.25"></DevInstance.TimelineLib.Heatline>
@@ -38,16 +16,16 @@ else
 }
 
 @inject ReportService Service;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 @inject ITimeProvider TimeProvider;
 
 @using DevInstance.TimelineLib;
 
 @code {
 
-        string ErrorText { get; set; }
+    string ErrorText { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     private DateTime selectedDate;
     private DateTime startDate;
@@ -61,7 +39,7 @@ else
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
         try
         {
             selectedDate = TimeProvider.CurrentTime;

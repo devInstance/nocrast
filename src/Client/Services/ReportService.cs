@@ -14,7 +14,7 @@ namespace NoCrast.Client.Services
 
         public ReportService(NotificationService notificationServ,
                             ITimeProvider provider,
-                            ILogProvider logProvider,
+                            IScopeManager logProvider,
                             IReportApi api) : base(notificationServ)
         {
             Api = api;

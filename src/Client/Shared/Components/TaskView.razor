@@ -48,13 +48,13 @@
 
 @inject TasksService Service;
 @inject ITimeProvider TimeProvider;
-@inject ILogProvider LogProvider;
+@inject IScopeManager ScopeManager;
 
 @code {
     [Parameter]
     public TaskItem Item { get; set; }
 
-    private ILog log;
+    private IScopeLog log;
 
     //TODO: refactor code duplication here and in TaskDetails into a separate component
     private TagItem[] Tags { get; set; }
@@ -90,7 +90,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        log = LogProvider.CreateLogger(this);
+        log = ScopeManager.CreateLogger(this);
 
         await RefreshDataAsync();
     }

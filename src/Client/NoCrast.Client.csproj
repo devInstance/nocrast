@@ -8,13 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
+    <PackageReference Include="DevInstance.LogScope" Version="0.9.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="5.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.2" PrivateAssets="all" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LogScope\LogScope\LogScope.csproj" />
     <ProjectReference Include="..\..\..\TimelineLib\TimelineLib\TimelineLib.csproj" />
     <ProjectReference Include="..\Shared\NoCrast.Shared.csproj" />
   </ItemGroup>

@@ -19,9 +19,9 @@ namespace NoCrast.Client.Services
         public bool EnableDelete { get { return Delete != null; } }
         public bool EnableTitileChange { get { return TitleChanged != null; } }
 
-        private ILog log;
+        private IScopeLog log;
 
-        public ToolbarService(ILogProvider lp)
+        public ToolbarService(IScopeManager lp)
         {
             log = lp.CreateLogger(this);
         }
