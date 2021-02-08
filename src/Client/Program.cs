@@ -26,7 +26,7 @@ namespace NoCrast.Client
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
 
-            builder.Services.AddConsoleLogging(LogLevel.DEBUG, true);
+            builder.Services.AddConsoleLogging(LogLevel.INFO, true);
 
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
 
