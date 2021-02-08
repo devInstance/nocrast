@@ -130,7 +130,12 @@
     </div>
     <div class="row pt-2">
         <div class="col">
-            <TimeLinePanel Items="Items" Logs="Logs"></TimeLinePanel>
+            @*<TimeLinePanel Items="Items" Logs="Logs"></TimeLinePanel>*@
+            <DevInstance.Timelines.Chart IsTimeRangeFlexible="true">
+                <Lines>
+                    <DevInstance.Timelines.Timeline Data="Lines"></DevInstance.Timelines.Timeline>
+                </Lines>
+            </DevInstance.Timelines.Chart>
         </div>
     </div>
     @if (TimeLog != null)
@@ -179,6 +184,7 @@ else
 }
 
 @using System.Timers;
+@using static DevInstance.Timelines.Timeline;
 
 @inject TasksService Service;
 @inject ProjectsService PrjService;
@@ -210,6 +216,8 @@ else
     private ModelList<TimeLogItem>[] Logs = new ModelList<TimeLogItem>[1];
 
     private System.Timers.Timer timer;
+
+    private Line[] Lines => TimelinesUtils.GetLines(TimeProvider, Items, Logs);
 
     private IScopeLog log;
 

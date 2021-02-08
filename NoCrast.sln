@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoCrast.ServerTests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoCrast.SharedTests", "test\Shared\NoCrast.SharedTests.csproj", "{D8BFEDD1-AEEF-4763-9BAD-740B4CB9CF8E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TimelineLib", "..\TimelineLib\TimelineLib\TimelineLib.csproj", "{AACE567F-037F-4677-A181-1A1CE7509E7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timelines", "..\Timelines\Timelines\Timelines.csproj", "{E91E1466-E28B-4208-951A-B6402CC5E52E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{D8BFEDD1-AEEF-4763-9BAD-740B4CB9CF8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8BFEDD1-AEEF-4763-9BAD-740B4CB9CF8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8BFEDD1-AEEF-4763-9BAD-740B4CB9CF8E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AACE567F-037F-4677-A181-1A1CE7509E7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AACE567F-037F-4677-A181-1A1CE7509E7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AACE567F-037F-4677-A181-1A1CE7509E7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AACE567F-037F-4677-A181-1A1CE7509E7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

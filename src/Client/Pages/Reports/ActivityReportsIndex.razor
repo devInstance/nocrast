@@ -5,10 +5,13 @@
 {
     <div class="row pt-2">
         <div class="col">
-            <DevInstance.TimelineLib.Heatline Data="Lines" IsTimeRangeFlexible="true" TimeInterval="0.25"></DevInstance.TimelineLib.Heatline>
+            <DevInstance.Timelines.Chart IsTimeRangeFlexible="true">
+                <Lines>
+                    <DevInstance.Timelines.Heatline Data="Lines" TimeInterval="0.25"></DevInstance.Timelines.Heatline>
+                </Lines>
+            </DevInstance.Timelines.Chart>
         </div>
     </div>
-
 }
 else
 {
@@ -19,7 +22,7 @@ else
 @inject IScopeManager ScopeManager;
 @inject ITimeProvider TimeProvider;
 
-@using DevInstance.TimelineLib;
+@using DevInstance.Timelines;
 
 @code {
 

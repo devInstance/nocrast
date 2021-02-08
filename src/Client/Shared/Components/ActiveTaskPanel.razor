@@ -51,24 +51,6 @@
                 </div>
             </div>
         </div>
-        @*<div class="row my-2">
-                <div class="col">
-                    @if (Tags != null && Tags.Length > 0)
-                    {
-                        @foreach (var label in Tags)
-                        {
-                            @if (label.added)
-                            {
-                                <NavLink class="mr-2" href="@("tags/" + label.tag.Id)">
-                                    <span class="oi oi-tag" style="font-size:14px" aria-hidden="true"></span>
-                                    <span class="ml-1">@label.tag.Name</span>
-                                </NavLink>
-
-                            }
-                        }
-                    }
-                </div>
-            </div>*@
     }
 }
 
@@ -76,7 +58,11 @@
 {
     <div class="row pt-2">
         <div class="col">
-            <DevInstance.TimelineLib.Timeline Data="Lines" IsTimeRangeFlexible="true"></DevInstance.TimelineLib.Timeline>
+            <DevInstance.Timelines.Chart IsTimeRangeFlexible="true">
+                <Lines>
+                    <DevInstance.Timelines.Timeline Data="Lines"></DevInstance.Timelines.Timeline>
+                </Lines>
+            </DevInstance.Timelines.Chart>
         </div>
     </div>
 }
@@ -94,6 +80,5 @@
 
     [Parameter]
     public ModelList<TimeLogItem>[] TodayTimeLog { get; set; }
-
 
 }
