@@ -80,7 +80,7 @@
     protected async override Task OnInitializedAsync()
     {
         log = ScopeManager.CreateLogger(this);
-        using (var l = log.DebugExScope())
+        using (var l = log.TraceScope())
         {
             ToolbarServ.ToolbarHasChanged += OnChange;
             OnChange(null);
@@ -89,7 +89,7 @@
 
     private void OnChange(object value)
     {
-        using (var l = log.DebugExScope())
+        using (var l = log.TraceScope())
         {
             StateHasChanged();
         }
@@ -97,7 +97,7 @@
 
     private void OnBack()
     {
-        using (var l = log.DebugExScope())
+        using (var l = log.TraceScope())
         {
             ToolbarServ.InvokeBack();
         }

@@ -30,7 +30,7 @@ namespace NoCrast.Client.Services
         /*
         private async Task<bool> SyncUpWithServerAsync(List<TaskItem> tasks)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 //Sync first in case there are any pending changes
                 foreach (var t in tasks)
@@ -60,7 +60,7 @@ namespace NoCrast.Client.Services
         /*
         private async Task<List<TaskItem>> LocalStorage_OnLoadTasks(List<TaskItem> items)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 List<TaskItem> tasks = items;
                 if (items != null)
@@ -85,7 +85,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem[]> GetRunningTasksAsync()
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -106,7 +106,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem[]> GetTasksForDashboardAsync()
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -127,7 +127,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem[]> GetTasksAsync(int? top, int? page)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -148,7 +148,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem[]> GetTodayTasksAsync()
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -169,7 +169,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> GetTaskAsync(string taskId)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -191,7 +191,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> AddNewTaskAsync(string title)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 if (string.IsNullOrWhiteSpace(title))
                 {
@@ -245,7 +245,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> UpdateTaskTitleAsync(TaskItem task, string newTitle)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 TaskItem newTask;
                 try
@@ -268,7 +268,7 @@ namespace NoCrast.Client.Services
 
         public async Task<bool> RemoveTaskAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -287,7 +287,7 @@ namespace NoCrast.Client.Services
 
         public async void StartTaskAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 if (item is null)
                 {
@@ -314,7 +314,7 @@ namespace NoCrast.Client.Services
 
         public async void StopTaskAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 if (item is null)
                 {
@@ -340,7 +340,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ModelList<TimeLogItem>> GetTimeLogItemsAsync(TaskItem item, TimeLogResultType type, int? top, int? page)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 if (item is null)
                 {
@@ -364,7 +364,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> UpdateTimelogAsync(TaskItem item, TimeLogItem log)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -384,7 +384,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> InsertTimelogAsync(TaskItem item, TimeLogItem log)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -404,7 +404,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> RemoveTimelogAsync(TaskItem item, TimeLogItem log)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -424,7 +424,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem[]> GetTagsAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -443,7 +443,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem[]> GetAllTagsAsync()
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -464,7 +464,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TagItem> AddOrCreateTagAsync(TaskItem item, string name)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 var tag = new TagItem
                 {
@@ -490,7 +490,7 @@ namespace NoCrast.Client.Services
 
         public async Task<bool> AddTagAsync(TaskItem item, string id)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -509,7 +509,7 @@ namespace NoCrast.Client.Services
 
         public async Task<bool> RemoveTagAsync(TaskItem item, string id)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {
@@ -526,7 +526,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem> UpdateProjectAsync(TaskItem item, string id)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 TaskItem newTask;
                 try

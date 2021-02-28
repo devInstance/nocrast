@@ -47,7 +47,7 @@ else
         {
             selectedDate = TimeProvider.CurrentTime;
 
-            using (var scope = log.DebugExScope())
+            using (var scope = log.TraceScope())
             {
                 RequestReportAsync(ReportItem.RIType.Daily);
             }

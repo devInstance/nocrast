@@ -11,14 +11,14 @@
     protected async override Task OnInitializedAsync()
     {
         log = ScopeManager.CreateLogger(this);
-        using (var l = log.DebugExScope())
+        using (var l = log.TraceScope())
         {
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        using (var l = log.DebugExScope())
+        using (var l = log.TraceScope())
         {
             l.D($"Title: {Value}");
             if (String.IsNullOrEmpty(Value))

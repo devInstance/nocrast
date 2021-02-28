@@ -51,7 +51,7 @@ else
     {
         log = ScopeManager.CreateLogger(this);
 
-        using (var scope = log.DebugExScope())
+        using (var scope = log.TraceScope())
         {
             ToolbarServ.Back += OnBack;
             ToolbarServ.Delete += OnDelete;
@@ -90,7 +90,7 @@ else
 
     public void Dispose()
     {
-        using (var scope = log.DebugExScope())
+        using (var scope = log.TraceScope())
         {
             ToolbarServ.Back -= OnBack;
             ToolbarServ.Delete -= OnDelete;
@@ -128,7 +128,7 @@ else
 
     private void OnDataHasChanged(Object sender, EventArgs e)
     {
-        using (var scope = log.DebugExScope())
+        using (var scope = log.TraceScope())
         {
             RefreshData();
         }
@@ -141,7 +141,7 @@ else
 
     private async Task<bool> RefreshData()
     {
-        using (var scope = log.DebugExScope())
+        using (var scope = log.TraceScope())
         {
             if (!String.IsNullOrEmpty(Id))
             {

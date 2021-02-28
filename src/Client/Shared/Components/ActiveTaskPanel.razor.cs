@@ -16,14 +16,14 @@ namespace NoCrast.Client.Shared.Components
         protected override void OnInitialized()
         {
             log = ScopeManager.CreateLogger(this);
-            using (var l = log.DebugExScope())
+            using (var l = log.TraceScope())
             {
             }
         }
 
         protected override void OnParametersSet()
         {
-            using (var l = log.DebugExScope())
+            using (var l = log.TraceScope())
             {
                 base.OnParametersSet();
 

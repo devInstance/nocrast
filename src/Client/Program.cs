@@ -11,6 +11,7 @@ using NoCrast.Client.Services.Net;
 using NoCrast.Shared.Utils;
 using DevInstance.LogScope;
 using DevInstance.LogScope.Extensions;
+using DevInstance.LogScope.Formaters;
 
 namespace NoCrast.Client
 {
@@ -26,7 +27,8 @@ namespace NoCrast.Client
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
 
-            builder.Services.AddConsoleLogging(LogLevel.INFO, true);
+            builder.Services.AddConsoleLogging(LogLevel.INFO, 
+                new DefaultFormaterOptions { ShowTimestamp = true, ShowThreadNumber = true} );
 
             builder.Services.AddSingleton<ITimeProvider, TimeProvider>();
 

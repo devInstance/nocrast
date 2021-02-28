@@ -56,7 +56,7 @@ namespace NoCrast.Client.Services.LocalStore
         {
             if (data == null)
             {
-                using (var l = Log.DebugExScope())
+                using (var l = Log.TraceScope())
                 {
                     // Step 1: Try loading from the local store
                     data = await Storage.GetItemAsync<NoCrastData>(GetStorageName());
@@ -102,7 +102,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         private async Task SaveDataAsync()
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -126,7 +126,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<TaskItem> CreateTaskAsync(string title)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -143,7 +143,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<bool> UpdateTaskAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -159,7 +159,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<bool> RemoveTaskAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -178,7 +178,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<List<TimeLogItem>> GetTimeLogAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -200,7 +200,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<TimeLogItem> CreateTimeLogAsync(TaskItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -222,7 +222,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<bool> UpdateTimeLogAsync(TaskItem item, TimeLogItem log)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
 
@@ -238,7 +238,7 @@ namespace NoCrast.Client.Services.LocalStore
 
         public async Task<bool> RemoveTimeLogAsync(TaskItem item, TimeLogItem log)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 await TryLoadDataAsync();
                 int index = data.FindTaskIndex(item);

@@ -29,7 +29,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem[]> GetProjectsAsync(bool addTotals)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -48,7 +48,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem> GetProjectAsync(string id)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -67,7 +67,7 @@ namespace NoCrast.Client.Services
 
         public async Task<TaskItem[]> GetTasksAsync(string id)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
                 try
@@ -86,7 +86,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem> AddNewProjectAsync(string newTitle, string newDescription, ProjectColor color)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ResetUIError();
 
@@ -114,7 +114,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem> UpdateProjectNameAsync(ProjectItem project, string newTitle)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ProjectItem newProject;
                 try
@@ -135,7 +135,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem> UpdateProjectAsync(ProjectItem project)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 ProjectItem newProject;
                 try
@@ -155,7 +155,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem> UpdateProjectDescriptionAsync(ProjectItem project, string newDescription)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 project.Descritpion = newDescription;
                 return await UpdateProjectAsync(project);
@@ -164,7 +164,7 @@ namespace NoCrast.Client.Services
 
         public async Task<ProjectItem> UpdateProjectColorAsync(ProjectItem project, ProjectColor color)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 project.Color = color;
                 return await UpdateProjectAsync(project);
@@ -173,7 +173,7 @@ namespace NoCrast.Client.Services
 
         public async Task<bool> RemoveProjectAsync(ProjectItem item)
         {
-            using (var l = Log.DebugExScope())
+            using (var l = Log.TraceScope())
             {
                 try
                 {

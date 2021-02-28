@@ -82,7 +82,7 @@ else
 
         try
         {
-            using (var scope = log.DebugExScope())
+            using (var scope = log.TraceScope())
             {
                 SetUpTimer();
 
@@ -110,7 +110,7 @@ else
 
     public void Dispose()
     {
-        using (var scope = log.DebugExScope())
+        using (var scope = log.TraceScope())
         {
             ToolbarServ.EnableAddTask = false;
             ToolbarServ.Update();
