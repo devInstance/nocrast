@@ -15,35 +15,43 @@ namespace NoCrast.Client.Utils
         {
             if (items == null || todayTimeLog == null)
             {
-                return new Timeline.Line[0];
+                return null;
             }
 
-            var lines = new Timeline.Line[items.Length];
-            for (var i = 0; i < items.Length; i++)
+            try
             {
-                var itm = items[i];
-                var log = todayTimeLog[i];
-                var titems = new Timeline.Item[log.Items.Length];
-
-                for (var j = 0; j < titems.Length; j++)
+                var lines = new Timeline.Line[items.Length];
+                for (var i = 0; i < items.Length; i++)
                 {
-                    titems[j] = new Timeline.Item
+                    var itm = items[i];
+                    var log = todayTimeLog[i];
+
+                    var titems = new Timeline.Item[log.Items.Length];
+
+                    for (var j = 0; j < titems.Length; j++)
                     {
-                        StartTime = log.Items[j].StartTime.ToLocalTime(),
-                        ElapsedTime = log.Items[j].GetElapsedTimeSpan(timeProvider)
+                        titems[j] = new Timeline.Item
+                        {
+                            StartTime = log.Items[j].StartTime.ToLocalTime(),
+                            ElapsedTime = log.Items[j].GetElapsedTimeSpan(timeProvider)
+                        };
+                    }
+                    var line = new Timeline.Line
+                    {
+                        Title = itm.Title,
+                        CssClass = itm.Project != null ? itm.Project.Color.ToString().ToLower() : "white",
+                        Descritpion = itm.Descritpion,
+                        Items = titems
                     };
+                    lines[i] = line;
                 }
-                var line = new Timeline.Line
-                {
-                    Title = itm.Title,
-                    CssClass = itm.Project != null ? itm.Project.Color.ToString().ToLower() : "white",
-                    Descritpion = itm.Descritpion,
-                    Items = titems
-                };
-                lines[i] = line;
-            }
 
-            return lines;
+                return lines;
+            }
+            catch(Exception ex)
+            {
+            }
+            return null;
         }
     }
 }
