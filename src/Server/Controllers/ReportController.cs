@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NoCrast.Server.Database;
 using NoCrast.Server.Model;
+using NoCrast.Server.Services;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
@@ -19,12 +20,16 @@ namespace NoCrast.Server.Controllers
     {
         public ITimeProvider TimeProvider { get; }
 
+        public ActivityReportService ActivityService { get; }
+
         public ReportController(ApplicationDbContext d,
                                 UserManager<ApplicationUser> userManager,
-                                ITimeProvider timeProvider)
+                                ITimeProvider timeProvider,
+                                ActivityReportService activityService)
             : base(d, userManager)
         {
             TimeProvider = timeProvider;
+            ActivityService = activityService;
         }
 
         private ReportItem GetAggregateReport(ReportItem.RIType tp, DateTime start, int ColumnsCount)
@@ -146,75 +151,11 @@ namespace NoCrast.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public ActionResult<ReportItem> GetActivityReport(int timeoffset)
+        //        public ActionResult<ReportItem> GetActivityReport(ActivityReportType? type, int? interval, string taskid, int timeoffset)
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                DateTime now = TimeProvider.CurrentTime;
-                DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
-
-                var result = new ReportItem()
-                {
-                    RiType = ReportItem.RIType.Unknown
-                };
-
-                var intervalMinutes = 15;
-                var columnsCount = 24 * 60 / intervalMinutes; //every 15 minutes
-                var columnDate = startOfDay;
-                result.Columns = new DateTime[columnsCount];
-                var dateRanges = new DateTime[columnsCount + 1];
-                for (int i = 0; i < columnsCount; i++)
-                {
-                    dateRanges[i] = columnDate;
-                    result.Columns[i] = columnDate;
-                    columnDate = columnDate.AddMinutes(intervalMinutes);
-                }
-                dateRanges[columnsCount] = columnDate;
-
-                result.Rows = new ReportItem.Row[1/*tasks.Count*/];
-
-                for (int i = 0; i < 1; i++)
-                {
-                    var data = new long[columnsCount];
-                    long maxValue = 0;
-                    for (int n = 0; n < columnsCount; n++)
-                    {
-                        long startTime = dateRanges[n].Hour * 60 + dateRanges[n].Minute;
-                        long endTime = dateRanges[n + 1].Hour * 60 + dateRanges[n + 1].Minute;
-
-                        // https://scicomp.stackexchange.com/questions/26258/the-easiest-way-to-find-intersection-of-two-intervals
-                        var q = (from tl in DB.TimeLog
-                                 join ts in DB.Tasks on tl.Task equals ts
-                                 where ts.Profile == CurrentProfile &&
-                                 !(startTime > (tl.StartTime.Hour * 60 + tl.StartTime.Minute + (tl.ElapsedMilliseconds / 1000 / 60))
-                                 || (endTime < tl.StartTime.Hour * 60 + tl.StartTime.Minute))
-                                 select Math.Min(endTime, (tl.StartTime.Hour * 60 + tl.StartTime.Minute + (tl.ElapsedMilliseconds / 1000 / 60))) 
-                                        - Math.Max(startTime, tl.StartTime.Hour * 60 + tl.StartTime.Minute)
-                                        );
-
-                        var d = q.Sum();
-                        var test = q.Count();
-
-                        if (d > maxValue)
-                        {
-                            maxValue = d;
-                        }
-                        data[n] = d;
-                    }
-
-                    var finalData = new float[columnsCount];
-                    for (int n = 0; n < columnsCount; n++)
-                    {
-                        finalData[n] = (float)(data[n]) / (float)maxValue;
-                    }
-
-                    result.Rows[i] = new ReportItem.Row
-                    {
-                        //TaskTitle = tasks[i].Title,
-                        Data = finalData
-                    };
-                }
-
-                return Ok(result);
+                return Ok(ActivityService.GetActivityReport(CurrentProfile, timeoffset));
             });
         }
     }

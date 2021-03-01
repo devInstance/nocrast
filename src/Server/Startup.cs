@@ -11,6 +11,9 @@ using NoCrast.Server.Database;
 using NoCrast.Server.Indentity;
 using Newtonsoft.Json;
 using NoCrast.Shared.Utils;
+using NoCrast.Server.Services;
+using NoCrast.Server.Queries;
+using NoCrast.Server.Queries.Postgress;
 
 namespace NoCrast.Server
 {
@@ -32,6 +35,10 @@ namespace NoCrast.Server
 
             services.AddSingleton<ITimeProvider, TimeProvider>();
             services.AddScoped<IApplicationSignManager, ApplicationSignManager>();
+
+            services.AddScoped<IActivityReportSelect, ActivityReportSelect>();
+
+            services.AddScoped<ActivityReportService>();
 
             services.AddControllersWithViews().AddNewtonsoftJson();
         }
