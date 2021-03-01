@@ -8,6 +8,6 @@ namespace NoCrast.Server.Queries
 {
     public interface IActivityReportSelect
     {
-        long GetTotalForPeriod(UserProfile currentProfile, long startTime, long endTime);
+        long GetTotalForPeriod(UserProfile currentProfile, int timeoffset, long startTime, long endTime);
     }
 }

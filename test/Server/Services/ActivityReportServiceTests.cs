@@ -9,6 +9,7 @@ using NoCrast.ServerTests;
 using NoCrast.Server.Queries;
 using Moq;
 using NoCrast.Server.Model;
+using DevInstance.LogScope;
 
 namespace NoCrast.Server.Services.Tests
 {
@@ -16,7 +17,7 @@ namespace NoCrast.Server.Services.Tests
     {
         private static void AddTestCase(Mock<IActivityReportSelect> mockSelect, long start, long duration,  long returnValue)
         {
-            mockSelect.Setup(x => x.GetTotalForPeriod(It.IsAny<UserProfile>(), It.Is<long>(a => a.Equals(start)), It.Is<long>(a => a.Equals(start + duration)))).Returns(returnValue);
+            mockSelect.Setup(x => x.GetTotalForPeriod(It.IsAny<UserProfile>(), It.IsAny<int>(), It.Is<long>(a => a.Equals(start)), It.Is<long>(a => a.Equals(start + duration)))).Returns(returnValue);
         }
 
         [Fact()]
@@ -28,7 +29,9 @@ namespace NoCrast.Server.Services.Tests
             var mockSelect = new Mock<IActivityReportSelect>();
             AddTestCase(mockSelect, 15, 15, 25);
 
-            ActivityReportService service = new ActivityReportService(timeProvider, mockSelect.Object);
+            var mockLog = new Mock<IScopeManager>();
+
+            ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockSelect.Object);
 
             var result = service.GetActivityReport(null, 0);
 
@@ -50,11 +53,11 @@ namespace NoCrast.Server.Services.Tests
             var timeProvider = TestUtils.CreateTimerProvider(time);
 
             var mockSelect = new Mock<IActivityReportSelect>();
-            mockSelect.Setup(x => x.GetTotalForPeriod(It.IsAny<UserProfile>(), It.IsAny<long>(), It.IsAny<long>())).Returns(0);
+            mockSelect.Setup(x => x.GetTotalForPeriod(It.IsAny<UserProfile>(), It.IsAny<int>(),  It.IsAny<long>(), It.IsAny<long>())).Returns(0);
 
-            ActivityReportService service = new ActivityReportService(timeProvider, mockSelect.Object);
+            ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockSelect.Object);
 
-            var result = service.GetActivityReport(null, interval, startOfDay, columnsCount);
+            var result = service.GetActivityReport(null, 0, interval, startOfDay, columnsCount);
 
             Assert.Equal(columnsCount, result.Rows[0].Data.Length);
             Assert.Equal(columnsCount, result.Columns.Length);

@@ -14,6 +14,9 @@ using NoCrast.Shared.Utils;
 using NoCrast.Server.Services;
 using NoCrast.Server.Queries;
 using NoCrast.Server.Queries.Postgress;
+using DevInstance.LogScope;
+using DevInstance.LogScope.Extensions;
+using DevInstance.LogScope.Formaters;
 
 namespace NoCrast.Server
 {
@@ -30,6 +33,9 @@ namespace NoCrast.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddConsoleLogging(LogLevel.TRACE,
+                new DefaultFormaterOptions { ShowTimestamp = true, ShowThreadNumber = true });
+
             services.ConfigureDatabase(Configuration);
             services.ConfigureIdentity();
 

@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using DevInstance.LogScope;
+using Moq;
 using NoCrast.Server.Indentity;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Utils;

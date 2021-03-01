@@ -44,7 +44,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider);
+                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
 
                 var result = controller.GetDailyReport(0, timeProvider.CurrentTime);
 
@@ -110,7 +110,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider);
+                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
 
                 var result = controller.GetWeeklyReport(0, timeProvider.CurrentTime);
 
@@ -179,7 +179,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider);
+                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
 
                 var result = controller.GetMonthlyReport(0, timeProvider.CurrentTime);
 
@@ -240,7 +240,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider);
+                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
 
                 var result = controller.GetActivityReport(0);
 
