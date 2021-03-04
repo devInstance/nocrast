@@ -9,13 +9,20 @@ namespace NoCrast.Shared.Model
             Unknown,
             Daily,
             Weekly,
-            Monthly
+            Monthly,
+            Total
         }
 
+        public class Cell
+        {
+            public string Details { get; set; }
+            public float Value { get; set; }
+
+        }
         public class Row
         {
             public string TaskTitle { get; set; }
-            public float[] Data { get; set; }
+            public Cell[] Data { get; set; }
         }
 
         public RIType RiType { get; set; }

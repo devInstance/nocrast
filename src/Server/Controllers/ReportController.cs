@@ -2,14 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NoCrast.Server.Database;
 using NoCrast.Server.Model;
 using NoCrast.Server.Services;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace NoCrast.Server.Controllers
@@ -69,7 +67,7 @@ namespace NoCrast.Server.Controllers
             result.Rows = new ReportItem.Row[tasks.Count];
             for (int i = 0; i < tasks.Count; i++)
             {
-                var data = new float[ColumnsCount + 1];
+                var data = new ReportItem.Cell[ColumnsCount + 1];
                 float total = 0F;
                 for (int n = 0; n < ColumnsCount; n++)
                 {
@@ -77,11 +75,13 @@ namespace NoCrast.Server.Controllers
                              where tl.TaskId == tasks[i].Id
                              && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
                              select tl.ElapsedMilliseconds).Sum();
-
-                    data[n] = d;
+                    data[n] = new ReportItem.Cell
+                    {
+                        Value = d
+                    };
                     total += d;
                 }
-                data[ColumnsCount] = total;
+                data[ColumnsCount] = new ReportItem.Cell { Value = total };
 
                 result.Rows[i] = new ReportItem.Row
                 {

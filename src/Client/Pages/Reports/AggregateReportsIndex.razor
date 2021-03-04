@@ -2,23 +2,7 @@
 
 <PageTitle Value="Report"></PageTitle>
 
-<div class="btn-toolbar p-2" role="toolbar">
-    <div class="btn-group btn-group-toggle mr-4" role="group">
-        <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Daily))">Daily</button>
-        <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Weekly))">Weekly</button>
-        <button type="button" class="btn btn-secondary @(selectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => RequestReportAsync(ReportItem.RIType.Monthly))">Monthly</button>
-    </div>
-    <div class="input-group">
-        <button type="button" class="btn btn-secondary mr-1" @onclick="@(() => PrevAsync())">
-            <span class="oi oi-chevron-left" aria-hidden="true"></span>
-        </button>
-        <input type="text" class="form-control mr-1" @bind="selectedDate" @bind:format="MMM d yyy" readonly />
-        <button type="button" class="btn btn-secondary mr-2" @onclick="@(() => NextAsync())">
-            <span class="oi oi-chevron-right" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-secondary" @onclick="@(() => TodayAsync())">Today</button>
-    </div>
-</div>
+<ReportToolbar FilterChanged="(t)=>RequestReportAsync(t)" SelectedType="selectedType" SelectedDate="selectedDate"></ReportToolbar>
 
 <div class="p-2">
     <h2>@selectedPeriod</h2>
@@ -68,7 +52,7 @@
                         @foreach (var cell in row.Data)
                         {
                             <td>
-                                @String.Format("{0:F1}", cell / (60 * 60 * 1000))
+                                @String.Format("{0:F1}", cell.Value / (60 * 60 * 1000))
                             </td>
                         }
                     </tr>
@@ -120,6 +104,12 @@
         }
     }
 
+    public async void RequestReportAsync(ReportToolbar.FilterChangedArgs args)
+    {
+        selectedDate = args.Date;
+        RequestReportAsync(args.Type);
+    }
+
     public async void RequestReportAsync(ReportItem.RIType type)
     {
         Report = null;
@@ -135,36 +125,4 @@
         StateHasChanged();
     }
 
-    private DateTime UpdateStep(DateTime aDate, int sign)
-    {
-        switch (selectedType)
-        {
-            case ReportItem.RIType.Daily:
-                return aDate.AddDays(7 * sign);
-            case ReportItem.RIType.Weekly:
-                return aDate.AddDays(7 * 5 * sign);
-            case ReportItem.RIType.Monthly:
-                return aDate.AddYears(1 * sign);
-            default:
-                return aDate;
-        }
-    }
-
-    public async void PrevAsync()
-    {
-        selectedDate = UpdateStep(selectedDate, -1);
-        RequestReportAsync(selectedType);
-    }
-
-    public async void NextAsync()
-    {
-        selectedDate = UpdateStep(selectedDate, 1);
-        RequestReportAsync(selectedType);
-    }
-
-    public async void TodayAsync()
-    {
-        selectedDate = TimeProvider.CurrentTime;
-        RequestReportAsync(selectedType);
-    }
 }

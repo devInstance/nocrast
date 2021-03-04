@@ -69,7 +69,8 @@ else
             var item = new Heatline.Item
             {
                 Time = Report.Columns[i], //TimeConverter.ConvertToLocal(Report.Columns[i], TimeProvider.UtcTimeOffset),
-                Value = Report.Rows[0].Data[i]
+                Value = Report.Rows[0].Data[i].Value,
+                Description = Report.Rows[0].Data[i].Details
             };
             items[i] = item;
         }

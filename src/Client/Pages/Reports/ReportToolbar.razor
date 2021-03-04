@@ -1,0 +1,89 @@
+﻿<div class="btn-toolbar p-2" role="toolbar">
+    <div class="btn-group btn-group-toggle mr-4" role="group">
+        <button type="button" class="btn btn-secondary @(SelectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Daily))">Daily</button>
+        <button type="button" class="btn btn-secondary @(SelectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Weekly))">Weekly</button>
+        <button type="button" class="btn btn-secondary @(SelectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Monthly))">Monthly</button>
+    </div>
+    <div class="input-group">
+        <button type="button" class="btn btn-secondary mr-1" @onclick="@(() => PrevAsync())">
+            <span class="oi oi-chevron-left" aria-hidden="true"></span>
+        </button>
+        <input type="text" class="form-control mr-1" @bind="SelectedDate" @bind:format="MMM d yyy" readonly />
+        <button type="button" class="btn btn-secondary mr-2" @onclick="@(() => NextAsync())">
+            <span class="oi oi-chevron-right" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="btn btn-secondary" @onclick="@(() => TodayAsync())">Today</button>
+    </div>
+</div>
+
+@inject IScopeManager ScopeManager;
+@inject ITimeProvider TimeProvider;
+
+
+@code {
+
+    [Parameter]
+    public ReportItem.RIType SelectedType { get; set; }
+
+    [Parameter]
+    public DateTime SelectedDate { get; set; }
+
+    public class FilterChangedArgs
+    {
+        public ReportItem.RIType Type { get; set; }
+        public DateTime Date { get; set; }
+    }
+
+    [Parameter]
+    public EventCallback<FilterChangedArgs> FilterChanged { get; set; }
+
+    private IScopeLog log;
+
+    protected async override Task OnInitializedAsync()
+    {
+        log = ScopeManager.CreateLogger(this);
+    }
+
+    private DateTime UpdateStep(DateTime aDate, int sign)
+    {
+        switch (SelectedType)
+        {
+            case ReportItem.RIType.Daily:
+                return aDate.AddDays(7 * sign);
+            case ReportItem.RIType.Weekly:
+                return aDate.AddDays(7 * 5 * sign);
+            case ReportItem.RIType.Monthly:
+                return aDate.AddYears(1 * sign);
+            default:
+                return aDate;
+        }
+    }
+
+    public async void PrevAsync()
+    {
+        SelectedDate = UpdateStep(SelectedDate, -1);
+        InvokeChangeAsync();
+    }
+
+    public async void NextAsync()
+    {
+        SelectedDate = UpdateStep(SelectedDate, 1);
+        InvokeChangeAsync();
+    }
+
+    public async void TodayAsync()
+    {
+        SelectedDate = TimeProvider.CurrentTime;
+        InvokeChangeAsync();
+    }
+
+    private async void InvokeChangeAsync(ReportItem.RIType t)
+    {
+        FilterChanged.InvokeAsync(new FilterChangedArgs { Type = t, Date = SelectedDate });
+    }
+
+    private async void InvokeChangeAsync()
+    {
+        InvokeChangeAsync(SelectedType);
+    }
+}

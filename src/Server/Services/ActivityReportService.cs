@@ -73,7 +73,7 @@ namespace NoCrast.Server.Services
                         long startTime = dateRanges[n].Hour * 60 + dateRanges[n].Minute;
                         long endTime = dateRanges[n + 1].Hour * 60 + dateRanges[n + 1].Minute;
 
-                        if(startTime > endTime)
+                        if (startTime > endTime)
                         {
                             endTime = startTime + interval;
                         }
@@ -88,10 +88,14 @@ namespace NoCrast.Server.Services
                         data[n] = d;
                     }
 
-                    var finalData = new float[columnsCount];
+                    var finalData = new ReportItem.Cell[columnsCount];
                     for (int n = 0; n < columnsCount; n++)
                     {
-                        finalData[n] = (float)(data[n]) / (float)maxValue;
+                        finalData[n] = new ReportItem.Cell
+                        {
+                            Details = $"{(float)data[n] / 60.0} hours", //TODO: i18n/l10n?
+                            Value = (float)(data[n]) / (float)maxValue
+                        };
                     }
 
                     result.Rows[i] = new ReportItem.Row
