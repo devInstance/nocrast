@@ -93,7 +93,7 @@ namespace NoCrast.Server.Services
                     {
                         finalData[n] = new ReportItem.Cell
                         {
-                            Details = $"{(float)data[n] / 60.0} hours", //TODO: i18n/l10n?
+                            Details = String.Format("{0:F2} hours", (float)data[n] / 60.0), //TODO: i18n/l10n?
                             Value = (float)(data[n]) / (float)maxValue
                         };
                     }
