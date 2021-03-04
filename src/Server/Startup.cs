@@ -1,22 +1,17 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
 using NoCrast.Server.Database;
 using NoCrast.Server.Indentity;
-using Newtonsoft.Json;
 using NoCrast.Shared.Utils;
 using NoCrast.Server.Services;
-using NoCrast.Server.Queries;
-using NoCrast.Server.Queries.Postgress;
 using DevInstance.LogScope;
 using DevInstance.LogScope.Extensions;
 using DevInstance.LogScope.Formaters;
+using NoCrast.Server.Data.Queries.Postgres;
+using NoCrast.Server.Data;
 
 namespace NoCrast.Server
 {
@@ -42,7 +37,7 @@ namespace NoCrast.Server
             services.AddSingleton<ITimeProvider, TimeProvider>();
             services.AddScoped<IApplicationSignManager, ApplicationSignManager>();
 
-            services.AddScoped<IActivityReportSelect, ActivityReportSelect>();
+            services.AddScoped<IQueryRepository, PostgresQueryRepository>();
 
             services.AddScoped<ActivityReportService>();
 

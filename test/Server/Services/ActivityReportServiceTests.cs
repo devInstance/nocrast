@@ -1,23 +1,19 @@
 ﻿using Xunit;
-using NoCrast.Server.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NoCrast.ServerTests;
-using NoCrast.Server.Queries;
 using Moq;
 using NoCrast.Server.Model;
 using DevInstance.LogScope;
+using NoCrast.Server.Data.Queries;
+using NoCrast.Server.Data;
 
 namespace NoCrast.Server.Services.Tests
 {
     public class ActivityReportServiceTests
     {
-        private static void AddTestCase(Mock<IActivityReportSelect> mockSelect, long start, long duration,  long returnValue)
+        private static void AddTestCase(Mock<IActivityReportQuery> mockSelect, long start, long duration,  long returnValue)
         {
-            mockSelect.Setup(x => x.GetTotalForPeriod(It.IsAny<UserProfile>(), It.IsAny<int>(), It.Is<long>(a => a.Equals(start)), It.Is<long>(a => a.Equals(start + duration)))).Returns(returnValue);
+            mockSelect.Setup(x => x.PeriodSum(It.Is<long>(a => a.Equals(start)), It.Is<long>(a => a.Equals(start + duration)))).Returns(returnValue);
         }
 
         [Fact()]
@@ -26,12 +22,17 @@ namespace NoCrast.Server.Services.Tests
             var time = new DateTime(2016, 7, 12, 14, 0, 0);
             var timeProvider = TestUtils.CreateTimerProvider(time);
 
-            var mockSelect = new Mock<IActivityReportSelect>();
+            var mockRepository = new Mock<IQueryRepository>();
+            //It.IsAny<UserProfile>(), It.IsAny<int>(), 
+
+            var mockSelect = new Mock<IActivityReportQuery>();
             AddTestCase(mockSelect, 15, 15, 25);
+
+            mockRepository.Setup(x => x.GetActivityReportQuery(It.IsAny<UserProfile>())).Returns(mockSelect.Object);
 
             var mockLog = new Mock<IScopeManager>();
 
-            ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockSelect.Object);
+            ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockRepository.Object);
 
             var result = service.GetActivityReport(null, 0);
 
@@ -52,10 +53,14 @@ namespace NoCrast.Server.Services.Tests
             var startOfDay = time.Date;
             var timeProvider = TestUtils.CreateTimerProvider(time);
 
-            var mockSelect = new Mock<IActivityReportSelect>();
-            mockSelect.Setup(x => x.GetTotalForPeriod(It.IsAny<UserProfile>(), It.IsAny<int>(),  It.IsAny<long>(), It.IsAny<long>())).Returns(0);
+            var mockRepository = new Mock<IQueryRepository>();
 
-            ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockSelect.Object);
+            var mockSelect = new Mock<IActivityReportQuery>();
+            mockSelect.Setup(x => x.PeriodSum(It.IsAny<long>(), It.IsAny<long>())).Returns(0);
+
+            mockRepository.Setup(x => x.GetActivityReportQuery(It.IsAny<UserProfile>())).Returns(mockSelect.Object);
+
+            ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockRepository.Object);
 
             var result = service.GetActivityReport(null, 0, interval, startOfDay, columnsCount);
 

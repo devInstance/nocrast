@@ -32,6 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Data\Decorators\" />
         <Folder Include="Utils\" />
     </ItemGroup>
 

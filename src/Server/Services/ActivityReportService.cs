@@ -1,13 +1,10 @@
 ﻿using DevInstance.LogScope;
+using NoCrast.Server.Data;
 using NoCrast.Server.Model;
-using NoCrast.Server.Queries;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("NoCrast.ServerTests")]
 namespace NoCrast.Server.Services
@@ -18,14 +15,14 @@ namespace NoCrast.Server.Services
         private IScopeLog log;
 
         public ITimeProvider TimeProvider { get; }
-        public IActivityReportSelect Query { get; }
+        public IQueryRepository Repository { get; }
 
-        public ActivityReportService(IScopeManager logManager, ITimeProvider timeProvider, IActivityReportSelect query)
+        public ActivityReportService(IScopeManager logManager, ITimeProvider timeProvider, IQueryRepository query)
         {
             log = logManager.CreateLogger(this);
 
             TimeProvider = timeProvider;
-            Query = query;
+            Repository = query;
         }
 
         public ReportItem GetActivityReport(UserProfile currentProfile, int timeoffset)
@@ -64,6 +61,9 @@ namespace NoCrast.Server.Services
 
                 result.Rows = new ReportItem.Row[1/*tasks.Count*/];
 
+                var query = Repository.GetActivityReportQuery(currentProfile);
+                query.Offset(timeoffset);
+
                 for (int i = 0; i < 1; i++)
                 {
                     var data = new long[columnsCount];
@@ -77,7 +77,8 @@ namespace NoCrast.Server.Services
                         {
                             endTime = startTime + interval;
                         }
-                        var d = Query.GetTotalForPeriod(currentProfile, timeoffset, startTime, endTime);
+
+                        var d = query.PeriodSum(startTime, endTime);
 
                         l.T($"{startTime}-{endTime} startTime:{dateRanges[n].TimeOfDay}, endTime:{dateRanges[n + 1].TimeOfDay} -> {d}");
                         if (d > maxValue)
