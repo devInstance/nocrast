@@ -36,5 +36,25 @@ namespace NoCrast.Server.Data.Queries.Postgres
             }
             return postgresActivityReportQuery;
         }
+
+        private PostgresAggregateReportQuery postgresAggregateReportQuery;
+        public IAggregateReportQuery GetAggregateReportQuery(UserProfile userProfile)
+        {
+            if (postgresAggregateReportQuery == null)
+            {
+                postgresAggregateReportQuery = new PostgresAggregateReportQuery(LogManager, TimeProvider, DB, userProfile);
+            }
+            return postgresAggregateReportQuery;
+        }
+
+        private PostgresTasksQuery postgresTasksQuery;
+        public ITasksQuery GetTasksQuery(UserProfile userProfile)
+        {
+            if (postgresTasksQuery == null)
+            {
+                postgresTasksQuery = new PostgresTasksQuery(LogManager, TimeProvider, DB, userProfile);
+            }
+            return postgresTasksQuery;
+        }
     }
 }

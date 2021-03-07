@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Server\NoCrast.Server.csproj" />
+    <ProjectReference Include="..\TestUtils\NoCrast.TestUtils.csproj" />
   </ItemGroup>
 
   <ItemGroup>

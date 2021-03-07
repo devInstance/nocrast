@@ -8,35 +8,21 @@ using System.Linq;
 
 namespace NoCrast.Server.Data.Queries.Postgres
 {
-    internal class PostgresActivityReportQuery : IActivityReportQuery
+    internal class PostgresActivityReportQuery : PostgresBaseQuery, IActivityReportQuery
     {
-        public ITimeProvider TimeProvider { get; }
-
-        private IScopeLog log;
-
-        private ApplicationDbContext DB { get; }
-
-        private UserProfile CurrentProfile { get; }
-        private int Timeoffset { get; set; }
-
         class QueryType {
             public TimeLog log;
             public TimerTask task;
         }
         private IQueryable<QueryType> CurrentQuery;
+        protected int Timeoffset { get; set; }
 
         public PostgresActivityReportQuery(IScopeManager logManager, 
                                             ITimeProvider timeProvider, 
                                             ApplicationDbContext dB,
                                             UserProfile currentProfile)
+            : base(logManager, timeProvider, dB, currentProfile)
         {
-            log = logManager.CreateLogger(this);
-
-            TimeProvider = timeProvider;
-            DB = dB;
-
-            CurrentProfile = currentProfile;
-
             CurrentQuery = from tl in DB.TimeLog
                            join ts in DB.Tasks on tl.Task equals ts
                            where ts.Profile == CurrentProfile

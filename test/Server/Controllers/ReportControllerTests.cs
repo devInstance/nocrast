@@ -4,6 +4,7 @@ using NoCrast.ServerTests;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Shared.Model;
 using static NoCrast.Shared.Model.ReportItem;
+using NoCrast.TestUtils;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -17,7 +18,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetDailyReportTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -44,7 +45,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
+                var controller = new ReportController(db_test.db, userManager, null, null); //TODO: Fix me
 
                 var result = controller.GetDailyReport(0, timeProvider.CurrentTime);
 
@@ -57,21 +58,21 @@ namespace NoCrast.Server.Controllers.Tests
 
                 Assert.Equal("Task 1", resultList.Rows[0].TaskTitle);
                 Assert.Equal(8, resultList.Rows[0].Data.Length);
-                Assert.Equal(0, resultList.Rows[0].Data[0]);
-                Assert.Equal(4 * HOURS, resultList.Rows[0].Data[1]);
-                Assert.Equal(8 * HOURS, resultList.Rows[0].Data[2]);
-                Assert.Equal(0, resultList.Rows[0].Data[3]);
-                Assert.Equal(0, resultList.Rows[0].Data[5]);
-                Assert.Equal(12 * HOURS, resultList.Rows[0].Data[7]);
+                Assert.Equal(0, resultList.Rows[0].Data[0].Value);
+                Assert.Equal(4 * HOURS, resultList.Rows[0].Data[1].Value);
+                Assert.Equal(8 * HOURS, resultList.Rows[0].Data[2].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[3].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[5].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[0].Data[7].Value);
 
                 Assert.Equal("Task 2", resultList.Rows[1].TaskTitle);
                 Assert.Equal(8, resultList.Rows[1].Data.Length);
-                Assert.Equal(0, resultList.Rows[1].Data[0]);
-                Assert.Equal(4 * HOURS, resultList.Rows[1].Data[2]);
-                Assert.Equal(8 * HOURS, resultList.Rows[1].Data[3]);
-                Assert.Equal(0, resultList.Rows[1].Data[4]);
-                Assert.Equal(0, resultList.Rows[1].Data[5]);
-                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[7]);
+                Assert.Equal(0, resultList.Rows[1].Data[0].Value);
+                Assert.Equal(4 * HOURS, resultList.Rows[1].Data[2].Value);
+                Assert.Equal(8 * HOURS, resultList.Rows[1].Data[3].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[4].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[5].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[7].Value);
 
                 Assert.Equal(new DateTime(2020, 8, 10), resultList.StartDate.Date);
                 Assert.Equal(new DateTime(2020, 8, 16), resultList.EndDate.Date);
@@ -83,7 +84,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetWeeklyReportTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -110,7 +111,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
+                var controller = new ReportController(db_test.db, userManager, null, null); //TODO: Fix me
 
                 var result = controller.GetWeeklyReport(0, timeProvider.CurrentTime);
 
@@ -123,20 +124,20 @@ namespace NoCrast.Server.Controllers.Tests
 
                 Assert.Equal("Task 1", resultList.Rows[0].TaskTitle);
                 Assert.Equal(6, resultList.Rows[0].Data.Length);
-                Assert.Equal(0, resultList.Rows[0].Data[0]);
-                Assert.Equal(0, resultList.Rows[0].Data[1]);
-                Assert.Equal(2 * HOURS, resultList.Rows[0].Data[2]);
-                Assert.Equal(0, resultList.Rows[0].Data[3]);
-                Assert.Equal(12 * HOURS, resultList.Rows[0].Data[4]);
-                Assert.Equal(14 * HOURS, resultList.Rows[0].Data[5]);
+                Assert.Equal(0, resultList.Rows[0].Data[0].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[1].Value);
+                Assert.Equal(2 * HOURS, resultList.Rows[0].Data[2].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[3].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[0].Data[4].Value);
+                Assert.Equal(14 * HOURS, resultList.Rows[0].Data[5].Value);
 
                 Assert.Equal("Task 2", resultList.Rows[1].TaskTitle);
                 Assert.Equal(6, resultList.Rows[1].Data.Length);
-                Assert.Equal(0, resultList.Rows[1].Data[0]);
-                Assert.Equal(0, resultList.Rows[1].Data[1]);
-                Assert.Equal(0, resultList.Rows[1].Data[2]);
-                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[4]);
-                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[5]);
+                Assert.Equal(0, resultList.Rows[1].Data[0].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[1].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[2].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[4].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[5].Value);
 
                 Assert.Equal(new DateTime(2020, 7, 13), resultList.StartDate.Date);
                 Assert.Equal(new DateTime(2020, 8, 16), resultList.EndDate.Date);
@@ -148,7 +149,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetMonthlyReportTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -179,7 +180,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
+                var controller = new ReportController(db_test.db, userManager, null, null); //TODO: Fix me
 
                 var result = controller.GetMonthlyReport(0, timeProvider.CurrentTime);
 
@@ -192,23 +193,23 @@ namespace NoCrast.Server.Controllers.Tests
 
                 Assert.Equal("Task 1", resultList.Rows[0].TaskTitle);
                 Assert.Equal(13, resultList.Rows[0].Data.Length);
-                Assert.Equal(0, resultList.Rows[0].Data[0]);
-                Assert.Equal(0, resultList.Rows[0].Data[1]);
-                Assert.Equal(0, resultList.Rows[0].Data[2]);
-                Assert.Equal(2 * HOURS, resultList.Rows[0].Data[6]);
-                Assert.Equal(16 * HOURS, resultList.Rows[0].Data[7]);
-                Assert.Equal(0, resultList.Rows[0].Data[8]);
-                Assert.Equal(2 * HOURS, resultList.Rows[0].Data[9]);
-                Assert.Equal(20 * HOURS, resultList.Rows[0].Data[12]);
+                Assert.Equal(0, resultList.Rows[0].Data[0].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[1].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[2].Value);
+                Assert.Equal(2 * HOURS, resultList.Rows[0].Data[6].Value);
+                Assert.Equal(16 * HOURS, resultList.Rows[0].Data[7].Value);
+                Assert.Equal(0, resultList.Rows[0].Data[8].Value);
+                Assert.Equal(2 * HOURS, resultList.Rows[0].Data[9].Value);
+                Assert.Equal(20 * HOURS, resultList.Rows[0].Data[12].Value);
 
                 Assert.Equal("Task 2", resultList.Rows[1].TaskTitle);
                 Assert.Equal(13, resultList.Rows[1].Data.Length);
-                Assert.Equal(0, resultList.Rows[1].Data[0]);
-                Assert.Equal(0, resultList.Rows[1].Data[1]);
-                Assert.Equal(0, resultList.Rows[1].Data[2]);
-                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[7]);
-                Assert.Equal(0, resultList.Rows[1].Data[8]);
-                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[12]);
+                Assert.Equal(0, resultList.Rows[1].Data[0].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[1].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[2].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[7].Value);
+                Assert.Equal(0, resultList.Rows[1].Data[8].Value);
+                Assert.Equal(12 * HOURS, resultList.Rows[1].Data[12].Value);
 
                 Assert.Equal(new DateTime(2020, 1, 1), resultList.StartDate.Date);
                 Assert.Equal(new DateTime(2020, 12, 31), resultList.EndDate.Date);
@@ -219,7 +220,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetActivityReportTest()
         {
             var time = new DateTime(2016, 7, 12, 14, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -240,7 +241,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new ReportController(db_test.db, userManager, timeProvider, null);
+                var controller = new ReportController(db_test.db, userManager, null, null); //TODO: Fix me
 
                 var result = controller.GetActivityReport(0);
 
@@ -251,10 +252,10 @@ namespace NoCrast.Server.Controllers.Tests
                 Assert.Single(resultList.Rows);
 
                 Assert.Equal(96, resultList.Rows[0].Data.Length);
-                Assert.Equal(25.0f/45.0f, resultList.Rows[0].Data[56]);
-                Assert.Equal(40.0f/45.0f, resultList.Rows[0].Data[57]);
-                Assert.Equal(35.0f/45.0f, resultList.Rows[0].Data[58]);
-                Assert.Equal(45.0f/45.0f, resultList.Rows[0].Data[59]);
+                Assert.Equal(25.0f/45.0f, resultList.Rows[0].Data[56].Value);
+                Assert.Equal(40.0f/45.0f, resultList.Rows[0].Data[57].Value);
+                Assert.Equal(35.0f/45.0f, resultList.Rows[0].Data[58].Value);
+                Assert.Equal(45.0f/45.0f, resultList.Rows[0].Data[59].Value);
             }
         }
     }

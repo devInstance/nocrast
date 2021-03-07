@@ -7,6 +7,7 @@ using NoCrast.ServerTests;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Model;
+using NoCrast.TestUtils;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -16,7 +17,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetProfileTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("Test").EndSetup();
@@ -37,7 +38,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void UpdateProfileTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("Test").EndSetup();

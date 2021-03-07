@@ -10,6 +10,7 @@ using NoCrast.Server.Model;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Server.Indentity;
 using System.Threading.Tasks;
+using NoCrast.TestUtils;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -19,7 +20,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void DeleteUsedAccountTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("Proj1")
@@ -30,7 +31,7 @@ namespace NoCrast.Server.Controllers.Tests
                     .EndSetup();
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
-                var signinManagerMq = TestUtils.CreateSignManager(true);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(true);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 
@@ -59,13 +60,13 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void DeleteNewAccountTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().EndSetup();
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
-                var signinManagerMq = TestUtils.CreateSignManager(true);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(true);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 
@@ -85,7 +86,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void LoginInvalidAccountTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("nobody").CreateProject("Proj1")
@@ -97,7 +98,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var signinManagerMq = TestUtils.CreateSignManager(false);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(false);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 
@@ -117,7 +118,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void LoginExistingAccountTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("nobody").CreateProject("Proj1")
@@ -129,7 +130,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 var userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var signinManagerMq = TestUtils.CreateSignManager(true);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(true);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 
@@ -152,7 +153,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void LoginExistingAccountMultipleAtteptsTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("nobody").CreateProject("Proj1")
@@ -164,7 +165,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var signinManagerMq = TestUtils.CreateSignManager(true);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(true);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 
@@ -195,14 +196,14 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void ChangePasswordFailedTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("nobody").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var signinManagerMq = TestUtils.CreateSignManager(true);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(true);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 
@@ -223,14 +224,14 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void ChangePasswordTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile("nobody").EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId, true);
 
-                var signinManagerMq = TestUtils.CreateSignManager(true);
+                var signinManagerMq = ServerTestUtils.CreateSignManager(true);
 
                 var controller = new AuthorizationController(db_test.db, userManager, signinManagerMq.Object);
 

@@ -6,6 +6,7 @@ using NoCrast.Server.Model;
 using DevInstance.LogScope;
 using NoCrast.Server.Data.Queries;
 using NoCrast.Server.Data;
+using NoCrast.TestUtils;
 
 namespace NoCrast.Server.Services.Tests
 {
@@ -20,7 +21,7 @@ namespace NoCrast.Server.Services.Tests
         public void GetActivityReportTest()
         {
             var time = new DateTime(2016, 7, 12, 14, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
 
             var mockRepository = new Mock<IQueryRepository>();
             //It.IsAny<UserProfile>(), It.IsAny<int>(), 
@@ -34,7 +35,7 @@ namespace NoCrast.Server.Services.Tests
 
             ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockRepository.Object);
 
-            var result = service.GetActivityReport(null, 0);
+            var result = service.GetReport(null, 0);
 
             Assert.Equal(96, result.Rows[0].Data.Length);
             //Assert.Equal(25.0f / 45.0f, resultList.Rows[0].Data[56]);
@@ -51,7 +52,7 @@ namespace NoCrast.Server.Services.Tests
         {
             var time = new DateTime(2016, 7, 12, 14, 0, 0);
             var startOfDay = time.Date;
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
 
             var mockRepository = new Mock<IQueryRepository>();
 

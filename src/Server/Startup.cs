@@ -28,7 +28,7 @@ namespace NoCrast.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddConsoleLogging(LogLevel.INFO,
+            services.AddConsoleLogging(LogLevel.TRACE,
                 new DefaultFormaterOptions { ShowTimestamp = true, ShowThreadNumber = true });
 
             services.ConfigureDatabase(Configuration);
@@ -39,7 +39,7 @@ namespace NoCrast.Server
 
             services.AddScoped<IQueryRepository, PostgresQueryRepository>();
 
-            services.AddScoped<ActivityReportService>();
+            services.ConfigureServices();
 
             services.AddControllersWithViews().AddNewtonsoftJson();
         }

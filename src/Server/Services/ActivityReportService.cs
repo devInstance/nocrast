@@ -10,22 +10,14 @@ using System.Runtime.CompilerServices;
 namespace NoCrast.Server.Services
 {
 
-    public class ActivityReportService
+    public class ActivityReportService : BaseService
     {
-        private IScopeLog log;
-
-        public ITimeProvider TimeProvider { get; }
-        public IQueryRepository Repository { get; }
-
         public ActivityReportService(IScopeManager logManager, ITimeProvider timeProvider, IQueryRepository query)
+            : base(logManager, timeProvider, query)
         {
-            log = logManager.CreateLogger(this);
-
-            TimeProvider = timeProvider;
-            Repository = query;
         }
 
-        public ReportItem GetActivityReport(UserProfile currentProfile, int timeoffset)
+        public ReportItem GetReport(UserProfile currentProfile, int timeoffset)
         {
             DateTime now = TimeProvider.CurrentTime;
             //DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);

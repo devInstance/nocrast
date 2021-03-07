@@ -1,12 +1,11 @@
-﻿using NoCrast.Server.Controllers;
-using Xunit;
+﻿using Xunit;
 using NoCrast.ServerTests;
 using Microsoft.AspNetCore.Mvc;
 using NoCrast.Shared.Model;
 using System;
 using Moq;
 using NoCrast.Shared.Utils;
-using System.Drawing;
+using NoCrast.TestUtils;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -18,7 +17,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetTasksSimpleSuccessfulTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1").CreateTask("Task 2").EndSetup();
@@ -52,7 +51,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetTasksWithProjectSuccessfulTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("TTT", ProjectColor.Red).CreateTask("Task 1").CreateTask("Task 2").EndSetup();
@@ -78,7 +77,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTasksRunningOnlyTest()
         {
             var time = new DateTime(2020, 8, 10, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
 
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
@@ -107,7 +106,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTasksStoppedOnlyTest()
         {
             var time = new DateTime(2020, 8, 10, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
 
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
@@ -186,7 +185,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTasksTimeOffsetTodayTest()
         {
             var time = new DateTime(2020, 8, 10, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -272,7 +271,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTasksTimeOffsetTomorrowTest()
         {
             var time = new DateTime(2020, 8, 10, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time.AddDays(1));
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time.AddDays(1));
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -358,7 +357,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTasksTimeOffsetYesterdayTest()
         {
             var time = new DateTime(2020, 8, 10, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time.AddDays(-1));
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time.AddDays(-1));
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -444,7 +443,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTasksTimeOffsetMyTestTest()
         {
             var time = new DateTime(2020, 8, 18, 18, 35, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -479,14 +478,14 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void AddTaskTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().EndSetup();
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new TasksController(db_test.db, userManager, TestUtils.CreateTimerProvider());
+                var controller = new TasksController(db_test.db, userManager, TimerProviderMock.CreateTimerProvider());
 
                 var input = new TaskItem
                 {
@@ -510,7 +509,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void RemoveProjectTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("P").CreateTask("Task")
@@ -518,7 +517,7 @@ namespace NoCrast.Server.Controllers.Tests
 
                 UserManagerMock userManager = new UserManagerMock(db_test.profile.ApplicationUserId);
 
-                var controller = new TasksController(db_test.db, userManager, TestUtils.CreateTimerProvider());
+                var controller = new TasksController(db_test.db, userManager, TimerProviderMock.CreateTimerProvider());
 
                 var input = new TaskItem
                 {
@@ -543,7 +542,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnAllTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -576,7 +575,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnTodayTest()
         {
             var time = new DateTime(2020, 8, 12, 15, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -612,7 +611,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnWeekTest()
         {
             var time = new DateTime(2020, 8, 12, 15, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -648,7 +647,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnTop5Test()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -684,7 +683,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnTop5Page2Test()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -720,7 +719,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnTop3PageCount4Test()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -773,7 +772,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void GetTimelogAsyncReturnTopPageSizeTest(int? page, int? top, TimeLogResultType? type, int expectedQueryCount, int expectedItemsCount, int expectedPage, int expectedPagesCount)
         {
             var time = new DateTime(2020, 8, 12, 15, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -809,7 +808,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void DeleteTimerLogAsyncNullActiveLogItemTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -841,7 +840,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void DeleteTimerLogAsyncActiveLogItemTest()
         {
             var time = new DateTime(2020, 8, 12, 0, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")
@@ -872,7 +871,7 @@ namespace NoCrast.Server.Controllers.Tests
         public void DeleteTimerLogAsyncNonActiveLogItemTest()
         {
             var time = new DateTime(2020, 8, 12, 12, 0, 0);
-            var timeProvider = TestUtils.CreateTimerProvider(time);
+            var timeProvider = TimerProviderMock.CreateTimerProvider(time);
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateTask("Task 1")

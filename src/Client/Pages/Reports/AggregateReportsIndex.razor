@@ -23,16 +23,16 @@
                             @switch (selectedType)
                             {
                                 case ReportItem.RIType.Daily:
-                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString("ddd");
+                                    @column.ToString("ddd");
                                     break;
                                 case ReportItem.RIType.Weekly:
-                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString("MMM d");
+                                    @column.ToString("MMM d");
                                     break;
                                 case ReportItem.RIType.Monthly:
-                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString("MMM");
+                                    @column.ToString("MMM");
                                     break;
                                 default:
-                                    @TimeConverter.ConvertToLocal(column, TimeProvider.UtcTimeOffset).ToString()
+                                    @column.ToString()
                                     break;
                             }
                         </th>

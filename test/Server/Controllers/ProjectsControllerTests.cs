@@ -6,6 +6,7 @@ using System.Text;
 using NoCrast.ServerTests;
 using NoCrast.Shared.Model;
 using Microsoft.AspNetCore.Mvc;
+using NoCrast.TestUtils;
 
 namespace NoCrast.Server.Controllers.Tests
 {
@@ -15,7 +16,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetProjectsTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("Test A").CreateProject("Test B").EndSetup();
@@ -40,7 +41,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetProjectsWithZeroTotalsTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("Test A").CreateProject("Test B").EndSetup();
@@ -68,19 +69,19 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void GetProjectsWithTotalsTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile()
                     .CreateProject("Test A")
                         .CreateTask("Task 1")
-                            .CreateTimeLog(TestUtils.TEST_TIME.AddHours(-4), 2 * 60 * 1000, false)
-                            .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                            .CreateTimeLog(TimerProviderMock.TEST_TIME.AddHours(-4), 2 * 60 * 1000, false)
+                            .CreateTimeLog(TimerProviderMock.TEST_TIME, 2 * 60 * 1000, false)
                         .CreateTask("Test 2")
-                            .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                            .CreateTimeLog(TimerProviderMock.TEST_TIME, 2 * 60 * 1000, false)
                     .CreateProject("Test B")
                         .CreateTask("Test 3")
-                            .CreateTimeLog(TestUtils.TEST_TIME, 2 * 60 * 1000, false)
+                            .CreateTimeLog(TimerProviderMock.TEST_TIME, 2 * 60 * 1000, false)
                     .CreateProject("Test C")
                     .EndSetup();
 
@@ -108,7 +109,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void AddProjectTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("Test B").EndSetup();
@@ -138,7 +139,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void UpdateProjectTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("Test B").EndSetup();
@@ -171,7 +172,7 @@ namespace NoCrast.Server.Controllers.Tests
         [Fact()]
         public void RemoveProjectTest()
         {
-            var timeProvider = TestUtils.CreateTimerProvider();
+            var timeProvider = TimerProviderMock.CreateTimerProvider();
             using (TestDatabase db_test = new TestDatabase(timeProvider))
             {
                 db_test.UserProfile().CreateProject("Test B").EndSetup();

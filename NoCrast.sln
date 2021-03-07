@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoCrast.SharedTests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Timelines", "..\Timelines\Timelines\Timelines.csproj", "{E91E1466-E28B-4208-951A-B6402CC5E52E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoCrast.Server.PostgressTests", "test\Server.Postgress\NoCrast.Server.PostgressTests.csproj", "{A4FF0D45-57EE-481E-BC1E-7C2A325258DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoCrast.TestUtils", "test\TestUtils\NoCrast.TestUtils.csproj", "{6286EBBF-ABE4-4B73-9078-CB3766B2D134}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E91E1466-E28B-4208-951A-B6402CC5E52E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4FF0D45-57EE-481E-BC1E-7C2A325258DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4FF0D45-57EE-481E-BC1E-7C2A325258DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4FF0D45-57EE-481E-BC1E-7C2A325258DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4FF0D45-57EE-481E-BC1E-7C2A325258DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6286EBBF-ABE4-4B73-9078-CB3766B2D134}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6286EBBF-ABE4-4B73-9078-CB3766B2D134}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6286EBBF-ABE4-4B73-9078-CB3766B2D134}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6286EBBF-ABE4-4B73-9078-CB3766B2D134}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

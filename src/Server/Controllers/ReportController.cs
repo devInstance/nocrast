@@ -16,82 +16,19 @@ namespace NoCrast.Server.Controllers
     [Route("api/data/reports")]
     public class ReportController : UserBaseController
     {
-        public ITimeProvider TimeProvider { get; }
-
-        public ActivityReportService ActivityService { get; }
+        private ActivityReportService ActivityService { get; }
+        private AggregateReportService AggregateService { get; }
 
         public ReportController(ApplicationDbContext d,
                                 UserManager<ApplicationUser> userManager,
-                                ITimeProvider timeProvider,
-                                ActivityReportService activityService)
+                                ActivityReportService activityService,
+                                AggregateReportService aggregateService)
             : base(d, userManager)
         {
-            TimeProvider = timeProvider;
             ActivityService = activityService;
+            AggregateService = aggregateService;
         }
 
-        private ReportItem GetAggregateReport(ReportItem.RIType tp, DateTime start, int ColumnsCount)
-        {
-            var result = new ReportItem()
-            {
-                RiType = tp,
-                StartDate = start
-            };
-
-            var columnDate = start;
-            result.Columns = new DateTime[ColumnsCount];
-            var dateRanges = new DateTime[ColumnsCount + 1];
-            for (int i = 0; i < ColumnsCount; i++)
-            {
-                dateRanges[i] = columnDate;
-                result.Columns[i] = columnDate;
-                switch (tp)
-                {
-                    case ReportItem.RIType.Daily:
-                        columnDate = columnDate.AddDays(1);
-                        break;
-                    case ReportItem.RIType.Weekly:
-                        columnDate = columnDate.AddDays(7);
-                        break;
-                    case ReportItem.RIType.Monthly:
-                    default:
-                        columnDate = columnDate.AddMonths(1);
-                        break;
-                }
-            }
-            dateRanges[ColumnsCount] = columnDate;
-            result.EndDate = columnDate.AddDays(-1);
-
-            var tasks = (from tks in DB.Tasks where tks.Profile == CurrentProfile orderby tks.CreateDate select tks).ToList();
-
-            result.Rows = new ReportItem.Row[tasks.Count];
-            for (int i = 0; i < tasks.Count; i++)
-            {
-                var data = new ReportItem.Cell[ColumnsCount + 1];
-                float total = 0F;
-                for (int n = 0; n < ColumnsCount; n++)
-                {
-                    var d = (from tl in DB.TimeLog
-                             where tl.TaskId == tasks[i].Id
-                             && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
-                             select tl.ElapsedMilliseconds).Sum();
-                    data[n] = new ReportItem.Cell
-                    {
-                        Value = d
-                    };
-                    total += d;
-                }
-                data[ColumnsCount] = new ReportItem.Cell { Value = total };
-
-                result.Rows[i] = new ReportItem.Row
-                {
-                    TaskTitle = tasks[i].Title,
-                    Data = data
-                };
-            }
-
-            return result;
-        }
 
         [Authorize]
         [HttpGet]
@@ -102,11 +39,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset);
-
-                var result = GetAggregateReport(ReportItem.RIType.Daily, startOfTheWeek, 7);
-
-                return Ok(result);
+                return Ok(AggregateService.GetReport(CurrentProfile, ReportItem.RIType.Daily, timeoffset, start));
             });
         }
 
@@ -119,12 +52,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-
-                DateTime startOfTheWeek = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset).AddDays(-4 * 7);
-
-                var result = GetAggregateReport(ReportItem.RIType.Weekly, startOfTheWeek, 5);
-
-                return Ok(result);
+                return Ok(AggregateService.GetReport(CurrentProfile, ReportItem.RIType.Weekly, timeoffset, start));
             });
         }
 
@@ -137,11 +65,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                DateTime startOfTheYear = TimeConverter.GetStartOfTheYearForTimeOffset(start, timeoffset);
-
-                var result = GetAggregateReport(ReportItem.RIType.Monthly, startOfTheYear, 12);
-
-                return Ok(result);
+                return Ok(AggregateService.GetReport(CurrentProfile, ReportItem.RIType.Monthly, timeoffset, start));
             });
         }
 
@@ -155,7 +79,7 @@ namespace NoCrast.Server.Controllers
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                return Ok(ActivityService.GetActivityReport(CurrentProfile, timeoffset));
+                return Ok(ActivityService.GetReport(CurrentProfile, timeoffset));
             });
         }
     }
