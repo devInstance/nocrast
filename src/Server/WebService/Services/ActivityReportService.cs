@@ -6,7 +6,7 @@ using NoCrast.Shared.Utils;
 using System;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("NoCrast.ServerTests")]
+[assembly: InternalsVisibleTo("NoCrast.Server.WebService.Tests")]
 namespace NoCrast.Server.Services
 {
 

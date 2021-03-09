@@ -4,10 +4,9 @@ using NoCrast.Server.Model;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("NoCrast.ServerTests")]
+[assembly: InternalsVisibleTo("NoCrast.Server.WebService.Tests")]
 namespace NoCrast.Server.Services
 {
     public class AggregateReportService : BaseService
@@ -54,8 +53,6 @@ namespace NoCrast.Server.Services
 
                 var tasks = Repository.GetTasksQuery(currentProfile).SelectList();
 
-                //            var tasks = (from tks in DB.Tasks where tks.Profile == currentProfile orderby tks.CreateDate select tks).ToList();
-
                 result.Rows = new ReportItem.Row[tasks.Count];
 
                 for (int i = 0; i < tasks.Count; i++)
@@ -67,11 +64,6 @@ namespace NoCrast.Server.Services
                     float total = 0F;
                     for (int n = 0; n < ColumnsCount; n++)
                     {
-                        //var d = (from tl in DB.TimeLog
-                        //         where tl.TaskId == tasks[i].Id
-                        //         && tl.StartTime >= dateRanges[n] && tl.StartTime < dateRanges[n + 1]
-                        //         select tl.ElapsedMilliseconds).Sum();
-
                         var d = reportQuery.PeriodSum(dateRanges[n], dateRanges[n + 1]);
                         l.T($"report cell between: {dateRanges[n]} and {dateRanges[n+1]}, sum {d}");
 

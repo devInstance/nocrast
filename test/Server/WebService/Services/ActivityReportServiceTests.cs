@@ -31,8 +31,6 @@ namespace NoCrast.Server.Services.Tests
 
             mockRepository.Setup(x => x.GetActivityReportQuery(It.IsAny<UserProfile>())).Returns(mockSelect.Object);
 
-            var mockLog = new Mock<IScopeManager>();
-
             ActivityReportService service = new ActivityReportService(new IScopeManagerMock(), timeProvider, mockRepository.Object);
 
             var result = service.GetReport(null, 0);
