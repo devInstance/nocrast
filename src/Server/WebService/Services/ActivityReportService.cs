@@ -21,11 +21,25 @@ namespace NoCrast.Server.Services
         {
             DateTime now = TimeProvider.CurrentTime;
             DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
-            //DateTime startOfDay = now.Date;
+
             if(start.HasValue)
             {
                 startOfDay = TimeConverter.ConvertToUtc(start.Value.Date, timeoffset);
             }
+
+            switch (type)
+            {
+                case ReportItem.RIType.Weekly:
+                    startOfDay = TimeConverter.GetStartOfTheWeekForTimeOffset(startOfDay, timeoffset);
+                    break;
+                case ReportItem.RIType.Monthly:
+                    startOfDay = TimeConverter.GetStartOfTheMonthForTimeOffset(startOfDay, timeoffset);
+                    break;
+                case ReportItem.RIType.Yearly:
+                    startOfDay = TimeConverter.GetStartOfTheYearForTimeOffset(startOfDay, timeoffset);
+                    break;
+            }
+
 
             var ninterval = 15;
             if(interval.HasValue)
