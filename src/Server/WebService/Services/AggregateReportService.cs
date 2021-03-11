@@ -87,7 +87,7 @@ namespace NoCrast.Server.Services
             }
         }
 
-        internal ReportItem GetReport(UserProfile currentProfile, ReportItem.RIType type, int timeoffset, DateTime start)
+        internal ReportItem GetReport(UserProfile currentProfile, int timeoffset, ReportItem.RIType type, DateTime start)
         {
             using (var l = log.TraceScope())
             {
@@ -97,15 +97,15 @@ namespace NoCrast.Server.Services
                 {
                     case ReportItem.RIType.Daily:
                         columnCount = 7;
-                        startPeriod = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset);
+                        startPeriod = start.StartOfWeek(DayOfWeek.Monday).ToUTC(timeoffset);
                         break;
                     case ReportItem.RIType.Weekly:
                         columnCount = 5;
-                        startPeriod = TimeConverter.GetStartOfTheWeekForTimeOffset(start, timeoffset).AddDays(-4 * 7);
+                        startPeriod = start.StartOfWeek(DayOfWeek.Monday).ToUTC(timeoffset).AddDays(-4 * 7);
                         break;
                     case ReportItem.RIType.Monthly:
                         columnCount = 12;
-                        startPeriod = TimeConverter.GetStartOfTheYearForTimeOffset(start, timeoffset);
+                        startPeriod = start.StartOfYear().ToUTC(timeoffset);
                         break;
                     default:
                         throw new Exception("Report type is not supported");

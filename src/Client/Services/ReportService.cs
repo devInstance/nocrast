@@ -23,24 +23,16 @@ namespace NoCrast.Client.Services
             Log.D("constructor");
         }
 
-        public async Task<ReportItem> GetReportAsync(ReportItem.RIType rIType, DateTime start)
+        public async Task<ReportItem> GetAggregateReportAsync(ReportItem.RIType rIType, DateTime start)
         {
             using (var l = Log.TraceScope())
             {
                 ResetNetworkError();
 
+
                 try
                 {
-                    switch (rIType)
-                    {
-                        case ReportItem.RIType.Weekly:
-                            return await Api.GetWeeklyReportAsync(TimeProvider.UtcTimeOffset, start);
-                        case ReportItem.RIType.Monthly:
-                            return await Api.GetMonthlyReportAsync(TimeProvider.UtcTimeOffset, start);
-                        case ReportItem.RIType.Daily:
-                        default:
-                            return await Api.GetDailyReportAsync(TimeProvider.UtcTimeOffset, start);
-                    }
+                    return await Api.GetAggregateReportAsync(TimeProvider.UtcTimeOffset, rIType, start);
                 }
                 catch (Exception ex)
                 {

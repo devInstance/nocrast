@@ -16,19 +16,9 @@ namespace NoCrast.Client.Services.Net
         {
         }
 
-        public async Task<ReportItem> GetDailyReportAsync(int timeoffset, DateTime startTime)
+        public async Task<ReportItem> GetAggregateReportAsync(int timeoffset, ReportItem.RIType type, DateTime startTime)
         {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/daily?timeoffset={timeoffset}&start={startTime}");
-        }
-
-        public async Task<ReportItem> GetMonthlyReportAsync(int timeoffset, DateTime startTime)
-        {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/monthly?timeoffset={timeoffset}&start={startTime}");
-        }
-
-        public async Task<ReportItem> GetWeeklyReportAsync(int timeoffset, DateTime startTime)
-        {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/weekly?timeoffset={timeoffset}&start={startTime}");
+            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate?timeoffset={timeoffset}&type={type}&start={startTime}");
         }
 
         public async Task<ReportItem> GetActivityReportAsync(int timeoffset, ReportItem.RIType type, ReportItem.RIMode mode, DateTime startTime, DateTime? endTime)

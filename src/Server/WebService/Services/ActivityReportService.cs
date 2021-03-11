@@ -19,27 +19,23 @@ namespace NoCrast.Server.Services
 
         public ReportItem GetReport(UserProfile currentProfile, int timeoffset, ReportItem.RIType type, ReportItem.RIMode mode, int? interval, DateTime? start)
         {
-            DateTime now = TimeProvider.CurrentTime;
-            DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
+            DateTime startOfDay = TimeProvider.CurrentTime.Date.ToLocal(timeoffset);
 
-            if(start.HasValue)
+            if (start.HasValue)
             {
-                startOfDay = TimeConverter.ConvertToUtc(start.Value.Date, timeoffset);
+                switch (type)
+                {
+                    case ReportItem.RIType.Weekly:
+                        startOfDay = start.Value.StartOfWeek(DayOfWeek.Monday).ToUTC(timeoffset);
+                        break;
+                    case ReportItem.RIType.Monthly:
+                        startOfDay = start.Value.StartOfMonth().ToUTC(timeoffset);
+                        break;
+                    case ReportItem.RIType.Yearly:
+                        startOfDay = start.Value.StartOfYear().ToUTC(timeoffset);
+                        break;
+                }
             }
-
-            switch (type)
-            {
-                case ReportItem.RIType.Weekly:
-                    startOfDay = TimeConverter.GetStartOfTheWeekForTimeOffset(startOfDay, timeoffset);
-                    break;
-                case ReportItem.RIType.Monthly:
-                    startOfDay = TimeConverter.GetStartOfTheMonthForTimeOffset(startOfDay, timeoffset);
-                    break;
-                case ReportItem.RIType.Yearly:
-                    startOfDay = TimeConverter.GetStartOfTheYearForTimeOffset(startOfDay, timeoffset);
-                    break;
-            }
-
 
             var ninterval = 15;
             if(interval.HasValue)
@@ -90,10 +86,6 @@ namespace NoCrast.Server.Services
                 dateRanges[columnsCount] = columnDate;
 
                 result.Rows = new ReportItem.Row[tasks.Length];
-                
-                
-                //query.Start(startOfDay);
-                //query.End(columnDate);
 
                 for (int i = 0; i < tasks.Length; i++)
                 {
@@ -137,6 +129,7 @@ namespace NoCrast.Server.Services
                     {
                         query.Task(tasks[i].PublicId);
                     }
+
                     l.T($"***** Task {tasks[i].Title} startTime:{result.StartDate}, endTime:{result.EndDate} -> {type}");
 
                     var data = new long[columnsCount];

@@ -32,40 +32,14 @@ namespace NoCrast.Server.Controllers
 
         [Authorize]
         [HttpGet]
-        [Route("aggregate/daily")]
+        [Route("aggregate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<ReportItem> GetDailyReport(int timeoffset, DateTime start)
+        public ActionResult<ReportItem> GetAggregateReport(int timeoffset, ReportItem.RIType type, DateTime start)
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                return Ok(AggregateService.GetReport(CurrentProfile, ReportItem.RIType.Daily, timeoffset, start));
-            });
-        }
-
-        [Authorize]
-        [HttpGet]
-        [Route("aggregate/weekly")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<ReportItem> GetWeeklyReport(int timeoffset, DateTime start)
-        {
-            return HandleWebRequest<ReportItem>(() =>
-            {
-                return Ok(AggregateService.GetReport(CurrentProfile, ReportItem.RIType.Weekly, timeoffset, start));
-            });
-        }
-
-        [Authorize]
-        [HttpGet]
-        [Route("aggregate/monthly")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<ReportItem> GetMonthlyReport(int timeoffset, DateTime start)
-        {
-            return HandleWebRequest<ReportItem>(() =>
-            {
-                return Ok(AggregateService.GetReport(CurrentProfile, ReportItem.RIType.Monthly, timeoffset, start));
+                return Ok(AggregateService.GetReport(CurrentProfile, timeoffset, type, start));
             });
         }
 

@@ -51,9 +51,12 @@
                         </td>
                         @foreach (var cell in row.Data)
                         {
-                            <td>
+                        <td>
+                            @if (cell.Value > 0)
+                            {
                                 @String.Format("{0:F1}", cell.Value / (60 * 60 * 1000))
-                            </td>
+                            }
+                        </td>
                         }
                     </tr>
                 }
@@ -72,73 +75,5 @@
 
 @code {
 
-    private IScopeLog log;
-
-    private ReportItem.RIType selectedType = ReportItem.RIType.Unknown;
-
-    private DateTime selectedDate;
-    private DateTime startDate;
-    private DateTime endDate;
-
-    private string InputFormat
-    {
-        get
-        {
-            switch (selectedType)
-            {
-                case ReportItem.RIType.Weekly:
-                    return "MMM d yyy";
-                case ReportItem.RIType.Monthly:
-                case ReportItem.RIType.Yearly:
-                    return "yyy";
-                case ReportItem.RIType.Daily:
-                default:
-                    return "MMM d yyy";
-            }
-        }
-    }
-
-    private string selectedPeriod = "";
-
-    private ReportItem Report { get; set; }
-
-    protected async override Task OnInitializedAsync()
-    {
-        log = ScopeManager.CreateLogger(this);
-        try
-        {
-            selectedDate = TimeProvider.CurrentTime;
-
-            using (var scope = log.TraceScope())
-            {
-                RequestReportAsync(ReportItem.RIType.Daily);
-            }
-        }
-        catch (Exception ex)
-        {
-            log.E(ex);
-        }
-    }
-
-    public async void RequestReportAsync(ReportToolbar.FilterChangedArgs args)
-    {
-        selectedDate = args.Date;
-        RequestReportAsync(args.Type);
-    }
-
-    public async void RequestReportAsync(ReportItem.RIType type)
-    {
-        Report = null;
-        selectedType = type;
-        Report = await Service.GetReportAsync(type, selectedDate.ToUniversalTime());
-        if (Report != null)
-        {
-            startDate = TimeConverter.ConvertToLocal(Report.StartDate, TimeProvider.UtcTimeOffset);
-            endDate = TimeConverter.ConvertToLocal(Report.EndDate, TimeProvider.UtcTimeOffset);
-            selectedPeriod = $"{startDate.ToString("MMM d yyy")} - {endDate.ToString("MMM d yyy")}";
-        }
-
-        StateHasChanged();
-    }
 
 }
