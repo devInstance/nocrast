@@ -14,8 +14,7 @@ namespace NoCrast.Server.Database.Postgres.Data.Queries
             public TimeLog log;
             public TimerTask task;
         }
-        private IQueryable<QueryType> CurrentQuery;
-        protected int Timeoffset { get; set; }
+        private IQueryable<QueryType> currentQuery;
 
         public PostgresActivityReportQuery(IScopeManager logManager, 
                                             ITimeProvider timeProvider, 
@@ -23,44 +22,38 @@ namespace NoCrast.Server.Database.Postgres.Data.Queries
                                             UserProfile currentProfile)
             : base(logManager, timeProvider, dB, currentProfile)
         {
-            CurrentQuery = from tl in DB.TimeLog
+            currentQuery = from tl in DB.TimeLog
                            join ts in DB.Tasks on tl.Task equals ts
                            where ts.Profile == CurrentProfile
                            select new QueryType { log = tl, task = ts };
         }
 
-        public IActivityReportQuery Offset(int timeoffset)
-        {
-            Timeoffset = timeoffset;
-            return this;
-        }
-
         public IActivityReportQuery Task(string id)
         {
-            CurrentQuery = (from q in CurrentQuery where q.task.PublicId == id select q);
+            currentQuery = (from q in currentQuery where q.task.PublicId == id select q);
             return this;
         }
 
         public IActivityReportQuery Start(DateTime time)
         {
-            CurrentQuery = (from q in CurrentQuery where q.log.StartTime >= time select q);
+            currentQuery = (from q in currentQuery where q.log.StartTime >= time select q);
             return this;
         }
 
         public IActivityReportQuery End(DateTime time)
         {
-            CurrentQuery = (from q in CurrentQuery where q.log.StartTime.AddMilliseconds(q.log.ElapsedMilliseconds) <= time select q);
+            currentQuery = (from q in currentQuery where q.log.StartTime <= time select q);
             return this;
         }
 
         public long PeriodSum(long startTime, long endTime)
         {
             // https://scicomp.stackexchange.com/questions/26258/the-easiest-way-to-find-intersection-of-two-intervals
-            var priod = (from q in CurrentQuery
-                     where !(startTime > (q.log.StartTime.AddMinutes(Timeoffset).Hour * 60 + q.log.StartTime.AddMinutes(Timeoffset).Minute + (q.log.ElapsedMilliseconds / 1000 / 60))
-                     || (endTime < q.log.StartTime.AddMinutes(Timeoffset).Hour * 60 + q.log.StartTime.AddMinutes(Timeoffset).Minute))
-                     select Math.Min(endTime, (q.log.StartTime.AddMinutes(Timeoffset).Hour * 60 + q.log.StartTime.AddMinutes(Timeoffset).Minute + (q.log.ElapsedMilliseconds / 1000 / 60)))
-                            - Math.Max(startTime, q.log.StartTime.AddMinutes(Timeoffset).Hour * 60 + q.log.StartTime.AddMinutes(Timeoffset).Minute)
+            var priod = (from q in currentQuery
+                     where !(startTime > (q.log.StartTime.Hour * 60 + q.log.StartTime.Minute + (q.log.ElapsedMilliseconds / 1000 / 60))
+                     || (endTime < q.log.StartTime.Hour * 60 + q.log.StartTime.Minute))
+                     select Math.Min(endTime, (q.log.StartTime.Hour * 60 + q.log.StartTime.Minute + (q.log.ElapsedMilliseconds / 1000 / 60)))
+                            - Math.Max(startTime, q.log.StartTime.Hour * 60 + q.log.StartTime.Minute)
                             );
 
             //var test = priod.Count();

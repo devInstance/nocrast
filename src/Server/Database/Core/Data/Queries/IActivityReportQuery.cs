@@ -8,7 +8,6 @@ namespace NoCrast.Server.Data.Queries
 {
     public interface IActivityReportQuery
     {
-        IActivityReportQuery Offset(int timeoffset);
         IActivityReportQuery Task(string id);
         IActivityReportQuery Start(DateTime time);
         IActivityReportQuery End(DateTime time);

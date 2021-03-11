@@ -17,28 +17,52 @@ namespace NoCrast.Server.Services
         {
         }
 
-        public ReportItem GetReport(UserProfile currentProfile, int timeoffset)
+        public ReportItem GetReport(UserProfile currentProfile, int timeoffset, ReportItem.RIType type, ReportItem.RIMode mode, int? interval, DateTime? start)
         {
             DateTime now = TimeProvider.CurrentTime;
-            //DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
-            DateTime startOfDay = now.Date;
+            DateTime startOfDay = TimeConverter.GetStartOfTheDayForTimeOffset(now, timeoffset);
+            //DateTime startOfDay = now.Date;
+            if(start.HasValue)
+            {
+                startOfDay = TimeConverter.ConvertToUtc(start.Value.Date, timeoffset);
+            }
 
-            var interval = 15;
-            var columnsCount = 24 * 60 / interval;
+            var ninterval = 15;
+            if(interval.HasValue)
+            {
+                ninterval = interval.Value;
+            }
+            var columnsCount = 24 * 60 / ninterval;
 
-            return GetActivityReport(currentProfile, timeoffset, interval, startOfDay, columnsCount);
+            return GetActivityReport(currentProfile, type, mode, timeoffset, ninterval, startOfDay, columnsCount);
         }
 
-        internal ReportItem GetActivityReport(UserProfile currentProfile, int timeoffset, int interval, DateTime startOfDay, int columnsCount)
-        //        public ActionResult<ReportItem> GetActivityReport(ActivityReportType? type, int? interval, string taskid, int timeoffset)
-
+        internal ReportItem GetActivityReport(UserProfile currentProfile, 
+                                                ReportItem.RIType type, 
+                                                ReportItem.RIMode mode, 
+                                                int timeoffset, 
+                                                int interval, 
+                                                DateTime startOfDay, 
+                                                int columnsCount)
         {
             using (var l = log.TraceScope())
             {
                 var result = new ReportItem()
                 {
-                    RiType = ReportItem.RIType.Unknown
+                    RiType = type,
+                    RiMode = mode,
+                    StartDate = startOfDay
                 };
+
+                TimerTask[] tasks;
+                if(mode == ReportItem.RIMode.ByTask)
+                {
+                    tasks = Repository.GetTasksQuery(currentProfile).SelectList().ToArray();
+                }
+                else
+                {
+                    tasks = new[] { new TimerTask { Title = "All" } };
+                }
 
                 var columnDate = startOfDay;
                 result.Columns = new DateTime[columnsCount];
@@ -46,20 +70,63 @@ namespace NoCrast.Server.Services
                 for (int i = 0; i < columnsCount; i++)
                 {
                     dateRanges[i] = columnDate;
-                    result.Columns[i] = columnDate;
+                    result.Columns[i] = TimeConverter.ConvertToLocal(columnDate, timeoffset);
                     columnDate = columnDate.AddMinutes(interval);
                 }
                 dateRanges[columnsCount] = columnDate;
 
-                result.Rows = new ReportItem.Row[1/*tasks.Count*/];
+                result.Rows = new ReportItem.Row[tasks.Length];
+                
+                
+                //query.Start(startOfDay);
+                //query.End(columnDate);
 
-                var query = Repository.GetActivityReportQuery(currentProfile);
-                query.Offset(timeoffset);
-
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < tasks.Length; i++)
                 {
+                    var query = Repository.GetActivityReportQuery(currentProfile);
+
+                    switch (type)
+                    {
+                        case ReportItem.RIType.Weekly:
+                            {
+                                query.Start(startOfDay);
+
+                                var end = startOfDay.AddDays(7);
+                                query.End(end);
+                                result.EndDate = end;
+                            }
+                            break;
+                        case ReportItem.RIType.Monthly:
+                            {
+                                query.Start(startOfDay);
+
+                                var end = startOfDay.AddMonths(1);
+                                query.End(end);
+                                result.EndDate = end;
+                            }
+                            break;
+                        case ReportItem.RIType.Yearly:
+                            {
+                                query.Start(startOfDay);
+
+                                var end = startOfDay.AddYears(1);
+                                query.End(end);
+                                result.EndDate = end;
+                            }
+                            break;
+                        default:
+                            result.EndDate = startOfDay;
+                            break;
+                    }
+
+                    if (tasks[i].PublicId != null)
+                    {
+                        query.Task(tasks[i].PublicId);
+                    }
+                    l.T($"***** Task {tasks[i].Title} startTime:{result.StartDate}, endTime:{result.EndDate} -> {type}");
+
                     var data = new long[columnsCount];
-                    long maxValue = 0;
+                    long maxValue = 1;
                     for (int n = 0; n < columnsCount; n++)
                     {
                         long startTime = dateRanges[n].Hour * 60 + dateRanges[n].Minute;
@@ -73,7 +140,8 @@ namespace NoCrast.Server.Services
                         var d = query.PeriodSum(startTime, endTime);
 
                         l.T($"{startTime}-{endTime} startTime:{dateRanges[n].TimeOfDay}, endTime:{dateRanges[n + 1].TimeOfDay} -> {d}");
-                        if (d > maxValue)
+
+                        if (d > 0 && d > maxValue)
                         {
                             maxValue = d;
                         }
@@ -92,7 +160,7 @@ namespace NoCrast.Server.Services
 
                     result.Rows[i] = new ReportItem.Row
                     {
-                        //TaskTitle = tasks[i].Title,
+                        Title = tasks[i].Title,
                         Data = finalData
                     };
                 }

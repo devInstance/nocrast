@@ -1,6 +1,13 @@
 ﻿@page "/reports/activity"
 
-<PageTitle Value="Report"></PageTitle>
+<PageTitle Value="Activity Report"></PageTitle>
+
+<ReportToolbar FilterChanged="(t)=>RequestReportAsync(t)" SelectedType="selectedType" SelectedDate="selectedDate" SelectedMode="selectedMode" ViewType="ReportToolbar.ToolbarType.Activity"></ReportToolbar>
+
+<div class="p-2">
+    <h3>@selectedPeriod</h3>
+</div>
+
 @if (Report != null)
 {
     <div class="row pt-2">
@@ -30,6 +37,9 @@ else
 
     private IScopeLog log;
 
+    private ReportItem.RIType selectedType = ReportItem.RIType.Total;
+    private ReportItem.RIMode selectedMode = ReportItem.RIMode.Combined;
+
     private DateTime selectedDate;
     private DateTime startDate;
     private DateTime endDate;
@@ -49,7 +59,7 @@ else
 
             using (var scope = log.TraceScope())
             {
-                RequestReportAsync(ReportItem.RIType.Daily);
+                RequestReportAsync(ReportItem.RIType.Total, ReportItem.RIMode.Combined);
             }
         }
         catch (Exception ex)
@@ -58,28 +68,47 @@ else
         }
     }
 
-    public async void RequestReportAsync(ReportItem.RIType type)
+    public async void RequestReportAsync(ReportToolbar.FilterChangedArgs args)
+    {
+        selectedDate = args.Date;
+        RequestReportAsync(args.Type, args.Mode);
+    }
+
+    public async void RequestReportAsync(ReportItem.RIType type, ReportItem.RIMode mode)
     {
         Report = null;
-        Report = await Service.GetActivityReportAsync();
+        Report = await Service.GetActivityReportAsync(type, mode, selectedDate);
+        selectedType = type;
+        selectedMode = mode;
 
-        var items = new Heatline.Item[Report.Rows[0].Data.Length];
-        for (int i = 0; i < Report.Rows[0].Data.Length; i++)
+        Lines = new Heatline.Line[Report.Rows.Length];
+        for (int n = 0; n < Lines.Length; n++)
         {
-            var item = new Heatline.Item
+            var data = Report.Rows[n].Data;
+            var items = new Heatline.Item[data.Length];
+            for (int i = 0; i < items.Length; i++)
             {
-                Time = Report.Columns[i], //TimeConverter.ConvertToLocal(Report.Columns[i], TimeProvider.UtcTimeOffset),
-                Value = Report.Rows[0].Data[i].Value,
-                Description = Report.Rows[0].Data[i].Details
+                var item = new Heatline.Item
+                {
+                    Time = Report.Columns[i],
+                    Value = data[i].Value,
+                    Description = data[i].Details
+                };
+                items[i] = item;
+            }
+
+            Lines[n] = new Heatline.Line
+            {
+                CssClass = "blue",
+                Items = items
             };
-            items[i] = item;
         }
 
-        Lines[0] = new Heatline.Line
-        {
-            CssClass = "blue",
-            Items = items
-        };
+        startDate = Report.StartDate;
+        endDate = Report.EndDate;
+
+        selectedPeriod = $"{startDate.ToString("MMM d yyy")} - {endDate.ToString("MMM d yyy")}";
+
         StateHasChanged();
     }
 

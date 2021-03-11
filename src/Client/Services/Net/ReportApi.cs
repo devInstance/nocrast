@@ -31,9 +31,14 @@ namespace NoCrast.Client.Services.Net
             return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/aggregate/weekly?timeoffset={timeoffset}&start={startTime}");
         }
 
-        public async Task<ReportItem> GetActivityReportAsync(int timeoffset)
+        public async Task<ReportItem> GetActivityReportAsync(int timeoffset, ReportItem.RIType type, ReportItem.RIMode mode, DateTime startTime, DateTime? endTime)
         {
-            return await httpClient.GetFromJsonAsync<ReportItem>($"{Controller}/activity?timeoffset={timeoffset}");
+            var url = $"{Controller}/activity?timeoffset={timeoffset}&type={type}&mode={mode}&start={startTime}";
+            if(endTime.HasValue)
+            {
+                url += $"&end={endTime.Value}";
+            }
+            return await httpClient.GetFromJsonAsync<ReportItem>(url);
         }
     }
 }

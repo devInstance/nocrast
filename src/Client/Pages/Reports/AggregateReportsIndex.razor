@@ -1,11 +1,11 @@
 ﻿@page "/reports/aggregate"
 
-<PageTitle Value="Report"></PageTitle>
+<PageTitle Value="Aggregate Report"></PageTitle>
 
-<ReportToolbar FilterChanged="(t)=>RequestReportAsync(t)" SelectedType="selectedType" SelectedDate="selectedDate"></ReportToolbar>
+<ReportToolbar FilterChanged="(t)=>RequestReportAsync(t)" SelectedType="selectedType" SelectedDate="selectedDate" ViewType="ReportToolbar.ToolbarType.Aggregate"></ReportToolbar>
 
 <div class="p-2">
-    <h2>@selectedPeriod</h2>
+    <h3>@selectedPeriod</h3>
 </div>
 
 <div class="table-responsive p-2">
@@ -47,7 +47,7 @@
                 {
                     <tr>
                         <td>
-                            @row.TaskTitle
+                            @row.Title
                         </td>
                         @foreach (var cell in row.Data)
                         {

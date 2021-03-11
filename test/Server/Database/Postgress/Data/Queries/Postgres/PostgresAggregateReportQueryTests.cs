@@ -15,14 +15,14 @@ namespace NoCrast.Server.Data.Queries.Postgres.Tests
         static DateTime STARTDATE = new DateTime(2020, 8, 12, 0, 0, 0);
 
         [Theory()]
-        [InlineData("2020-8-12 10:00:00", "2020-8-12 12:00:00", 2, false)]
-        [InlineData("2020-8-13 10:00:00", "2020-8-13 12:00:00", 2, false)]
-        [InlineData("2020-8-12 10:00:00", "2020-8-12 12:00:00", 0, true)]
+        [InlineData("2020-8-12 10:00:00", "2020-8-12 12:00:00", 2, null)]
+        [InlineData("2020-8-13 10:00:00", "2020-8-13 12:00:00", 2, null)]
+        [InlineData("2020-8-12 10:00:00", "2020-8-12 12:00:00", 0, "Task 2")]
 //        [InlineData("2020-8-13 10:00:00", "2020-8-13 11:00:00", 1, true)] //TODO: we have to support this case eventually
-        [InlineData("2020-8-13 00:00:00", "2020-8-13 23:00:00", 8, true)]
-        [InlineData("2020-8-12 00:00:00", "2020-8-13 23:00:00", 12, true)]
-        [InlineData("2020-8-12 00:00:00", "2020-8-13 23:00:00", 20, false)]
-        public void PeriodSumTest(string startDate, string endDate, long expectedResultInHours, bool filterLastTask)
+        [InlineData("2020-8-13 00:00:00", "2020-8-13 23:00:00", 8, "Task 2")]
+        [InlineData("2020-8-12 00:00:00", "2020-8-13 23:00:00", 12, "Task 2")]
+        [InlineData("2020-8-12 00:00:00", "2020-8-13 23:00:00", 20, null)]
+        public void PeriodSumTest(string startDate, string endDate, long expectedResultInHours, string taskid)
         {
             var start = DateTime.Parse(startDate);
             var end = DateTime.Parse(endDate);
@@ -58,9 +58,9 @@ namespace NoCrast.Server.Data.Queries.Postgres.Tests
 
                 var query = new PostgresAggregateReportQuery(new IScopeManagerMock(), timeProvider.Object, db_test.db, db_test.profile);
 
-                if (filterLastTask)
+                if (taskid != null)
                 {
-                    query.Task(db_test.lastTask);
+                    query.Task(taskid);
                 }
                 var result = query.PeriodSum(start, end);
 

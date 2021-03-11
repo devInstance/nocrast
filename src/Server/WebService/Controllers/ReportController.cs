@@ -74,12 +74,11 @@ namespace NoCrast.Server.Controllers
         [Route("activity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public ActionResult<ReportItem> GetActivityReport(int timeoffset)
-        //        public ActionResult<ReportItem> GetActivityReport(ActivityReportType? type, int? interval, string taskid, int timeoffset)
+        public ActionResult<ReportItem> GetActivityReport(int timeoffset, ReportItem.RIType type, ReportItem.RIMode mode, int? interval, DateTime? start, DateTime? end)
         {
             return HandleWebRequest<ReportItem>(() =>
             {
-                return Ok(ActivityService.GetReport(CurrentProfile, timeoffset));
+                return Ok(ActivityService.GetReport(CurrentProfile, timeoffset, type, mode, interval, start));
             });
         }
     }

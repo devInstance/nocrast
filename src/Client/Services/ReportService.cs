@@ -50,7 +50,7 @@ namespace NoCrast.Client.Services
             }
         }
 
-        public async Task<ReportItem> GetActivityReportAsync()
+        public async Task<ReportItem> GetActivityReportAsync(ReportItem.RIType rIType, ReportItem.RIMode mode, DateTime start)
         {
             using (var l = Log.TraceScope())
             {
@@ -58,7 +58,7 @@ namespace NoCrast.Client.Services
 
                 try
                 {
-                    return await Api.GetActivityReportAsync(TimeProvider.UtcTimeOffset);
+                    return await Api.GetActivityReportAsync(TimeProvider.UtcTimeOffset, rIType, mode, start, null);
                 }
                 catch (Exception ex)
                 {

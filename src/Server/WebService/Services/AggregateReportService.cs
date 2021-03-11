@@ -57,9 +57,10 @@ namespace NoCrast.Server.Services
 
                 for (int i = 0; i < tasks.Count; i++)
                 {
-                    l.T($"Task {tasks[i].Id} {tasks[i].PublicId}");
+                    var task = tasks[i];
+                    l.T($"Task {task.Id} {task.PublicId}");
 
-                    var reportQuery = Repository.GetAggregateReportQuery(currentProfile).Task(tasks[i]);
+                    var reportQuery = Repository.GetAggregateReportQuery(currentProfile).Task(task.PublicId);
                     var data = new ReportItem.Cell[ColumnsCount + 1];
                     float total = 0F;
                     for (int n = 0; n < ColumnsCount; n++)
@@ -77,7 +78,7 @@ namespace NoCrast.Server.Services
 
                     result.Rows[i] = new ReportItem.Row
                     {
-                        TaskTitle = tasks[i].Title,
+                        Title = task.Title,
                         Data = data
                     };
                 }

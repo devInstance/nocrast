@@ -1,7 +1,5 @@
 ﻿using NoCrast.Shared.Model;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NoCrast.Client.Services.Api
@@ -12,6 +10,6 @@ namespace NoCrast.Client.Services.Api
         Task<ReportItem> GetMonthlyReportAsync(int timeoffset, DateTime startTime);
         Task<ReportItem> GetDailyReportAsync(int timeoffset, DateTime startTime);
 
-        Task<ReportItem> GetActivityReportAsync(int timeoffset);
+        Task<ReportItem> GetActivityReportAsync(int timeoffset, ReportItem.RIType type, ReportItem.RIMode mode, DateTime startTime, DateTime? endTime);
     }
 }

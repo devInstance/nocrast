@@ -18,7 +18,7 @@ namespace NoCrast.Server.Services.Tests
         private static Mock<IAggregateReportQuery> AddTask(Mock<IAggregateReportQuery> mockSelect, string task)
         {
             var mockSelectReport = new Mock<IAggregateReportQuery>();
-            mockSelect.Setup(x => x.Task(It.Is<TimerTask>(a => a.Title == task))).Returns(mockSelectReport.Object);
+            mockSelect.Setup(x => x.Task(It.Is<string>(a => a == task))).Returns(mockSelectReport.Object);
             return mockSelectReport;
         }
 
@@ -63,7 +63,7 @@ namespace NoCrast.Server.Services.Tests
             Assert.Equal(2, result.Rows.Length);
 
             var row1 = result.Rows[0];
-            Assert.Equal("Task 1", row1.TaskTitle);
+            Assert.Equal("Task 1", row1.Title);
             var data1 = row1.Data;
             Assert.Equal(8, data1.Length);
             Assert.Equal(1 * HOURS, data1[0].Value);
@@ -76,7 +76,7 @@ namespace NoCrast.Server.Services.Tests
             Assert.Equal(8 * HOURS, data1[7].Value); //Total
 
             var row2 = result.Rows[1];
-            Assert.Equal("Task 2", row2.TaskTitle);
+            Assert.Equal("Task 2", row2.Title);
             var data2 = row2.Data;
             Assert.Equal(8, data2.Length);
             Assert.Equal(0, data2[0].Value);
@@ -135,7 +135,7 @@ namespace NoCrast.Server.Services.Tests
             Assert.Equal(3, result.Rows.Length);
 
             var row1 = result.Rows[0];
-            Assert.Equal("Task 1", row1.TaskTitle);
+            Assert.Equal("Task 1", row1.Title);
             var data1 = row1.Data;
             Assert.Equal(6, data1.Length);
             Assert.Equal(0 * HOURS, data1[0].Value);
@@ -146,7 +146,7 @@ namespace NoCrast.Server.Services.Tests
             Assert.Equal(8 * HOURS, data1[5].Value); //Total
 
             var row2 = result.Rows[1];
-            Assert.Equal("Task 2", row2.TaskTitle);
+            Assert.Equal("Task 2", row2.Title);
             var data2 = row2.Data;
             Assert.Equal(6, data2.Length);
             Assert.Equal(2 * HOURS, data2[0].Value);
@@ -200,7 +200,7 @@ namespace NoCrast.Server.Services.Tests
             Assert.Equal(3, result.Rows.Length);
 
             var row1 = result.Rows[0];
-            Assert.Equal("Task 1", row1.TaskTitle);
+            Assert.Equal("Task 1", row1.Title);
             var data1 = row1.Data;
             Assert.Equal(13, data1.Length);
             Assert.Equal(1 * HOURS, data1[0].Value);
@@ -212,7 +212,7 @@ namespace NoCrast.Server.Services.Tests
             Assert.Equal(6 * HOURS, data1[12].Value);
 
             var row2 = result.Rows[1];
-            Assert.Equal("Task 2", row2.TaskTitle);
+            Assert.Equal("Task 2", row2.Title);
             var data2 = row2.Data;
             Assert.Equal(13, data2.Length);
             Assert.Equal(0 * HOURS, data2[12].Value);

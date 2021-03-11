@@ -1,89 +1,168 @@
-﻿<div class="btn-toolbar p-2" role="toolbar">
-    <div class="btn-group btn-group-toggle mr-4" role="group">
-        <button type="button" class="btn btn-secondary @(SelectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Daily))">Daily</button>
-        <button type="button" class="btn btn-secondary @(SelectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Weekly))">Weekly</button>
-        <button type="button" class="btn btn-secondary @(SelectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Monthly))">Monthly</button>
+﻿<div class="btn-toolbar p-2 justify-content-between" role="toolbar">
+    <div class="btn-group btn-group-toggle mt-2" role="group">
+        @switch (ViewType)
+        {
+            case ToolbarType.Aggregate:
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Daily ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Daily))">Daily</button>
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Weekly))">Weekly</button>
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Monthly))">Monthly</button>
+                break;
+            case ToolbarType.Activity:
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Weekly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Weekly))">Weekly</button>
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Monthly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Monthly))">Monthly</button>
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Yearly ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Yearly))">Yearly</button>
+                <button type="button" class="btn btn-outline-primary @(selectedType == ReportItem.RIType.Total ? "active" : "")" @onclick="@(() => InvokeChangeAsync(ReportItem.RIType.Total))">All Time</button>
+                break;
+        }
     </div>
-    <div class="input-group">
-        <button type="button" class="btn btn-secondary mr-1" @onclick="@(() => PrevAsync())">
-            <span class="oi oi-chevron-left" aria-hidden="true"></span>
-        </button>
-        <input type="text" class="form-control mr-1" @bind="SelectedDate" @bind:format="MMM d yyy" readonly />
-        <button type="button" class="btn btn-secondary mr-2" @onclick="@(() => NextAsync())">
-            <span class="oi oi-chevron-right" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-secondary" @onclick="@(() => TodayAsync())">Today</button>
-    </div>
+    @if (selectedType != ReportItem.RIType.Total)
+    {
+        <div class="input-group mt-2">
+            <button type="button" class="btn mr-1" @onclick="@(() => PrevAsync())">
+                <span class="oi oi-chevron-left" aria-hidden="true"></span>
+            </button>
+            <input type="text" class="form-control mr-1" @bind="SelectedDate" @bind:format="@inputFormat" readonly />
+            <button type="button" class="btn mr-2" @onclick="@(() => NextAsync())">
+                <span class="oi oi-chevron-right" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-outline-primary" @onclick="@(() => TodayAsync())">Today</button>
+        </div>
+    }
+    @if (ViewType == ToolbarType.Activity)
+    {
+        <div class="btn-group btn-group-toggle mt-2">
+            <button type="button" class="btn btn-outline-primary" @onclick="@(() => InvokeChangeAsync(ReportItem.RIMode.Combined))">All</button>
+            <button type="button" class="btn btn-outline-primary" @onclick="@(() => InvokeChangeAsync(ReportItem.RIMode.ByTask))">By Task</button>
+        </div>
+
+    }
 </div>
 
 @inject IScopeManager ScopeManager;
-@inject ITimeProvider TimeProvider;
+    @inject ITimeProvider TimeProvider;
 
+    @code {
 
-@code {
-
-    [Parameter]
-    public ReportItem.RIType SelectedType { get; set; }
-
-    [Parameter]
-    public DateTime SelectedDate { get; set; }
-
-    public class FilterChangedArgs
-    {
-        public ReportItem.RIType Type { get; set; }
-        public DateTime Date { get; set; }
-    }
-
-    [Parameter]
-    public EventCallback<FilterChangedArgs> FilterChanged { get; set; }
-
-    private IScopeLog log;
-
-    protected async override Task OnInitializedAsync()
-    {
-        log = ScopeManager.CreateLogger(this);
-    }
-
-    private DateTime UpdateStep(DateTime aDate, int sign)
-    {
-        switch (SelectedType)
+        public enum ToolbarType
         {
-            case ReportItem.RIType.Daily:
-                return aDate.AddDays(7 * sign);
-            case ReportItem.RIType.Weekly:
-                return aDate.AddDays(7 * 5 * sign);
-            case ReportItem.RIType.Monthly:
-                return aDate.AddYears(1 * sign);
-            default:
-                return aDate;
+            Aggregate,
+            Activity
+        };
+
+        [Parameter]
+        public ToolbarType ViewType { get; set; }
+
+        [Parameter]
+        public ReportItem.RIMode SelectedMode { get; set; }
+
+        private ReportItem.RIType selectedType;
+        [Parameter]
+        public ReportItem.RIType SelectedType
+        {
+            get
+            {
+                return selectedType;
+            }
+            set
+            {
+                selectedType = value;
+                switch (selectedType)
+                {
+                    case ReportItem.RIType.Weekly:
+                        inputFormat = "MMM d yyy";
+                        break;
+                    case ReportItem.RIType.Monthly:
+                    case ReportItem.RIType.Yearly:
+                        inputFormat = "yyy";
+                        break;
+                    case ReportItem.RIType.Daily:
+                    default:
+                        inputFormat = "MMM d yyy";
+                        break;
+                }
+            }
+        }
+
+        [Parameter]
+        public DateTime SelectedDate { get; set; }
+
+        [Parameter]
+        public bool ShowTotalButton { get; set; }
+
+        string inputFormat = "MMM d yyy";
+
+        public class FilterChangedArgs
+        {
+            public ReportItem.RIType Type { get; set; }
+            public ReportItem.RIMode Mode { get; set; }
+            public DateTime Date { get; set; }
+        }
+
+        [Parameter]
+        public EventCallback<FilterChangedArgs> FilterChanged { get; set; }
+
+        private IScopeLog log;
+
+        protected async override Task OnInitializedAsync()
+        {
+            log = ScopeManager.CreateLogger(this);
+        }
+
+        private DateTime UpdateStep(DateTime aDate, int sign)
+        {
+            switch (selectedType)
+            {
+                case ReportItem.RIType.Daily:
+                    return aDate.AddDays(7 * sign);
+                case ReportItem.RIType.Weekly:
+                    if (ViewType == ToolbarType.Activity)
+                    {
+                        return aDate.AddDays(7 * sign);
+                    }
+                    return aDate.AddDays(7 * 5 * sign);
+                case ReportItem.RIType.Monthly:
+                    if (ViewType == ToolbarType.Activity)
+                    {
+                        return aDate.AddDays(7 * 5 * sign);
+                    }
+                    return aDate.AddYears(1 * sign);
+                case ReportItem.RIType.Yearly:
+                    return aDate.AddYears(1 * sign);
+                default:
+                    return aDate;
+            }
+        }
+
+        public async void PrevAsync()
+        {
+            SelectedDate = UpdateStep(SelectedDate, -1);
+            InvokeChangeAsync();
+        }
+
+        public async void NextAsync()
+        {
+            SelectedDate = UpdateStep(SelectedDate, 1);
+            InvokeChangeAsync();
+        }
+
+        public async void TodayAsync()
+        {
+            SelectedDate = TimeProvider.CurrentTime;
+            InvokeChangeAsync();
+        }
+
+        private async void InvokeChangeAsync(ReportItem.RIType t)
+        {
+            FilterChanged.InvokeAsync(new FilterChangedArgs { Type = t, Mode = SelectedMode, Date = SelectedDate });
+        }
+
+        private async void InvokeChangeAsync(ReportItem.RIMode m)
+        {
+            FilterChanged.InvokeAsync(new FilterChangedArgs { Type = SelectedType, Mode = m, Date = SelectedDate });
+        }
+
+        private async void InvokeChangeAsync()
+        {
+            InvokeChangeAsync(selectedType);
         }
     }
-
-    public async void PrevAsync()
-    {
-        SelectedDate = UpdateStep(SelectedDate, -1);
-        InvokeChangeAsync();
-    }
-
-    public async void NextAsync()
-    {
-        SelectedDate = UpdateStep(SelectedDate, 1);
-        InvokeChangeAsync();
-    }
-
-    public async void TodayAsync()
-    {
-        SelectedDate = TimeProvider.CurrentTime;
-        InvokeChangeAsync();
-    }
-
-    private async void InvokeChangeAsync(ReportItem.RIType t)
-    {
-        FilterChanged.InvokeAsync(new FilterChangedArgs { Type = t, Date = SelectedDate });
-    }
-
-    private async void InvokeChangeAsync()
-    {
-        InvokeChangeAsync(SelectedType);
-    }
-}

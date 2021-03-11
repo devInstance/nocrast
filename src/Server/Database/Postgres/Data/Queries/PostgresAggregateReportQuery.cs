@@ -13,6 +13,7 @@ namespace NoCrast.Server.Database.Postgres.Data.Queries
     internal class PostgresAggregateReportQuery : PostgresBaseQuery, IAggregateReportQuery
     {
         private IQueryable<TimeLog> currentQuery;
+        protected int Timeoffset { get; set; }
 
         public PostgresAggregateReportQuery(IScopeManager logManager,
                                             ITimeProvider timeProvider,
@@ -26,7 +27,6 @@ namespace NoCrast.Server.Database.Postgres.Data.Queries
                            select tl;
         }
 
-
         public long PeriodSum(DateTime start, DateTime end)
         {
             return (from tl in currentQuery
@@ -34,10 +34,10 @@ namespace NoCrast.Server.Database.Postgres.Data.Queries
                     select tl.ElapsedMilliseconds).Sum();
         }
 
-        public IAggregateReportQuery Task(TimerTask timerTask)
+        public IAggregateReportQuery Task(string id)
         {
             currentQuery = from tl in currentQuery
-                           where tl.TaskId == timerTask.Id
+                           where tl.Task.PublicId == id
                            select tl;
             return this;
         }

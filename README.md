@@ -5,7 +5,7 @@ A simple timer tracker. Visit [my blog](https://devinstance.net/blog/introductio
 Live demo: http://nocrast.com
 
 ## Hot reload
-Run `dotnet watch run` in src/Server
+Run `dotnet watch run` in src/Server/WebService
 
 ## Database Migrations
 Run `dotnet tool restore` in src/Server folder first time.

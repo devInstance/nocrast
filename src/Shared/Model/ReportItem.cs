@@ -7,10 +7,18 @@ namespace NoCrast.Shared.Model
         public enum RIType
         {
             Unknown,
+            Custom,
             Daily,
             Weekly,
             Monthly,
+            Yearly,
             Total
+        }
+
+        public enum RIMode
+        {
+            Combined,
+            ByTask
         }
 
         public class Cell
@@ -21,12 +29,12 @@ namespace NoCrast.Shared.Model
         }
         public class Row
         {
-            public string TaskTitle { get; set; }
+            public string Title { get; set; }
             public Cell[] Data { get; set; }
         }
 
         public RIType RiType { get; set; }
-
+        public RIMode RiMode { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public DateTime[] Columns { get; set; }
