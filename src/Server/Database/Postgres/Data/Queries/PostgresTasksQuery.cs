@@ -21,9 +21,9 @@ namespace NoCrast.Server.Database.Postgres.Data.Queries
                            select ts;
         }
 
-        public List<TimerTask> SelectList()
+        public IQueryable<TimerTask> Select()
         {
-            return (from ts in currentQuery select ts).ToList();
+            return currentQuery;
         }
     }
 }

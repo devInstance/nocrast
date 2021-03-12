@@ -39,7 +39,7 @@
 {
     <div class="row pt-2">
         <div class="col">
-            <DevInstance.Timelines.Chart IsTimeRangeFlexible="true">
+            <DevInstance.Timelines.Chart IsTimeRangeFlexible="true" StartTime="0.0" EndTime="24.0" ShowLineLabels="@(selectedMode == ReportItem.RIMode.ByTask)">
                 <Lines>
                     <DevInstance.Timelines.Heatline Data="Lines" TimeInterval="0.25"></DevInstance.Timelines.Heatline>
                 </Lines>

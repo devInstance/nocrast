@@ -8,6 +8,6 @@ namespace NoCrast.Server.Data.Queries
 {
     public interface ITasksQuery
     {
-        List<TimerTask> SelectList();
+        IQueryable<TimerTask> Select();
     }
 }

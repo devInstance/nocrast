@@ -95,7 +95,8 @@ namespace NoCrast.Client.Pages.Reports
             Lines = new Heatline.Line[Report.Rows.Length];
             for (int n = 0; n < Lines.Length; n++)
             {
-                var data = Report.Rows[n].Data;
+                var row = Report.Rows[n];
+                var data = row.Data;
                 var items = new Heatline.Item[data.Length];
                 for (int i = 0; i < items.Length; i++)
                 {
@@ -110,8 +111,9 @@ namespace NoCrast.Client.Pages.Reports
 
                 Lines[n] = new Heatline.Line
                 {
-                    CssClass = "blue",
-                    Items = items
+                    CssClass = row.Task.Project != null ? row.Task.Project.Color.ToString() : "blue",
+                    Items = items,
+                    Title = row.Task.Title
                 };
             }
 

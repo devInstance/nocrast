@@ -76,42 +76,42 @@ $color-rose: #9a28a7;
     }
 }
 
-.blue {
+div.blue, span.blue {
     @include dot-color($color-blue, $color-white)
 }
 
-.red {
+div.red, span.red {
     @include dot-color($color-red, $color-white)
 }
 
-.green {
+div.green, span.green {
     @include dot-color($color-green, $color-white)
 }
 
-.yellow {
+div.yellow, span.yellow {
     @include dot-color($color-yellow, $color-white)
 }
 
-.aqua {
+div.aqua, span.aqua {
     @include dot-color($color-aqua, $color-white);
 }
 
-.orange {
+div.orange, span.orange {
     @include dot-color($color-orange, $color-white);
 }
 
-.darkblue {
+div.darkblue, span.darkblue {
     @include dot-color($color-darkblue, $color-white);
 }
 
-.purple {
+div.purple, span.purple {
     @include dot-color($color-purple, $color-white);
 }
 
-.lightblue {
+div.lightblue, span.lightblue {
     @include dot-color($color-lightblue, $color-white);
 }
 
-.rose {
+div.rose, span.rose {
     @include dot-color($color-rose, $color-white);
 }

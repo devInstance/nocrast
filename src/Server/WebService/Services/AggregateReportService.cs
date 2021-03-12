@@ -1,5 +1,6 @@
 ﻿using DevInstance.LogScope;
 using NoCrast.Server.Data;
+using NoCrast.Server.Database.Data.Decorators;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
@@ -51,16 +52,16 @@ namespace NoCrast.Server.Services
                 dateRanges[ColumnsCount] = columnDate;
                 result.EndDate = columnDate.AddDays(-1);
 
-                var tasks = Repository.GetTasksQuery(currentProfile).SelectList();
+                var tasks = Repository.GetTasksQuery(currentProfile).SelectView();
 
                 result.Rows = new ReportItem.Row[tasks.Count];
 
                 for (int i = 0; i < tasks.Count; i++)
                 {
                     var task = tasks[i];
-                    l.T($"Task {task.Id} {task.PublicId}");
+                    l.T($"Task {task.Id} {task.Id}");
 
-                    var reportQuery = Repository.GetAggregateReportQuery(currentProfile).Task(task.PublicId);
+                    var reportQuery = Repository.GetAggregateReportQuery(currentProfile).Task(task.Id);
                     var data = new ReportItem.Cell[ColumnsCount + 1];
                     float total = 0F;
                     for (int n = 0; n < ColumnsCount; n++)
@@ -78,7 +79,7 @@ namespace NoCrast.Server.Services
 
                     result.Rows[i] = new ReportItem.Row
                     {
-                        Title = task.Title,
+                        Task = task,
                         Data = data
                     };
                 }

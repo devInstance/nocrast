@@ -29,7 +29,7 @@ namespace NoCrast.Shared.Model
         }
         public class Row
         {
-            public string Title { get; set; }
+            public TaskItem Task { get; set; }
             public Cell[] Data { get; set; }
         }
 

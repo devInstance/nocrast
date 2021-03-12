@@ -306,162 +306,142 @@ ul {
   fill: #b0b0b0;
   stroke: #a0a0a0; }
 
-.blue {
+div.blue, span.blue {
   background-color: #007bff !important;
   color: #ffffff !important;
   fill: #007bff;
   stroke: #003e80; }
-  .blue:hover {
+  div.blue:hover, span.blue:hover {
     background-color: #4da3ff !important;
     color: #ffffff !important;
     fill: #4da3ff; }
-  .blue:focus {
+  div.blue:focus, span.blue:focus {
     background-color: #003e80 !important;
     color: #ffffff !important;
     fill: #003e80; }
 
-.red {
+div.red, span.red {
   background-color: #dc3545 !important;
   color: #ffffff !important;
   fill: #dc3545;
   stroke: #6e1b23; }
-  .red:hover {
+  div.red:hover, span.red:hover {
     background-color: #e7727d !important;
     color: #ffffff !important;
     fill: #e7727d; }
-  .red:focus {
+  div.red:focus, span.red:focus {
     background-color: #6e1b23 !important;
     color: #ffffff !important;
     fill: #6e1b23; }
 
-.green {
+div.green, span.green {
   background-color: #28a745 !important;
   color: #ffffff !important;
   fill: #28a745;
   stroke: #145423; }
-  .green:hover {
+  div.green:hover, span.green:hover {
     background-color: #69c17d !important;
     color: #ffffff !important;
     fill: #69c17d; }
-  .green:focus {
+  div.green:focus, span.green:focus {
     background-color: #145423 !important;
     color: #ffffff !important;
     fill: #145423; }
 
-.yellow {
+div.yellow, span.yellow {
   background-color: #ffc107 !important;
   color: #ffffff !important;
   fill: #ffc107;
   stroke: #806104; }
-  .yellow:hover {
+  div.yellow:hover, span.yellow:hover {
     background-color: #ffd451 !important;
     color: #ffffff !important;
     fill: #ffd451; }
-  .yellow:focus {
+  div.yellow:focus, span.yellow:focus {
     background-color: #806104 !important;
     color: #ffffff !important;
     fill: #806104; }
 
-.aqua {
+div.aqua, span.aqua {
   background-color: #17a2b8 !important;
   color: #ffffff !important;
   fill: #17a2b8;
   stroke: #0c515c; }
-  .aqua:hover {
+  div.aqua:hover, span.aqua:hover {
     background-color: #5dbecd !important;
     color: #ffffff !important;
     fill: #5dbecd; }
-  .aqua:focus {
+  div.aqua:focus, span.aqua:focus {
     background-color: #0c515c !important;
     color: #ffffff !important;
     fill: #0c515c; }
 
-.orange {
+div.orange, span.orange {
   background-color: #d36b3b !important;
   color: #ffffff !important;
   fill: #d36b3b;
   stroke: #6a361e; }
-  .orange:hover {
+  div.orange:hover, span.orange:hover {
     background-color: #e09776 !important;
     color: #ffffff !important;
     fill: #e09776; }
-  .orange:focus {
+  div.orange:focus, span.orange:focus {
     background-color: #6a361e !important;
     color: #ffffff !important;
     fill: #6a361e; }
 
-.darkblue {
+div.darkblue, span.darkblue {
   background-color: #0507fd !important;
   color: #ffffff !important;
   fill: #0507fd;
   stroke: #03047f; }
-  .darkblue:hover {
+  div.darkblue:hover, span.darkblue:hover {
     background-color: #5051fe !important;
     color: #ffffff !important;
     fill: #5051fe; }
-  .darkblue:focus {
+  div.darkblue:focus, span.darkblue:focus {
     background-color: #03047f !important;
     color: #ffffff !important;
     fill: #03047f; }
 
-.purple {
+div.purple, span.purple {
   background-color: #7005fd !important;
   color: #ffffff !important;
   fill: #7005fd;
   stroke: #38037f; }
-  .purple:hover {
+  div.purple:hover, span.purple:hover {
     background-color: #9b50fe !important;
     color: #ffffff !important;
     fill: #9b50fe; }
-  .purple:focus {
+  div.purple:focus, span.purple:focus {
     background-color: #38037f !important;
     color: #ffffff !important;
     fill: #38037f; }
 
-.lightblue {
+div.lightblue, span.lightblue {
   background-color: #2874a7 !important;
   color: #ffffff !important;
   fill: #2874a7;
   stroke: #143a54; }
-  .lightblue:hover {
+  div.lightblue:hover, span.lightblue:hover {
     background-color: #699ec1 !important;
     color: #ffffff !important;
     fill: #699ec1; }
-  .lightblue:focus {
+  div.lightblue:focus, span.lightblue:focus {
     background-color: #143a54 !important;
     color: #ffffff !important;
     fill: #143a54; }
 
-.rose {
+div.rose, span.rose {
   background-color: #9a28a7 !important;
   color: #ffffff !important;
   fill: #9a28a7;
   stroke: #4d1454; }
-  .rose:hover {
+  div.rose:hover, span.rose:hover {
     background-color: #b869c1 !important;
     color: #ffffff !important;
     fill: #b869c1; }
-  .rose:focus {
+  div.rose:focus, span.rose:focus {
     background-color: #4d1454 !important;
     color: #ffffff !important;
     fill: #4d1454; }
-
-.bar {
-  height: 21px;
-  transition: fill .3s ease;
-  cursor: pointer;
-  stroke-width: 0.5px; }
-
-.bar text {
-  fill: #fff !important;
-  font-size: 14px; }
-
-.chart {
-  background-color: #D0E0FF; }
-
-.even-label, .odd-label {
-  float: left; }
-
-@media (max-width: 800px) {
-  .odd-label {
-    visibility: hidden; } }

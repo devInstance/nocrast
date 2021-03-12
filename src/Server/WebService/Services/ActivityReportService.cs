@@ -1,5 +1,6 @@
 ﻿using DevInstance.LogScope;
 using NoCrast.Server.Data;
+using NoCrast.Server.Database.Data.Decorators;
 using NoCrast.Server.Model;
 using NoCrast.Shared.Model;
 using NoCrast.Shared.Utils;
@@ -64,14 +65,14 @@ namespace NoCrast.Server.Services
                     StartDate = startOfDay
                 };
 
-                TimerTask[] tasks;
+                TaskItem[] tasks;
                 if(mode == ReportItem.RIMode.ByTask)
                 {
-                    tasks = Repository.GetTasksQuery(currentProfile).SelectList().ToArray();
+                    tasks = Repository.GetTasksQuery(currentProfile).SelectView().ToArray();
                 }
                 else
                 {
-                    tasks = new[] { new TimerTask { Title = "All" } };
+                    tasks = new[] { new TaskItem { Title = "All" } };
                 }
 
                 var columnDate = startOfDay;
@@ -125,9 +126,9 @@ namespace NoCrast.Server.Services
                             break;
                     }
 
-                    if (tasks[i].PublicId != null)
+                    if (tasks[i].Id != null)
                     {
-                        query.Task(tasks[i].PublicId);
+                        query.Task(tasks[i].Id);
                     }
 
                     l.T($"***** Task {tasks[i].Title} startTime:{result.StartDate}, endTime:{result.EndDate} -> {type}");
@@ -167,7 +168,7 @@ namespace NoCrast.Server.Services
 
                     result.Rows[i] = new ReportItem.Row
                     {
-                        Title = tasks[i].Title,
+                        Task = tasks[i],
                         Data = finalData
                     };
                 }
